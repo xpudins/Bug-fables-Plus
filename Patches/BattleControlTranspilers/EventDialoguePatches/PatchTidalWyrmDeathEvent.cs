@@ -1,13 +1,7 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
 {
@@ -18,9 +12,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
             priority = 7859;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdloc1(),i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "cancelupdate")), i=>i.MatchBrtrue(out _));
+            cursor.GotoNext(i => i.MatchLdloc1(), i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "cancelupdate")), i => i.MatchBrtrue(out _));
             cursor.GotoPrev(i => i.MatchLdarg0());
             cursor.RemoveRange(2);
             cursor.Emit(OpCodes.Ldloc_1);

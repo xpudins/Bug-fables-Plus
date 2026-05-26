@@ -3,11 +3,8 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -18,20 +15,36 @@ namespace BFPlus.Patches.EventControlTranspilers
     /// </summary>
     public class PatchSpyGuyExcludeIds : PatchBaseEvent65
     {
+        static int[] NoExcludesIds =
+        {
+            (int)MainManager.Enemies.TANGYBUG,
+            (int)MainManager.Enemies.HoloKabbu,
+            (int)MainManager.Enemies.HoloLeif,
+            (int)MainManager.Enemies.HoloVi
+        };
+
+        static int[] ExcludesIds =
+        {
+            (int)NewEnemies.MarsSprout,
+            (int)NewEnemies.RedSeedling,
+            (int)NewEnemies.BlueSeedling,
+        };
+
         public PatchSpyGuyExcludeIds()
         {
             priority = 71465;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdfld(AccessTools.Field(typeof(EventControl), "excludeids")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(EventControl), "excludeids")));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpyGuyExcludeIds), "GetExcludeIds"));
         }
 
         static List<int> GetExcludeIds(List<int> excludeIds)
         {
-            excludeIds.RemoveAll(e=> e == (int)MainManager.Enemies.TANGYBUG || e == (int)MainManager.Enemies.HoloKabbu || e == (int)MainManager.Enemies.HoloLeif|| e== (int)MainManager.Enemies.HoloVi);
-            excludeIds.Add((int)NewEnemies.MarsSprout);
+
+            excludeIds.RemoveAll(e=> NoExcludesIds.Contains(e));
+            excludeIds.AddRange(ExcludesIds);
             return excludeIds;
         }
     }
@@ -42,9 +55,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 71433;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(32), i=>i.MatchCallvirt(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(32), i => i.MatchCallvirt(out _));
 
             cursor.Emit(OpCodes.Ldloc_3);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpyGuyAddNewBosses), "AddNewBosses"));
@@ -72,6 +85,7 @@ namespace BFPlus.Patches.EventControlTranspilers
                 (int)NewEnemies.Patton,
                 (int)NewEnemies.Levi,
                 (int)NewEnemies.Celia,
+                (int)NewEnemies.JumpAnt
             });
             return bosses;
 

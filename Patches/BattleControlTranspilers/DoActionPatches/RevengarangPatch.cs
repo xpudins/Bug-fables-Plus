@@ -1,29 +1,23 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
 
 namespace BFPlus.Patches.DoActionPatches
 {
     public class PatchCheckRevengarang : PatchBaseDoAction
     {
-        public PatchCheckRevengarang() 
+        public PatchCheckRevengarang()
         {
             priority = 150484;
-        
+
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
 
             cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "EndPlayerTurn")));
-            cursor.GotoNext(MoveType.After,i => i.MatchBr(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchBr(out _));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext();
             cursor.GotoNext();

@@ -1,19 +1,52 @@
-﻿using BFPlus.Patches.DoActionPatches;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static CardGame;
 
 namespace BFPlus.Extensions
 {
+    public enum NewCards
+    {
+        Levi = 92,
+        Celia,
+        Caveling,
+        Voltshroom,
+        DynamSpore,
+        SplotchSpider,
+        LeafbugShaman,
+        Frostfly,
+        ShiverScorp,
+        PirahnaChomp,
+        Dewling,
+        LongLegSpider,
+        Worm,
+        WormSwarm,
+        MechaJaw,
+        Patton,
+        Mothmite,
+        Spineling,
+        IronSuit,
+        FireAnt,
+        Moeruki,
+        FirePopper,
+        Jester,
+        DarkVi,
+        DarkKabbu,
+        DarkLeif,
+        MarsBud,
+        Mars,
+        Belosslow,
+        TermiteKnight,
+        MrTester,
+        Tanjerin,
+        JumpAnt
+    }
     public enum NewCardEffect
     {
-        AttackNextTurnOnOtherCard=43,
+        AttackNextTurnOnOtherCard = 43,
         DmgOrAttackNextTurn,
         SleepOrAttack,
         Sleep,
@@ -34,7 +67,8 @@ namespace BFPlus.Extensions
         AttackNextTurnPerDef,
         HealPerAttack,
         MultiplyCard,
-        ExodiaPerCard
+        ExodiaPerCard,
+        TPRegenOnTribeUnique
     }
     public class CardGame_Ext : MonoBehaviour
     {
@@ -63,10 +97,10 @@ namespace BFPlus.Extensions
             playedId = playedId == 1 ? 0 : 1;
 
             CardGame.Cards[] hand = cardGame.playedcards[playedId].ToArray();
-            NewCardEffect effect = (NewCardEffect)card.effects[effectIndex,0];
+            NewCardEffect effect = (NewCardEffect)card.effects[effectIndex, 0];
             bool heads;
-            switch (effect) 
-            { 
+            switch (effect)
+            {
                 case NewCardEffect.AttackNextTurnOnOtherCard:
                     if (cardGame.GetCardQuantityID(card.effects[effectIndex, 2], playedId) > 0)
                         cardGame.attacknextturn[playedId] += card.effects[effectIndex, 1];
@@ -91,7 +125,7 @@ namespace BFPlus.Extensions
                     break;
 
                 case NewCardEffect.Ink:
-                    yield return Instance.DoInk(cardGame, hand[cardIndex], card.effects[effectIndex,1]);
+                    yield return Instance.DoInk(cardGame, hand[cardIndex], card.effects[effectIndex, 1]);
                     break;
 
                 case NewCardEffect.InkTribeAmount:
@@ -158,7 +192,7 @@ namespace BFPlus.Extensions
 
                 case NewCardEffect.AttackNextTurnPerDef:
                     int timesDef = Mathf.FloorToInt(defs[playedId] / card.effects[effectIndex, 1]);
-                    if (timesDef >0)
+                    if (timesDef > 0)
                     {
                         cardGame.attacknextturn[playedId] += card.effects[effectIndex, 2] * timesDef;
                         yield return cardGame.Shine(hand[cardIndex]);
@@ -168,9 +202,9 @@ namespace BFPlus.Extensions
 
                 case NewCardEffect.HealPerAttack:
                     int timesAtk = Mathf.FloorToInt(atks[playedId] / card.effects[effectIndex, 2]);
-                    if (timesAtk >0)
+                    if (timesAtk > 0)
                     {
-                        if (effectIndex + 1< card.effects.GetLength(0))
+                        if (effectIndex + 1 < card.effects.GetLength(0))
                         {
                             card.effects[effectIndex + 1, 1] *= timesAtk;
                         }
@@ -185,15 +219,39 @@ namespace BFPlus.Extensions
                 case NewCardEffect.ExodiaPerCard:
                     yield return Instance.DoExodia(cardGame, playedId, card, effectIndex, hand[cardIndex]);
                     break;
+
+                case NewCardEffect.TPRegenOnTribeUnique:
+                    int tribePlayed = Instance.GetTribeUnique(cardGame, (CardGame.Tribe)card.effects[effectIndex, 2], playedId);
+                    if (tribePlayed >= 1)
+                    {
+                        yield return Instance.DoTpRegen(cardGame, hand[cardIndex], playedId, tribePlayed * card.effects[effectIndex, 1]);
+                    }
+                    break;
             }
 
             yield return null;
         }
 
+        int GetTribeUnique(CardGame cardGame, CardGame.Tribe tribe, int playedid)
+        {
+            List<int> foundCard = new List<int>();
+            CardGame.Cards[] array = cardGame.playedcards[playedid].ToArray();
+            int amount = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (!foundCard.Contains(array[i].cardid) && cardGame.carddata[array[i].cardid].tribe.ToArray().Contains(tribe))
+                {
+                    foundCard.Add(array[i].cardid);
+                    amount++;
+                }
+            }
+            return amount;
+        }
+
         IEnumerator DoMultiplyCard(CardGame cardGame, int playedId, Cards card)
         {
             int[] indexes = cardGame.cards[playedId].Select((c, j) => new { CardId = c, Index = j }).Where(c => c.CardId != card.cardid).Select(j => j.Index).ToArray();
-            if(indexes.Length > 0)
+            if (indexes.Length > 0)
             {
                 cardGame.cards[playedId][indexes[UnityEngine.Random.Range(0, indexes.Length)]] = card.cardid;
                 yield return cardGame.Shine(card);
@@ -214,7 +272,7 @@ namespace BFPlus.Extensions
 
         IEnumerator DoSleep(int handId, CardGame cardGame, CardGame.Cards owner)
         {
-            for (int i = cardGame.playedcards[handId].Count-1; i >=0; i--)
+            for (int i = cardGame.playedcards[handId].Count - 1; i >= 0; i--)
             {
                 CardGame.Cards card = cardGame.playedcards[handId][i];
                 if (cardGame.carddata[card.cardid].type == CardGame.Type.Effect && !card.flipped)
@@ -265,7 +323,7 @@ namespace BFPlus.Extensions
         {
             MainManager.PlaySound("AhoneynationSpit");
             int[] tpCosts = GetTpCosts(cardGame, playedId == 0 ? 1 : 0);
-            if(tpCosts.Length > 0)
+            if (tpCosts.Length > 0)
                 Instance.defBuff[playedId] += tpCosts.Min();
             yield return cardGame.Shine(owner);
         }
@@ -281,7 +339,7 @@ namespace BFPlus.Extensions
         {
             MainManager.PlaySound("Poison");
             int[] tpCosts = GetTpCosts(cardGame, opponentId);
-            if(tpCosts.Length > 0)
+            if (tpCosts.Length > 0)
             {
                 Instance.atkBuff[opponentId == 0 ? 1 : 0] += Mathf.Clamp(Mathf.CeilToInt((float)tpCosts.Max() / 2), 1, 99);
             }
@@ -315,12 +373,12 @@ namespace BFPlus.Extensions
             CardGame cardGame = MainManager.instance.cardgame;
             CardGame.Cards[] hand = cardGame.playedcards[playedId].ToArray();
 
-            for(int i=0;i<hand.Length; i++)
+            for (int i = 0; i < hand.Length; i++)
             {
                 CardGame.CardData card = cardGame.carddata[hand[i].cardid];
                 if (card.type != CardGame.Type.Attacker && !hand[i].flipped)
                 {
-                    for(int j=0;j<card.effects.GetLength(0);j++)
+                    for (int j = 0; j < card.effects.GetLength(0); j++)
                     {
                         NewCardEffect effect = (NewCardEffect)card.effects[j, 0];
                         bool heads;
@@ -365,7 +423,7 @@ namespace BFPlus.Extensions
         static void SetBuffs(ref int[] atk, ref int[] def, int playedId)
         {
             playedId = playedId == 1 ? 0 : 1;
-            for (int i = 0; i < atk.Length; i++) 
+            for (int i = 0; i < atk.Length; i++)
             {
                 atk[i] = Mathf.Clamp(atk[i] + Instance.atkBuff[i], 0, 99);
                 def[i] = Mathf.Clamp(def[i] + Instance.defBuff[i], 0, 99);
@@ -388,7 +446,7 @@ namespace BFPlus.Extensions
             return MainManager.guisprites[48 + number];
         }
 
-        static bool CardIsFlipped(CardGame.Cards[] hand ,int index) => hand[index].flipped;
+        static bool CardIsFlipped(CardGame.Cards[] hand, int index) => hand[index].flipped;
 
         public class CardData_Ext : MonoBehaviour
         {

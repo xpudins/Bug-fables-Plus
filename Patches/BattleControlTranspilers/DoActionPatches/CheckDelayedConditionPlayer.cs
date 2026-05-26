@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
 {
@@ -18,9 +13,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
             priority = 150469;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdloc1(), i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "EndPlayerTurn")));
+            cursor.GotoNext(i => i.MatchLdloc1(), i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "EndPlayerTurn")));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext(i => i.MatchCall(out _));
             cursor.Emit(OpCodes.Ldarg_0);

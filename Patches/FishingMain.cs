@@ -1,10 +1,5 @@
 ﻿using BFPlus.Extensions;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches
 {
@@ -15,9 +10,9 @@ namespace BFPlus.Patches
         {
             if (!MainManager.instance.flags[616])
             {
-                for (int i = 0; i < __instance.party.Length; i++) 
+                for (int i = 0; i < __instance.party.Length; i++)
                 {
-                    if(i <= 2)
+                    if (i <= 2)
                     {
                         if (MainManager.BadgeIsEquipped((int)Medal.Switcheroo))
                         {

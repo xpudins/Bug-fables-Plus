@@ -3,10 +3,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -17,12 +13,12 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 23533;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
                 i => i.MatchLdnull(),
-                i =>i.MatchLdnull(),
-                i=>i.MatchLdcI4(0),
+                i => i.MatchLdnull(),
+                i => i.MatchLdcI4(0),
                 i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "StartBattle")));
 
             cursor.Emit(OpCodes.Ldstr, "Battle0");
@@ -36,7 +32,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 23346;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
                 i => i.MatchLdsfld(out _),
@@ -55,10 +51,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 24712;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(54));
-            cursor.GotoNext(MoveType.After,i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "MoveTowards", new Type[] {typeof(Vector3), typeof(float)})));
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "MoveTowards", new Type[] { typeof(Vector3), typeof(float) })));
             cursor.Emit(OpCodes.Ldc_R4, 0.05f);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager), "FadeMusic"));
         }

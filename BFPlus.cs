@@ -1,22 +1,13 @@
 ﻿using BepInEx;
-using HarmonyLib;
-using MonoMod.RuntimeDetour;
-using System.Reflection;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
 using BFPlus.Patches.DoActionPatches;
-using System.Diagnostics.Eventing.Reader;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using UnityEngine;
+using HarmonyLib;
 using System;
-using OpCodes = Mono.Cecil.Cil.OpCodes;
 using System.Diagnostics;
-using BFPlus.Extensions;
-using System.Linq;
+using System.Reflection;
+using UnityEngine;
 namespace BFPlus
 {
-    [BepInPlugin("com.Lyght.BugFables.plugins.BFPlus", "BFPlus", "1.0.4.9")]
+    [BepInPlugin("com.Lyght.BugFables.plugins.BFPlus", "BFPlus", "1.1")]
     [BepInProcess("Bug Fables.exe")]
     public class BFPlusPlugin : BaseUnityPlugin
     {
@@ -26,15 +17,19 @@ namespace BFPlus
             stopwatch.Start();
 
             //MainManager
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "ApplyBadges"), typeof(PatchBaseApplyBadges));
+
             MethodInfo setText = AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "SetText", new Type[] { typeof(string), typeof(int), typeof(float?), typeof(bool), typeof(bool), typeof(Vector3), typeof(Vector3), typeof(Vector2), typeof(Transform), typeof(NPCControl) }));
             PatchLoader.SetupILHook(setText, typeof(PatchBaseSetText));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "SetCondition",new Type[] { typeof(MainManager.BattleCondition), typeof(MainManager.BattleData).MakeByRefType(), typeof(int), typeof(int) }), typeof(PatchBaseMainManagerSetCondition));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LoadItemSprites"), typeof(PatchBaseMainManagerLoadItemSprites));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "FixCondition"), typeof(PatchBaseMainManagerFixCondition));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "SetCondition", new Type[] { typeof(MainManager.BattleCondition), typeof(MainManager.BattleData).MakeByRefType(), typeof(int), typeof(int) }), typeof(PatchBaseMainManagerSetCondition));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "ShowItemList"), typeof(PatchBaseShowItemList));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "Update"), typeof(PatchBaseMainManagerUpdate));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "CheckSamira", new Type[] {typeof(AudioClip)}), typeof(PatchBaseMainManagerCheckSamira));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "CheckSamira", new Type[] { typeof(AudioClip) }), typeof(PatchBaseMainManagerCheckSamira));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "GetEnemyData", new Type[] { typeof(int), typeof(bool), typeof(bool) }), typeof(PatchBaseMainManagerGetEnemyData));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "LoadEssentials")), typeof(PatchBaseMainManagerLoadEssentials));
-            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "SwitchMusic", new Type[] {typeof(AudioClip), typeof(float), typeof(int), typeof(bool)})), typeof(PatchBaseMainManagerSwitchMusic));
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "SwitchMusic", new Type[] { typeof(AudioClip), typeof(float), typeof(int), typeof(bool) })), typeof(PatchBaseMainManagerSwitchMusic));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "ChangeMusic", new Type[] { typeof(AudioClip), typeof(float), typeof(int), typeof(bool) }), typeof(PatchBaseMainManagerChangeMusic));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "SetVariables"), typeof(PatchBaseMainManagerSetVariables));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LateUpdate"), typeof(PatchBaseMainManagerLateUpdate));
@@ -43,18 +38,21 @@ namespace BFPlus
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LoadEntityData"), typeof(PatchBaseMainManagerLoadEntityData));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "LevelUpMessage")), typeof(PatchBaseMainManagerLevelUpMessage));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "GetTPCost", new Type[] { typeof(int), typeof(int), typeof(bool) }), typeof(PatchBaseMainManagerGetTPCost));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LoadMap",new Type[] { typeof(int) }), typeof(PatchBaseMainManagerLoadMap));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LoadMap", new Type[] { typeof(int) }), typeof(PatchBaseMainManagerLoadMap));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "Load"), typeof(PatchBaseMainManagerLoad));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "DoItemEffect"), typeof(PatchBaseMainManagerDoItemEffect));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "GetItemUse", new Type[] { typeof(int), typeof(int) }), typeof(PatchBaseMainManagerGetItemUse));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "LoopPoint"), typeof(PatchBaseMainManagerLoopPoint));
-            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "InnSleep",new Type[] { typeof(NPCControl), typeof(Vector3?), typeof(bool), typeof(bool), typeof(Vector3?), typeof(Vector3?) })), typeof(PatchBaseInnSleep));
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "InnSleep", new Type[] { typeof(NPCControl), typeof(Vector3?), typeof(bool), typeof(bool), typeof(Vector3?), typeof(Vector3?) })), typeof(PatchBaseInnSleep));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "MixIngredients"), typeof(PatchBaseMainManagerMixIngredients));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "PlayParticle", new Type[] { typeof(string), typeof(string), typeof(Vector3), typeof(Vector3), typeof(float), typeof(int) }), typeof(PatchBaseMainManagerPlayParticle));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "RefreshSkills"), typeof(PatchBaseMainManagerRefreshSkills));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(MainManager), "TransferMap", new Type[] { typeof(int), typeof(Vector3), typeof(Vector3), typeof(Vector3), typeof(NPCControl) })), typeof(PatchBaseMainManagerTransferMap));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(MainManager), "DoClock"), typeof(PatchBaseDoClock));
 
             //EventControl
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(EventControl), "Event222")), typeof(PatchBaseEvent222));
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(EventControl), "Event215")), typeof(PatchBaseEvent215));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(EventControl), "Event65")), typeof(PatchBaseEvent65));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(EventControl), "Event34")), typeof(PatchBaseEvent34));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(EventControl), "Event213")), typeof(PatchBaseEvent213));
@@ -99,6 +97,9 @@ namespace BFPlus
             PatchLoader.SetupILHook(AccessTools.Method(typeof(PauseMenu), "UpdateText"), typeof(PatchBasePauseMenuUpdateText));
 
             //EntityControl
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "RefreshTrail"), typeof(PatchBaseEntityControlRefreshTrail));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "Follow"), typeof(PatchBaseEntityControlFollow));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "UpdateSprite"), typeof(PatchBaseEntityControlUpdateSprite));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "UpdateItem"), typeof(PatchBaseEntityControlUpdateItem));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "AddModel"), typeof(PatchBaseEntityControlAddModel));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(EntityControl), "UpdateAnimSpecific"), typeof(PatchBaseEntityControlUpdateAnimSpecific));
@@ -114,7 +115,9 @@ namespace BFPlus
             PatchLoader.SetupILHook(AccessTools.Method(typeof(NPCControl), "OnTriggerEnter"), typeof(PatchBaseNPCControlOnTriggerEnter));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(NPCControl), "CheckItem")), typeof(PatchBaseNPCControlCheckItem));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(NPCControl), "CheckBump"), typeof(PatchBaseNPCControlCheckBump));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(NPCControl), "CreateDescWindow", new Type[] {typeof(bool)}), typeof(PatchBaseNPCControlCreateDescWindow));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(NPCControl), "SetUp"), typeof(PatchBaseNPCControlSetup));
+
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(NPCControl), "CreateDescWindow", new Type[] { typeof(bool) }), typeof(PatchBaseNPCControlCreateDescWindow));
 
             //MapControl
             PatchLoader.SetupILHook(AccessTools.Method(typeof(MapControl), "CreateEntities"), typeof(PatchBaseMapControlCreateEntities));
@@ -124,6 +127,7 @@ namespace BFPlus
             //PlayerControl
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(PlayerControl), "DoActionTap")), typeof(PatchBasePlayerControlDoActionTap));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(PlayerControl), "Movement"), typeof(PatchBasePlayerControlMovement));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(PlayerControl), "CancelAction", new Type[] { typeof(bool) }), typeof(PatchBasePlayerControlCancelAction));
 
             //CardGame
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(CardGame), "StartCard")), typeof(PatchBaseCardGameStartCard));
@@ -133,12 +137,21 @@ namespace BFPlus
             PatchLoader.SetupILHook(AccessTools.Method(typeof(CardGame), "GetInput"), typeof(PatchBaseCardGameGetInput));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(CardGame), "PlayEnemyCards"), typeof(PatchBaseCardGamePlayEnemyCards));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(CardGame), "CreateCard"), typeof(PatchBaseCardGameCreateCard));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(CardGame), "LateUpdate"), typeof(PatchBaseCardGameLateUpdate));
+
+            //GlowTrigger
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(GlowTrigger), "LateUpdate"), typeof(PatchBaseGlowTriggerLateUpdate));
 
             //BattleControl
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "SwitchParty")), typeof(PatchBaseBattleControlSwitchParty));
+            PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "SwitchPos")), typeof(PatchBaseBattleControlSwitchPos));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "PlayerTurn"), typeof(PatchBasePlayerTurn));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "RefreshEnemyHP"), typeof(PatchBaseRefreshEnemyHP));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "AddNewEnemy", new Type[] { typeof(int), typeof(Vector3) }), typeof(PatchBaseBattleControlAddNewEnemy));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "IceRain")), typeof(PatchBaseBattleControlIceRain));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "VineAttack")), typeof(PatchBaseBattleControlVineAttack));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "GameOver")), typeof(PatchBaseBattleControlGameover));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "RevivePlayer", new Type[] {typeof(int), typeof(int), typeof(bool)}), typeof(PatchBaseBattleControlRevivePlayer));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "RevivePlayer", new Type[] { typeof(int), typeof(int), typeof(bool) }), typeof(PatchBaseBattleControlRevivePlayer));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "CheckEvent"), typeof(PatchBaseBattleControlCheckEvent));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "ReturnToOverworld")), typeof(PatchBaseBattleControlReturnToOverworld));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "Invulnerable"), typeof(PatchBaseBattleControlInvulnerable));
@@ -167,7 +180,7 @@ namespace BFPlus
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "EventDialogue")), typeof(PatchBaseEventDialogue));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "CalculateBaseDamage"), typeof(PatchBaseCalculateBaseDamage));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "UseItem")), typeof(PatchBaseUseItem));
-            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "UpdateAnim", new Type[] {typeof(bool)}), typeof(PatchBaseUpdateAnim));
+            PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "UpdateAnim", new Type[] { typeof(bool) }), typeof(PatchBaseUpdateAnim));
             PatchLoader.SetupILHook(AccessTools.Method(typeof(BattleControl), "Update"), typeof(PatchBaseBattleControlUpdate));
             PatchLoader.SetupILHook(AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(BattleControl), "DoAction")), typeof(PatchBaseDoAction));
             var harmony = new Harmony("com.Lyght.BugFables.plugins.BFPlus");

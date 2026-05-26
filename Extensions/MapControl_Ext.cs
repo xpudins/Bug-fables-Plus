@@ -3,9 +3,10 @@ using BFPlus.Extensions.Maps;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Extensions
 {
@@ -47,15 +48,15 @@ namespace BFPlus.Extensions
                     {
                         string mapName = ((NewMaps)mapId).ToString();
                         data = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(mapName + "Data").ToString().Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                        names = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(mapName + "Names").ToString().Split(new string[] { "\r\n", "\r", "\n" },StringSplitOptions.RemoveEmptyEntries);
+                        names = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(mapName + "Names").ToString().Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
                     }
                     else
                     {
-                        if(MainManager.map.readdatafromothermap != MainManager.Maps.TestRoom)
+                        if (MainManager.map.readdatafromothermap != MainManager.Maps.TestRoom)
                         {
                             mapId = (int)MainManager.map.readdatafromothermap;
                         }
-                        
+
                         data = Resources.Load<TextAsset>("Data/EntityData/" + mapId).ToString().Split('\n');
                         names = Resources.Load<TextAsset>("Data/EntityData/Names/" + mapId + "names").ToString().Split('\n');
                     }
@@ -149,7 +150,7 @@ namespace BFPlus.Extensions
                     break;
 
                 case MainManager.Maps.BugariaPier:
-                    DesactivateEntities(__instance, 28, new int[] { 3,4,6,13,23,26 });
+                    DesactivateEntities(__instance, 28, new int[] { 3, 4, 6, 13, 23, 26 });
 
                     //discovery boat thing
                     __instance.entities[26].npcdata.dialogues = new Vector3[] { new Vector3(-1, 64, 0) };
@@ -164,7 +165,7 @@ namespace BFPlus.Extensions
                     break;
 
                 case MainManager.Maps.MetalIsland1:
-                    DesactivateEntities(__instance, 39, new int[] { 11,22,28,34,35 });
+                    DesactivateEntities(__instance, 39, new int[] { 11, 22, 28, 34, 35 });
                     __instance.entities[4].GetComponent<BoxCollider>().isTrigger = false;
 
                     //old sailor
@@ -183,7 +184,7 @@ namespace BFPlus.Extensions
             }
         }
 
-        static void DesactivateEntities(MapControl __instance, int maxEntity, int[] ignores=null)
+        static void DesactivateEntities(MapControl __instance, int maxEntity, int[] ignores = null)
         {
             for (int i = 0; i < maxEntity; i++)
             {
@@ -203,11 +204,110 @@ namespace BFPlus.Extensions
 
         static void ChangeCollider(GameObject obj)
         {
-            if(obj.GetComponent<Collider>() != null)
+            if (obj.GetComponent<Collider>() != null)
             {
                 Destroy(obj.GetComponent<Collider>());
             }
             obj.AddComponent<MeshCollider>();
+        }
+
+        static void ChangeOutlineMat(Transform obj)
+        {
+            foreach(Transform child in obj.transform)
+            {
+                var mr = obj.GetComponent<MeshRenderer>();
+                if (mr != null)
+                {
+                    mr.materials = new Material[] { mr.material, MainManager.outlinemain };
+                }
+                ChangeOutlineMat(child);
+            }
+        }
+
+        public static void ChangeDefiantRoot3(MapControl __instance)
+        {
+            Transform crisbeeTable = __instance.transform.Find("Bakery/Table");
+            crisbeeTable.localPosition = new Vector3(3.78f, -4.13f, 0.03f);
+            crisbeeTable.localScale = new Vector3(0.7342f, 0.3257f, 0.6798f);
+        }
+
+        public static void ChangeDesertEastmost(MapControl __instance)
+        {
+            if (!MainManager.instance.flags[991])
+            {
+                Transform baseMap = __instance.transform.GetChild(0);
+                GameObject car = (Instantiate(MainManager_Ext.mapPrefabs.LoadAsset<GameObject>("SpinoutCar"), Vector3.zero, Quaternion.Euler(0, 0, 0), baseMap) as GameObject);
+                car.transform.localPosition = new Vector3(10.73f, - 8.77f, 0.4182f);
+                car.transform.localEulerAngles = new Vector3(30f, 255f, 270f);
+
+                if (MainManager.instance.flagvar[(int)NewFlagVar.SpinoutCarBattery] > 0)
+                {
+                    foreach (Transform child in car.transform.GetChild(0))
+                    {
+                        if (!child.gameObject.activeSelf && child.name.Contains("Battery"))
+                        {
+                            child.gameObject.SetActive(true);
+                            break;
+                        }
+                    }
+                }
+                ChangeOutlineMat(car.transform);
+            }
+        }
+
+        public static void ChangeBugariaOutskitsSnakemouthCorridor1(MapControl __instance)
+        {
+            if (!MainManager.instance.flags[990])
+            {
+                GameObject temp = Resources.Load("prefabs/maps/" + MainManager.Maps.GiantLairFridgeInside.ToString()) as GameObject;
+                GameObject bottle = temp.transform.GetChild(0).Find("Bottle").gameObject;
+                bottle = CreateCloneObj(bottle, __instance.transform.GetChild(0), new Vector3(-31.96f, - 8.56f, 14.28f), new Vector3(8f, 345f, 0), new Vector3(1, 1, 1));
+
+                Transform stock = bottle.transform.GetChild(0);
+                stock.localScale = new Vector3(100, 100, 78);
+
+                var mr = bottle.GetComponent<MeshRenderer>();
+                mr.materials = new Material[] { MainManager.Main3D, MainManager.outlinemain };
+                mr.material.color = new Color(1, 0.5f, 0, 1);
+                Destroy(bottle.GetComponent<RenderQueue>());
+
+                GameObject screw = (Instantiate(MainManager_Ext.mapPrefabs.LoadAsset("CorkscrewModel"), Vector3.zero, Quaternion.Euler(270, 0, 0), bottle.transform) as GameObject);
+                screw.transform.localPosition = new Vector3(-0.22f, - 0.0753f, 10.4578f);
+                screw.transform.localEulerAngles = new Vector3(349f, 352f, 179f);
+                screw.AddComponent<CorkScrew>().stock = stock;
+            }
+        }
+
+        public static void ChangeBugariaOutskirtsOutsideCity(MapControl __instance)
+        {
+            if (MainManager.instance.flags[980])
+            {
+                GameObject carpet = Instantiate(MainManager_Ext.assetBundle.LoadAsset<GameObject>("CarpetPanel"));
+                carpet.GetComponent<MeshRenderer>().materials = new Material[] { MainManager.mainPlane, MainManager.outlinemain };
+                Transform association = __instance.transform.GetChild(1);
+
+                carpet.transform.parent = association;
+                carpet.transform.localPosition = new Vector3(5.64f, 0.1f, 0.8f);
+
+                CreateCloneObj(carpet, association, new Vector3(-19.6137f, 4.85f, 18.1912f),
+                    new Vector3(90, 0, 0), new Vector3(0.8066f, 0.7344f, 1));
+            }
+        }
+
+        public static void ChangeSandCastleBossRoom(MapControl __instance)
+        {
+            if (MainManager.instance.flags[973] && !MainManager.instance.flags[974])
+            {
+                GameObject temp = Resources.Load("prefabs/maps/" + MainManager.Maps.HideoutEntrance.ToString()) as GameObject;
+                GameObject chest = temp.transform.GetChild(0).Find("Chest").gameObject;
+                ChangeCollider(CreateCloneObj(chest, __instance.transform.GetChild(0), new Vector3(27.6f, 0f, 0.17f), new Vector3(0, 0, 0), new Vector3(1, 1, 1)));
+            }
+        }
+
+        public static void ChangeDesertSandCastle(MapControl __instance)
+        {
+            //add ant capitain to follow whitelist
+            __instance.canfollowID = __instance.canfollowID.AddItem((int)NewAnimID.JumpAnt).ToArray();
         }
 
         public static void ChangeWaspKingdomOutside(MapControl __instance)
@@ -218,7 +318,7 @@ namespace BFPlus.Extensions
 
                 GameObject canTent = baseObject.Find("CanTent").gameObject;
 
-                CreateCloneObj(canTent, baseObject.transform, new Vector3(-8.5f, 0, -5.74f), new Vector3(0,0,0), Vector3.one);
+                CreateCloneObj(canTent, baseObject.transform, new Vector3(-8.5f, 0, -5.74f), new Vector3(0, 0, 0), Vector3.one);
                 CreateCloneObj(canTent, baseObject.transform, new Vector3(8.5f, 0, -5.52f), new Vector3(0, 0, 180), Vector3.one);
 
                 baseObject.Find("gate").gameObject.SetActive(false);
@@ -231,8 +331,8 @@ namespace BFPlus.Extensions
         {
             if (MainManager.instance.flags[945])
             {
-                __instance.music[0] = Resources.Load<AudioClip>("audio/music/Tension3"); 
-               __instance.musicflags = new Vector2Int[] { new Vector2Int(945,0) };
+                __instance.music[0] = Resources.Load<AudioClip>("audio/music/Tension3");
+                __instance.musicflags = new Vector2Int[] { new Vector2Int(945, 0) };
             }
         }
 
@@ -283,7 +383,7 @@ namespace BFPlus.Extensions
                 GameObject waspHouseBroken = baseObject.Find("WaspHouseBroken").gameObject;
                 waspHouseBroken.GetComponent<MeshFilter>().mesh = closeHouseMesh;
 
-                GameObject hoaxeChanges = Instantiate(MainManager_Ext.mapPrefabs.LoadAsset("HoaxeWaspKingdom2Changes"),Vector3.zero,Quaternion.Euler(270,0,0),baseObject.transform) as GameObject;
+                GameObject hoaxeChanges = Instantiate(MainManager_Ext.mapPrefabs.LoadAsset("HoaxeWaspKingdom2Changes"), Vector3.zero, Quaternion.Euler(270, 0, 0), baseObject.transform) as GameObject;
 
                 baseObject.Find("Lock").gameObject.SetActive(false);
 
@@ -335,8 +435,8 @@ namespace BFPlus.Extensions
                 __instance.mainmesh.GetComponent<MeshCollider>().sharedMesh = floorMesh;
 
                 Transform door = __instance.mainmesh.Find("door");
-                door.position = new Vector3(-26.4f, 0f,-2.2f);
-                door.localEulerAngles = new Vector3(0,0,270);
+                door.position = new Vector3(-26.4f, 0f, -2.2f);
+                door.localEulerAngles = new Vector3(0, 0, 270);
             }
         }
 
@@ -359,11 +459,11 @@ namespace BFPlus.Extensions
 
                 if (MainManager.instance.flags[945])
                 {
-                    CreateCloneObj(gate.gameObject, __instance.mainmesh, new Vector3(-21.66f, -0.32f, 7.24f), new Vector3(0,0,90), gate.transform.localScale);
+                    CreateCloneObj(gate.gameObject, __instance.mainmesh, new Vector3(-21.66f, -0.32f, 7.24f), new Vector3(0, 0, 90), gate.transform.localScale);
                     Destroy(gate.gameObject);
                 }
 
-                __instance.camlimitneg = new Vector3(-15, __instance.camlimitneg.y,__instance.camlimitneg.z);
+                __instance.camlimitneg = new Vector3(-15, __instance.camlimitneg.y, __instance.camlimitneg.z);
 
                 if (!MainManager.instance.flags[945])
                 {
@@ -400,7 +500,7 @@ namespace BFPlus.Extensions
             baseObject.transform.Find("tomcan (1)").transform.position = new Vector3(2.76f, -0.41f, 0.11f);
 
             string[] resetObj = { "tomcan (1)", "MedicineBox", "MedicineBox (1)", "GlassPot" };
-            foreach(var obj in resetObj)
+            foreach (var obj in resetObj)
             {
                 ResetCollider(baseObject.transform.Find(obj).gameObject);
             }
@@ -443,7 +543,7 @@ namespace BFPlus.Extensions
 
             string[] objectsName = { "Bottle", "trunk", "Gear" };
             GameObject[] objects = new GameObject[objectsName.Length];
-            for(int i=0;i<objects.Length; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 objects[i] = baseObject.transform.Find(objectsName[i]).gameObject;
                 Destroy(objects[i].GetComponent<MeshCollider>());
@@ -453,12 +553,12 @@ namespace BFPlus.Extensions
             var boxCol = objects[0].GetComponent<BoxCollider>();
             boxCol.center = new Vector3(boxCol.center.x, boxCol.center.y, 2.5f);
 
-            foreach(Transform child in baseObject.transform)
+            foreach (Transform child in baseObject.transform)
             {
-                if(child.name == "trunk" && child.GetComponents<BoxCollider>().Length == 2)
+                if (child.name == "trunk" && child.GetComponents<BoxCollider>().Length == 2)
                 {
                     var boxCols = child.GetComponents<BoxCollider>();
-                    if(boxCols.Length == 2)
+                    if (boxCols.Length == 2)
                     {
                         foreach (var col in boxCols)
                         {
@@ -516,7 +616,7 @@ namespace BFPlus.Extensions
                 (new Vector3(56.3f, -7.56f, -3.64f), new Vector3(0, 0, 90))
             };
 
-            for(int i=0; i< plants.Length; i++)
+            for (int i = 0; i < plants.Length; i++)
             {
                 GameObject plant = Instantiate(plantPlatform);
                 plant.transform.parent = baseObject.transform;
@@ -628,13 +728,13 @@ namespace BFPlus.Extensions
         public static void ChangeAntMinesBreakRoom(MapControl __instance)
         {
             //crate with item on  top
-            ResetCollider(__instance.mainmesh.GetChild(20).gameObject);         
+            ResetCollider(__instance.mainmesh.GetChild(20).gameObject);
         }
 
         public static void ChangeFactoryProcessingPump(MapControl __instance)
         {
-            GameObject newPlatform = Instantiate(__instance.transform.Find("GratePlatform (1)").gameObject,__instance.transform);
-            
+            GameObject newPlatform = Instantiate(__instance.transform.Find("GratePlatform (1)").gameObject, __instance.transform);
+
             ScrewPlatform screwComp = newPlatform.GetComponent<ScrewPlatform>();
             screwComp.enabled = false;
             newPlatform.transform.position = new Vector3(-1f, -8f, 11f);
@@ -652,7 +752,7 @@ namespace BFPlus.Extensions
             __instance.mainmesh.GetComponent<MeshCollider>().sharedMesh = floorMesh;
 
             Transform spikeBed = __instance.mainmesh.Find("SpikeBed");
-            foreach(Transform spike in spikeBed)
+            foreach (Transform spike in spikeBed)
             {
                 spike.parent = __instance.mainmesh;
             }
@@ -694,7 +794,7 @@ namespace BFPlus.Extensions
         public static void ChangeFactoryProcessingFirstRoom(MapControl __instance)
         {
             Transform crate = __instance.gameObject.transform.Find("Crate (3)");
-            foreach(var col in crate.GetComponents<Collider>())
+            foreach (var col in crate.GetComponents<Collider>())
             {
                 Destroy(col);
             }
@@ -708,9 +808,9 @@ namespace BFPlus.Extensions
 
             Transform stall = baseObject.Find("Stall");
 
-            string[] objsToAddMeshCol = { "Pot (2)", "Crate", "Crate (1)", "Crate (2)", "SupportBeams", "SupportBeams (1)"};
+            string[] objsToAddMeshCol = { "Pot (2)", "Crate", "Crate (1)", "Crate (2)", "SupportBeams", "SupportBeams (1)" };
 
-            foreach(var obj in objsToAddMeshCol)
+            foreach (var obj in objsToAddMeshCol)
             {
                 ChangeCollider(baseObject.Find(obj).gameObject);
             }
@@ -751,7 +851,7 @@ namespace BFPlus.Extensions
             fader.fadespeed = 0.075f;
             fader.yoffset = -1;
             fader.checkx = 0;
-            fader.pivotoffset = new Vector3(0,0,0);
+            fader.pivotoffset = new Vector3(0, 0, 0);
 
             //Gourmet Race Loading Zone Decorations
             int[] itemSprites = new int[] { (int)MainManager.Items.GlazedHoney, (int)MainManager.Items.HoneyPancake, (int)MainManager.Items.HoneyMilk };
@@ -771,7 +871,7 @@ namespace BFPlus.Extensions
                 item.gameObject.layer = 14;
                 item.receiveShadows = true;
                 item.sortingOrder = 1;
-                if(spriteMat == null)
+                if (spriteMat == null)
                     spriteMat = item.materials;
             }
 
@@ -780,13 +880,13 @@ namespace BFPlus.Extensions
             foodSign.transform.parent = baseObject.transform;
             foodSign.transform.position = new Vector3(11.84f, 5.32f, 20.9f);
             foodSign.transform.localEulerAngles = new Vector3(0, 0, 200);
-            foreach(var sr in foodSign.gameObject.GetComponentsInChildren<SpriteRenderer>())
+            foreach (var sr in foodSign.gameObject.GetComponentsInChildren<SpriteRenderer>())
             {
                 sr.sprite = MainManager.itemsprites[0, (int)MainManager.Items.Donut];
                 sr.materials = spriteMat;
             }
 
-            GameObject table = Instantiate(baseObject.Find("Table"),baseObject.transform).gameObject;
+            GameObject table = Instantiate(baseObject.Find("Table"), baseObject.transform).gameObject;
             table.transform.position = new Vector3(16.2f, 0, 18.18f);
             table.transform.localEulerAngles = new Vector3(0, 0, 37);
 
@@ -835,7 +935,8 @@ namespace BFPlus.Extensions
             foreach (Transform t in baseObject.transform.Find("River").transform)
             {
                 t.gameObject.SetActive(false);
-            };
+            }
+            ;
             GameObject newRoom = MainManager_Ext.mapPrefabs.LoadAsset("SnakemouthBridgeNewMesh") as GameObject;
             Mesh mesh = newRoom.GetComponent<MeshFilter>().mesh;
             baseObject.GetComponent<MeshFilter>().mesh = mesh;
@@ -844,9 +945,9 @@ namespace BFPlus.Extensions
 
             GameObject temp = Resources.Load("prefabs/maps/" + MainManager.Maps.BugariaOutskirtsOutsideCity.ToString()) as GameObject;
             GameObject sign = null;
-            foreach(Transform child in temp.transform.GetChild(0))
+            foreach (Transform child in temp.transform.GetChild(0))
             {
-                if(child.name == "Stick" && child.childCount == 2)
+                if (child.name == "Stick" && child.childCount == 2)
                 {
                     sign = child.GetChild(0).gameObject;
                     break;
@@ -859,7 +960,7 @@ namespace BFPlus.Extensions
         public static void ChangeGoldenSMinigame(MapControl __instance)
         {
             __instance.battlemap = MainManager.BattleMaps.GoldenBattle1;
-            
+
         }
 
         public static void ChangeTestRoom(MapControl __instance)
@@ -868,7 +969,7 @@ namespace BFPlus.Extensions
             cube.transform.parent = __instance.transform;
             cube.transform.position = new Vector3(50, 100, 0);
             cube.transform.localScale = new Vector3(25, 1, 35);
-                
+
             Medal[] medals = Enum.GetValues(typeof(Medal)).Cast<Medal>().ToArray();
             NewEnemies[] enemies = Enum.GetValues(typeof(NewEnemies)).Cast<NewEnemies>().Reverse().ToArray();
             NewItem[] items = Enum.GetValues(typeof(NewItem)).Cast<NewItem>().ToArray();
@@ -880,10 +981,10 @@ namespace BFPlus.Extensions
             float totalLength = boxCollider.size.z * cube.transform.localScale.z;
             float spacing = 1.5f;
 
-            int columnCount = Mathf.FloorToInt(totalWidth / spacing)-1;
+            int columnCount = Mathf.FloorToInt(totalWidth / spacing) - 1;
             int rowCount = Mathf.FloorToInt(totalLength / spacing);
 
-            Vector3 startPosition = cube.transform.position - new Vector3((totalWidth / 2)-1, 0, (-totalLength / 2)+1);
+            Vector3 startPosition = cube.transform.position - new Vector3((totalWidth / 2) - 1, 0, (-totalLength / 2) + 1);
 
             int medalCount = 0;
             int enemyCount = 0;
@@ -894,9 +995,9 @@ namespace BFPlus.Extensions
                 for (int col = 0; col < columnCount; col++)
                 {
                     Vector3 position = startPosition + new Vector3(col * spacing, 1, -row * spacing);
-                    if(medalCount < medals.Length)
+                    if (medalCount < medals.Length)
                     {
-                        if(medals[medalCount] != Medal.TPComa)
+                        if (medals[medalCount] != Medal.TPComa)
                             EntityControl.CreateItem(position, 2, (int)medals[medalCount], Vector3.zero, -1);
                         medalCount++;
 
@@ -905,7 +1006,7 @@ namespace BFPlus.Extensions
                             break;
                         }
                     }
-                    else if(itemCount < items.Length)
+                    else if (itemCount < items.Length)
                     {
                         EntityControl.CreateItem(position, 1, (int)items[itemCount], Vector3.zero, -1);
                         itemCount++;
@@ -924,10 +1025,13 @@ namespace BFPlus.Extensions
                             int animID = Convert.ToInt32(MainManager.enemydata[enemy, 0]);
                             var entity = EntityControl.CreateNewEntity("enemy" + enemy, animID, position);
                             entity.transform.parent = __instance.transform;
-                            if ((NewEnemies)enemy == NewEnemies.Frostfly || (NewEnemies)enemy == NewEnemies.FlyingCaveling || (NewEnemies)enemy == NewEnemies.Dewling)
+                            if ((NewEnemies)enemy == NewEnemies.Frostfly || (NewEnemies)enemy == NewEnemies.Dewling)
                                 entity.height = 1;
+
+                            if ((NewEnemies)enemy == NewEnemies.FlyingCaveling)
+                                entity.height = 3;
                             enemyCount++;
-                            col+=2;                          
+                            col += 2;
                         }
                     }
                 }
@@ -947,10 +1051,6 @@ namespace BFPlus.Extensions
             rock.gameObject.AddComponent<MeshCollider>();
 
             baseObject.transform.Find("Big Plain Rock (2)").gameObject.AddComponent<MeshCollider>();
-
-            var boxCol = baseObject.transform.Find("AncientPillarBigBroken2").gameObject.GetComponent<BoxCollider>();
-            boxCol.size = new Vector3(14,boxCol.size.y, boxCol.size.z);
-            boxCol.center = new Vector3(-6, boxCol.center.y, boxCol.center.z);
         }
 
         public static void ChangeAntPalace1(MapControl __instance)
@@ -960,6 +1060,19 @@ namespace BFPlus.Extensions
             Mesh mesh = newRoom.GetComponent<MeshFilter>().mesh;
             baseObject.GetComponent<MeshFilter>().mesh = mesh;
             baseObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+        }
+
+        public static void ChangeAntPalaceWarRoom(MapControl __instance)
+        {
+            GameObject baseObject = __instance.gameObject.transform.Find("Base").gameObject;
+            GameObject newRoom = MainManager_Ext.mapPrefabs.LoadAsset("WarRoomNewBase") as GameObject;
+            Mesh mesh = newRoom.GetComponent<MeshFilter>().mesh;
+            baseObject.GetComponent<MeshFilter>().mesh = mesh;
+            baseObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+
+            GameObject temp = Resources.Load("prefabs/maps/" + MainManager.Maps.BugariaMainPlaza.ToString()) as GameObject;
+            GameObject sign = temp.transform.Find("Inn/Painting1/Sign (1)").gameObject;
+            ChangeCollider(CreateCloneObj(sign, __instance.transform.GetChild(0), new Vector3(12.195f, 5.4675f, 6.27f), new Vector3(0, 0, 152), new Vector3(75, 25, 75)));
         }
 
         public static void ChangeSandCastleRockRoom(MapControl __instance)
@@ -1069,7 +1182,7 @@ namespace BFPlus.Extensions
 
                 var teas = teaChest.transform.GetComponentsInChildren<SpriteRenderer>();
 
-                foreach(var tea in teas)
+                foreach (var tea in teas)
                 {
                     tea.sprite = MainManager.itemsprites[0, UnityEngine.Random.Range(0, 2) == 0 ? (int)MainManager.Items.SpicyTea : (int)MainManager.Items.BurlyTea];
                 }
@@ -1083,9 +1196,9 @@ namespace BFPlus.Extensions
 
                 GameObject leafBag = CreateCloneObj(__instance.transform.Find("Restaurant").Find("LeafBag").gameObject, baseObject.transform, new Vector3(15.84f, 0.57f, 13.22f), new Vector3(0, 0, 225), new Vector3(130f, 108f, 108f));
                 BoxCollider col = leafBag.AddComponent<BoxCollider>();
-                col.size = new Vector3(col.size.x, col.size.y,0.02f);
+                col.size = new Vector3(col.size.x, col.size.y, 0.02f);
 
-                SpriteRenderer dish = MainManager.NewSpriteObject(leafBag.transform.position + Vector3.up*1.5f, __instance.transform, MainManager.itemsprites[0, (int)MainManager.Items.DangerDish]);
+                SpriteRenderer dish = MainManager.NewSpriteObject(leafBag.transform.position + Vector3.up * 1.5f, __instance.transform, MainManager.itemsprites[0, (int)MainManager.Items.DangerDish]);
                 dish.name = "DangerDish";
 
                 Audience audience = NewEvent.CreateAudience(__instance.transform, 20, Audience.Type.MothAntBeetle, new Vector2(1, 0.1f), new Vector2(5, 2), new Vector3(-12f, 0.0308f, -22f), new Vector3(0, 0, 0));
@@ -1093,12 +1206,12 @@ namespace BFPlus.Extensions
                 GameObject door = __instance.transform.Find("Log House").Find("Door").gameObject;
                 Destroy(door.GetComponent<ConditionChecker>());
 
-                CreateCloneObj(door, baseObject.transform, new Vector3(0.94f,-0.30f, 19.40f), Vector3.zero, new Vector3(1, 1, 1f));        
+                CreateCloneObj(door, baseObject.transform, new Vector3(0.94f, -0.30f, 19.40f), Vector3.zero, new Vector3(1, 1, 1f));
             }
         }
 
         public static void ChangeBugariaOutskirtsEast1(MapControl __instance)
-        { 
+        {
             GameObject sideGrass = __instance.mainmesh.transform.GetComponentsInChildren<BoxCollider>().Where(b => b.name == "SideGrass" && Vector3.Distance(b.transform.position, new Vector3(41.98f, -0.13f, -10.97f)) < 0.01f).First().gameObject;
             Destroy(sideGrass.gameObject.GetComponent<BoxCollider>());
 
@@ -1161,7 +1274,7 @@ namespace BFPlus.Extensions
             superBossRush.transform.localScale = bossRushTrophy.transform.localScale;
             superBossRush.transform.localEulerAngles = bossRushTrophy.transform.localEulerAngles;
             superBossRush.transform.position = new Vector3(-13f, 5.21f, 11f);
-            
+
             ConditionChecker cc = superBossRush.GetComponent<ConditionChecker>();
             cc.requires = new int[] { 900 };
 
@@ -1187,7 +1300,7 @@ namespace BFPlus.Extensions
             GameObject darkBeerang = Instantiate(Resources.Load<GameObject>("prefabs/objects/BeerangBattle"));
             darkBeerang.transform.parent = house.transform;
             darkBeerang.transform.localEulerAngles = new Vector3(90, 45, 0);
-            darkBeerang.transform.position = new Vector3(-10.82f, 4,9.28f);
+            darkBeerang.transform.position = new Vector3(-10.32f, 4f, 11f);
             cc = darkBeerang.AddComponent<ConditionChecker>();
             cc.requires = new int[] { 229, 763 };
             darkBeerang.GetComponentInChildren<SpriteRenderer>().material.color = Color.black;
@@ -1200,6 +1313,13 @@ namespace BFPlus.Extensions
                 mrTesterTrophy.transform.localEulerAngles = marsTrophy.transform.localEulerAngles;
             }
 
+            if (MainManager.instance.flags[981])
+            {
+                Sprite jumpAntHammer = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("JumpAnt2")[31];
+                GameObject jumpAntTrophy = MainManager.NewSpriteObject(Vector3.zero, house.transform, jumpAntHammer).gameObject;
+                jumpAntTrophy.transform.localEulerAngles = new Vector3(270f, 194.44f, 0);
+                jumpAntTrophy.transform.position = new Vector3(-12.25f, 2.51f, 11.14f);
+            }
 
             //move crown to the ground
             house.transform.Find("artifacts_6").position = new Vector3(-16.92f, 1.38f, 5.38f);
@@ -1211,7 +1331,7 @@ namespace BFPlus.Extensions
             newCrate.transform.localScale = new Vector3(0.0074f, 0.005f, 0.0055f);
             newCrate.transform.position = new Vector3(-16.92f, 0.48f, 5f);
 
-            ResetCollider(CreateCloneObj(originalCrate, __instance.transform.Find("Inn"), new Vector3(-9.22f, 12f, 15.30f), new Vector3(0, 0, 180), new Vector3(0.01f, 0.01f, 0.005f))); 
+            ResetCollider(CreateCloneObj(originalCrate, __instance.transform.Find("Inn"), new Vector3(-9.22f, 12f, 15.30f), new Vector3(0, 0, 180), new Vector3(0.01f, 0.01f, 0.005f)));
         }
 
         public static void ChangeBugariaResidential(MapControl __instance)
@@ -1220,7 +1340,7 @@ namespace BFPlus.Extensions
 
             var fences = mothhouse.GetComponentsInChildren<BoxCollider>().Where(b => b.name.Contains("Fence") && !b.name.Contains('5') && !b.name.Contains('6') && !b.name.Contains('7'));
 
-            foreach(var fence in fences)
+            foreach (var fence in fences)
             {
                 GameObject go = fence.gameObject;
                 Destroy(fence.gameObject.GetComponent<BoxCollider>());
@@ -1237,9 +1357,9 @@ namespace BFPlus.Extensions
             var lightCone = baseObject.transform.Find("LightCone (2)").gameObject;
             var lightMats = lightCone.GetComponent<MeshRenderer>().materials;
 
-            foreach(Transform t in mushroomPlatforms.transform)
+            foreach (Transform t in mushroomPlatforms.transform)
             {
-                if(t.name == "LightCone")
+                if (t.name == "LightCone")
                 {
                     t.gameObject.AddComponent<LightSorter>();
                     var renderer = t.GetComponent<MeshRenderer>();
@@ -1255,7 +1375,7 @@ namespace BFPlus.Extensions
 
         static void AddMeshRenderer(Transform parent)
         {
-            foreach(Transform transform in parent)
+            foreach (Transform transform in parent)
             {
                 var mr = transform.gameObject.AddComponent<MeshRenderer>();
                 mr.materials = GameObject.Find("RoachHouse2").GetComponent<MeshRenderer>().materials;
@@ -1267,7 +1387,7 @@ namespace BFPlus.Extensions
         {
             if (MainManager.instance.flags[932])
             {
-                
+
                 GameObject baseObject = __instance.gameObject.transform.Find("Base").gameObject;
 
                 GameObject roachHouse2 = GameObject.Find("RoachHouse2").gameObject;
@@ -1304,7 +1424,7 @@ namespace BFPlus.Extensions
                 GameObject medalSign = Instantiate(MainManager_Ext.mapPrefabs.LoadAsset("MedalSignpost")) as GameObject;
                 medalSign.transform.SetParent(baseObject.transform);
                 medalSign.transform.localPosition = new Vector3(-39.83f, -8.419999f, -0.1120014f);
-                medalSign.transform.localRotation = Quaternion.Euler(0,0,-180);
+                medalSign.transform.localRotation = Quaternion.Euler(0, 0, -180);
 
             }
 
@@ -1339,7 +1459,7 @@ namespace BFPlus.Extensions
         {
             GameObject baseObject = __instance.gameObject.transform.Find("Base").gameObject;
             GameObject newStonePillar = Instantiate(baseObject.transform.Find("StonePillarNatural").gameObject, baseObject.transform);
-            newStonePillar.transform.position = new Vector3(54.78f,-16.93f,12.81f);
+            newStonePillar.transform.position = new Vector3(54.78f, -16.93f, 12.81f);
             newStonePillar.transform.rotation = Quaternion.Euler(270, 0, 0);
 
             GameObject eye = new GameObject("eye");
@@ -1353,7 +1473,7 @@ namespace BFPlus.Extensions
 
             GameObject deadlanderZoneNightmare = new GameObject("newZone");
             deadlanderZoneNightmare.transform.parent = baseObject.transform;
-            deadlanderZoneNightmare.transform.position = new Vector3(52.28f, -4.71f,7.98f);
+            deadlanderZoneNightmare.transform.position = new Vector3(52.28f, -4.71f, 7.98f);
             deadlanderZoneNightmare.transform.rotation = Quaternion.Euler(270, 90, 0);
             deadlanderZoneNightmare.transform.localScale = new Vector3(3.3f, 25, 40);
             DeadLanderZones zone = deadlanderZoneNightmare.AddComponent<DeadLanderZones>();
@@ -1379,7 +1499,7 @@ namespace BFPlus.Extensions
                 baseObject.transform.Find("Screw (1)").gameObject.SetActive(false);
                 baseObject.transform.Find("Screw (2)").gameObject.SetActive(false);
 
-                List<GameObject> resetColliders=  new List<GameObject>();
+                List<GameObject> resetColliders = new List<GameObject>();
                 GameObject squareStone = CreateCloneObj(baseObject.transform.Find("SquareStone").gameObject, baseObject.transform,
                     new Vector3(34.79f, -1.15f, 3.83f), new Vector3(0, 0, 300), new Vector3(265, 209, 350));
                 resetColliders.Add(squareStone);

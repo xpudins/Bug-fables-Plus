@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
@@ -111,9 +107,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
                 caller.StartCoroutine(caller.entity.TempIgnoreColision(hoaxe.ccol, 60));
 
-                for(int i=0;i<positions.Count; i++)
+                for (int i = 0; i < positions.Count; i++)
                 {
-                    caller.entity.forcejump = i != positions.Count-1;
+                    caller.entity.forcejump = i != positions.Count - 1;
                     caller.entity.MoveTowards(positions[i], 1.5f);
                     yield return new WaitUntil(() => !caller.entity.forcemove);
                 }
@@ -133,9 +129,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
                 caller.insideid = 0;
                 caller.dialogues = new Vector3[] { new Vector3(-1, 79, 0) };
                 caller.behaviors = new NPCControl.ActionBehaviors[] { NPCControl.ActionBehaviors.TurnRandomly, NPCControl.ActionBehaviors.FacePlayer };
-                
+
                 MainManager.instance.flagvar[(int)NewFlagVar.Intermission5RichNPCTalked]++;
-                if(MainManager.instance.flagvar[(int)NewFlagVar.Intermission5RichNPCTalked] == 3)
+                if (MainManager.instance.flagvar[(int)NewFlagVar.Intermission5RichNPCTalked] == 3)
                 {
                     MainManager.instance.flags[940] = true;
                 }
@@ -157,9 +153,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
                     Vector3[] positions = new Vector3[] { new Vector3(28.80f, 2.0487f, 5.329f), new Vector3(27.20f, 2.0487f, 5.78f), new Vector3(26.32f, 2.0487f, 5f) };
 
-                    MainManager.SetCamera(new Vector3(28.65f, 2, 5f),MainManager.defaultcamangle, new Vector3(0,2.25f,-8.25f), 0.1f);
+                    MainManager.SetCamera(new Vector3(28.65f, 2, 5f), MainManager.defaultcamangle, new Vector3(0, 2.25f, -8.25f), 0.1f);
                     MainManager.instance.insideid = -1;
-                    for(int i=0;i<richEntities.Length;i++)
+                    for (int i = 0; i < richEntities.Length; i++)
                     {
                         richEntities[i].npcdata.insideid = -1;
                         richEntities[i].gameObject.layer = 9;
@@ -197,9 +193,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
                     List<EntityControl> boatEntities = new List<EntityControl>(richEntities);
                     boatEntities.AddRange(new EntityControl[] { captain, hoaxe });
 
-                    positions = new Vector3[] { new Vector3(5.05f, 0f, 1.75f), new Vector3(2.95f, -1.3f, 1.88f), 
+                    positions = new Vector3[] { new Vector3(5.05f, 0f, 1.75f), new Vector3(2.95f, -1.3f, 1.88f),
                         new Vector3(3.57f, 0.36f, 1.75f), new Vector3(-3.15f, -0.6f, 1.8f), new Vector3(0, 2.1316f, 1.7073f) };
-                    for(int i=0;i<boatEntities.Count;i++)
+                    for (int i = 0; i < boatEntities.Count; i++)
                     {
                         boatEntities[i].LockRigid(true);
                         boatEntities[i].flip = true;
@@ -290,7 +286,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
                     yield return EventControl.quartersec;
 
-                    for(int i = 0; i < boatEntities.Count-2; i++)
+                    for (int i = 0; i < boatEntities.Count - 2; i++)
                     {
                         instance.StartCoroutine(GetOffBoat(boatEntities[i]));
                         yield return EventControl.tenthsec;
@@ -302,7 +298,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
                     hoaxe.PlaySound("Flee");
                     hoaxe.animstate = 101;
                     instance.StartCoroutine(BattleControl_Ext.LerpPosition(80, hoaxe.transform.position, new Vector3(-0.33f, -0.57f, -37.44f), hoaxe.transform));
-                    
+
                     MainManager.PlayTransition(4, 9999, 0.08f, Color.black);
                     yield return new WaitUntil(() => MainManager.transition == null);
 
@@ -368,7 +364,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
         {
             entity.animstate = 0;
             entity.PlaySound("Jump");
-            yield return MainManager.ArcMovement(entity.gameObject, entity.transform.position,new Vector3(-15.21f, -0.5781f, -37.95f),Vector3.zero, 5, 30,false);
+            yield return MainManager.ArcMovement(entity.gameObject, entity.transform.position, new Vector3(-15.21f, -0.5781f, -37.95f), Vector3.zero, 5, 30, false);
             entity.animstate = (int)MainManager.Animations.Walk;
             yield return BattleControl_Ext.LerpPosition(120, entity.transform.position, entity.transform.position + Vector3.right * 10, entity.transform);
         }
@@ -438,7 +434,6 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.Emoticon(MainManager.Emoticons.DotsLong, 120);
             yield return new WaitForSeconds(2);
 
-
             hoaxe.animstate = (int)MainManager.Animations.Upset;
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[123], true, Vector3.zero, hoaxe.transform, hoaxe.npcdata));
             while (MainManager.instance.message)
@@ -490,8 +485,8 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             MainManager.PlayParticle("Mistake", hoaxe.transform.position + Vector3.up);
             hoaxe.PlaySound("Fail");
 
-            caller.transform.position = new Vector3(0,-1000);
-            caller.entity.startpos = new Vector3(0,-1000);
+            caller.transform.position = new Vector3(0, -1000);
+            caller.entity.startpos = new Vector3(0, -1000);
 
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[129], true, Vector3.zero, hoaxe.transform, hoaxe.npcdata));
             while (MainManager.instance.message)

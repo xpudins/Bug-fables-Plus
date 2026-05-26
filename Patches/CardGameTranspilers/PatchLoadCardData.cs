@@ -5,11 +5,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BFPlus.Patches.CardGameTranspilers
 {
@@ -19,7 +14,7 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 24;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             var patchers = new DataPatcher[]
             {

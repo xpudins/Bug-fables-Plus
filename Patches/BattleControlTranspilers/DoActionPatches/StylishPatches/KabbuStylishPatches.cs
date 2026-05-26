@@ -21,9 +21,9 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 45123;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcR4(-7f), i=>i.MatchNewobj(out _), i=>i.MatchStfld(AccessTools.Field(typeof(MainManager),"camoffset")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcR4(-7f), i => i.MatchNewobj(out _), i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "camoffset")));
 
             ILLabel label = cursor.DefineLabel();
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CheckTutorialStylish"));
@@ -41,7 +41,6 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             yield return BattleControl_Ext.Instance.DoStylishTutorial(new KabbuStylish());
         }
     }
-    
     public class PatchKabbuBasicAttackWaitStylish : PatchBaseDoAction
     {
         public PatchKabbuBasicAttackWaitStylish()
@@ -49,16 +48,15 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 45384;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchStfld(AccessTools.Field(typeof(EntityControl), "overrridejump")));
-            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(EntityControl),"overrridejump")));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(EntityControl), "overrridejump")));
             cursor.Emit(OpCodes.Ldarg_0);
             Utils.InsertWaitStylish(cursor);
         }
     }
 
-    
     public class PatchKabbuUnderStrikeSetStylish : PatchBaseDoAction
     {
         public PatchKabbuUnderStrikeSetStylish()
@@ -66,16 +64,16 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 62092;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(193));
-            cursor.GotoNext(MoveType.After,i => i.MatchStfld(AccessTools.Field(typeof(EntityControl), "overrideheight")));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(EntityControl), "overrideheight")));
             Utils.InsertStartStylishTimer(cursor, 4f, 10f);
             cursor.Emit(OpCodes.Ldarg_0);
             Utils.InsertWaitStylish(cursor, 0.2f);
         }
     }
-    
+
     public class PatchKabbuDashThroughSetStylish : PatchBaseDoAction
     {
         public PatchKabbuDashThroughSetStylish()
@@ -83,17 +81,17 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 60543;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdarg0(),i => i.MatchLdcI4(172));
+            cursor.GotoNext(i => i.MatchLdarg(0), i => i.MatchLdcI4(172));
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdnull(), i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdnull(), i => i.MatchStfld(out _));
             Utils.InsertStartStylishTimer(cursor, 4f, 10f);
             cursor.Emit(OpCodes.Ldarg_0);
             Utils.InsertWaitStylish(cursor, 0.2f);
         }
     }
-    
+
     public class PatchKabbuBoulderTossSetStylish : PatchBaseDoAction
     {
         public PatchKabbuBoulderTossSetStylish()
@@ -101,14 +99,13 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 50710;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(75));
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(104), i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(104), i => i.MatchStfld(out _));
             Utils.InsertStartStylishTimer(cursor, 4f, 10f);
         }
     }
-    
     public class PatchKabbuBoulderTossWaitStylish : PatchBaseDoAction
     {
         public PatchKabbuBoulderTossWaitStylish()
@@ -116,7 +113,7 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 51101;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(78));
             cursor.GotoNext(i => i.MatchLdnull());
@@ -124,25 +121,23 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             cursor.Emit(OpCodes.Ldarg_0);
         }
     }
-    
+
     public class PatchKabbuFrozenDrillSetStylish : PatchBaseDoAction
     {
         public PatchKabbuFrozenDrillSetStylish()
         {
-            priority = 55017;
+            priority = 55108;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor c, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdarg0(),i => i.MatchLdcI4(109));
-            cursor.GotoNext(MoveType.After,i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "MultiSkillMove")));
-
-            Utils.InsertStartStylishTimer(cursor, 4f, 20f);
-            cursor.Emit(OpCodes.Ldarg_0);
-            Utils.InsertWaitStylish(cursor, 0.4f);
+            c.GotoNext(MoveType.After, x => x.MatchCall(AccessTools.Method(typeof(BattleControl), "MultiSkillMove")));
+            Utils.InsertStartStylishTimer(c, 4f, 20f);
+            c.Emit(OpCodes.Ldarg_0);
+            Utils.InsertWaitStylish(c, 0.4f);
         }
     }
-    
+
     public class PatchKabbuPepTalkSetStylish : PatchBaseDoAction
     {
         public PatchKabbuPepTalkSetStylish()
@@ -150,11 +145,11 @@ namespace BFPlus.Patches.DoActionPatches.StylishPatches
             priority = 62727;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(205));
-            cursor.GotoNext(MoveType.After,i => i.MatchCallvirt(out _));
-            Utils.InsertStartStylishTimer(cursor,4f,20f,commandSuccess: false);
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(out _));
+            Utils.InsertStartStylishTimer(cursor, 4f, 20f, commandSuccess: false);
         }
     }
 }

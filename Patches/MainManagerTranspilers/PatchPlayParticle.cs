@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.MainManagerTranspilers
@@ -18,16 +14,16 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchCall(out _), i => i.MatchCall(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchCall(out _), i => i.MatchCall(out _));
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchPlayParticle), "CheckParticle"));
         }
 
         static UnityEngine.Object CheckParticle(UnityEngine.Object particle, string name)
         {
-            if(Enum.IsDefined(typeof(NewParticle), name))
+            if (Enum.IsDefined(typeof(NewParticle), name))
             {
                 return MainManager_Ext.assetBundle.LoadAsset<GameObject>(name);
             }

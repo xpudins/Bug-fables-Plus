@@ -5,10 +5,6 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -22,15 +18,15 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 205120;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            for(int i=0;i<3;i++)
+            for (int i = 0; i < 3; i++)
                 cursor.GotoNext(j => j.MatchLdstr("Miniboss"));
-            
+
             cursor.GotoNext(i => i.MatchLdcI4(0), i => i.MatchStsfld(out _));
             int cursorIndex = cursor.Index;
 
-            cursor.GotoPrev(MoveType.After,i => i.MatchCall(AccessTools.Method(typeof(MainManager), "GetPartyPos", new Type[] { typeof(bool)})), i=>i.MatchStfld(out _));
+            cursor.GotoPrev(MoveType.After, i => i.MatchCall(AccessTools.Method(typeof(MainManager), "GetPartyPos", new Type[] { typeof(bool) })), i => i.MatchStfld(out _));
             var posRef = cursor.Prev.Operand;
 
             cursor.Goto(cursorIndex);

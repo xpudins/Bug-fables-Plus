@@ -1,15 +1,8 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using UnityEngine;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
-using Mono.Cecil;
+using MonoMod.Cil;
+using UnityEngine;
 
 namespace BFPlus.Patches.DoActionPatches.EnemyPatches
 {
@@ -34,13 +27,13 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             return bubble;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchNewobj(out _), i => i.MatchStfld(typeof(MainManager).GetField("camtargetpos")), i => i.MatchLdarg0(), i=>i.MatchLdcI4(1));
-            cursor.GotoNext(i=>i.MatchLdcI4(1));
+            cursor.GotoNext(i => i.MatchNewobj(out _), i => i.MatchStfld(typeof(MainManager).GetField("camtargetpos")), i => i.MatchLdarg0(), i => i.MatchLdcI4(1));
+            cursor.GotoNext(i => i.MatchLdcI4(1));
             cursor.Emit(OpCodes.Ldc_I4_2);//Changes spuder base max bubble from 1 to 2.
             cursor.Remove();
-            
+
             cursor.GotoNext(i => i.MatchLdstr("Prefabs/Objects/PoisonBubble"));
             int cursorIndex = cursor.Index;
 
@@ -55,7 +48,7 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             cursor.RemoveRange(13);
         }
     }
-    
+
     public class PatchSpuderBubbleProperty : PatchBaseDoAction
     {
         public PatchSpuderBubbleProperty()
@@ -78,14 +71,14 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             return "PoisonEffect";
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("Clomp"));
             cursor.GotoNext(i => i.MatchLdcI4(3));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpuderBubbleProperty), "GetSpuderBubbleProperty"));
             cursor.Remove();
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdnull());
+            cursor.GotoNext(MoveType.After, i => i.MatchLdnull());
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpuderBubbleProperty), "GetSpuderBubbleParticle"));
             cursor.Remove();
         }

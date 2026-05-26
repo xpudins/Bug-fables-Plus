@@ -1,10 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
@@ -50,7 +45,7 @@ namespace BFPlus.Extensions.EnemyAI
                     battle.enemydata[kabbuIndex].cantmove++;
                     MainManager.SetCondition(MainManager.BattleCondition.Poison, ref battle.enemydata[actionid], 4);
                     MainManager.PlayParticle("PoisonEffect", "Poison", battle.enemydata[actionid].battleentity.transform.position);
-                    yield return battle.ItemSpinAnim(entity.transform.position + Vector3.up,MainManager.itemsprites[1, 6], true);
+                    yield return battle.ItemSpinAnim(entity.transform.position + Vector3.up, MainManager.itemsprites[1, 6], true);
                     battle.dontusecharge = false;
                 }
             }
@@ -128,7 +123,7 @@ namespace BFPlus.Extensions.EnemyAI
                     break;
                 case Attacks.HardCharge:
                     battle.StartCoroutine(battle.ItemSpinAnim(entity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.Powerbank], true));
-                    yield return BattleControl_Ext.Instance.DoHardCharge(entity, actionid, battle,5,9);
+                    yield return BattleControl_Ext.Instance.DoHardCharge(entity, actionid, battle, 5, 9);
                     break;
                 case Attacks.MiracleShake:
                     yield return DarkTeamSnakemouth.UseItem((int)MainManager.Items.MiracleShake, entity, actionid);
@@ -212,7 +207,7 @@ namespace BFPlus.Extensions.EnemyAI
             int hits = 4;
 
             huricaneParticles.transform.parent = playerTargetEntityRef.transform;
-            battle.enemybounce = new Coroutine[1] { battle.StartCoroutine(battle.BounceEnemy(MainManager.GetPlayerData(playerTargetIDRef), 0, hits, Mathf.Clamp((float)hits * 0.65f, 0f, 3f)))};
+            battle.enemybounce = new Coroutine[1] { battle.StartCoroutine(battle.BounceEnemy(MainManager.GetPlayerData(playerTargetIDRef), 0, hits, Mathf.Clamp((float)hits * 0.65f, 0f, 3f))) };
             emission.rateOverTime = Mathf.Clamp(50f * 1, 20f, 50f);
 
             SpinAround spinAround = beemerang.gameObject.AddComponent<SpinAround>();
@@ -226,18 +221,18 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 if (i == 0)
                 {
-                    battle.DoDamage(battle.enemydata[actionid], ref MainManager.instance.playerdata[playerTargetIDRef], firstdamage - 1, BattleControl.AttackProperty.Flip,null, battle.commandsuccess);
+                    battle.DoDamage(battle.enemydata[actionid], ref MainManager.instance.playerdata[playerTargetIDRef], firstdamage - 1, BattleControl.AttackProperty.Flip, null, battle.commandsuccess);
                     firstdamage = battle.lastdamage;
                 }
                 else if (firstdamage > 0)
                 {
                     int value3 = firstdamage - i;
-                    battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], Mathf.Clamp(value3, 1, 99), BattleControl.AttackProperty.NoExceptions,null, battle.commandsuccess);
+                    battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], Mathf.Clamp(value3, 1, 99), BattleControl.AttackProperty.NoExceptions, null, battle.commandsuccess);
                     battle.ShowComboMessage(playerTargetEntityRef, battle.commandsuccess);
                 }
                 else
                 {
-                    battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], 0, BattleControl.AttackProperty.NoExceptions,null, battle.commandsuccess);
+                    battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], 0, BattleControl.AttackProperty.NoExceptions, null, battle.commandsuccess);
                 }
                 if (hits > 1)
                 {
@@ -278,7 +273,7 @@ namespace BFPlus.Extensions.EnemyAI
         public IEnumerator DoNeedleToss(EntityControl entity, int actionid, BattleControl battle)
         {
             battle.nonphyscal = true;
-            
+
             entity.animstate = 115;
             yield return new WaitForSeconds(0.65f);
             entity.overridefly = true;
@@ -341,14 +336,14 @@ namespace BFPlus.Extensions.EnemyAI
                     null,
                     null,
                     null,
-                    Vector3.zero, 
+                    Vector3.zero,
                     false
                 ));
                 UnityEngine.Object.Destroy(crosshair.gameObject);
                 while (dart != null)
                 {
                     yield return null;
-                }          
+                }
                 yield return EventControl.halfsec;
             }
             a = 0f;

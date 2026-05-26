@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using UnityEngine;
 
 namespace BFPlus.Extensions
@@ -434,8 +431,8 @@ namespace BFPlus.Extensions
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.Ironclad, (int)MainManager.Enemies.Ironclad, (int)NewEnemies.Frostfly },
-                new int[] { (int)MainManager.Enemies.Ironclad, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry},
-                new int[] { (int)MainManager.Enemies.Ironclad, (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.MimicSpider},
+                new int[] { (int)MainManager.Enemies.Ironclad, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw},
+                new int[] { (int)MainManager.Enemies.Ironclad, (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.MimicSpider},
             },
             new int[][]
             {
@@ -447,13 +444,13 @@ namespace BFPlus.Extensions
             {
                 new int[] { (int)NewEnemies.Frostfly, (int)NewEnemies.Frostfly,(int)NewEnemies.Frostfly },
                 new int[] { (int)NewEnemies.Frostfly, (int)NewEnemies.WormSwarm },
-                new int[] { (int)NewEnemies.Frostfly, (int)NewEnemies.Abomiberry, (int)NewEnemies.LonglegsSpider},
+                new int[] { (int)NewEnemies.Frostfly, (int)NewEnemies.MechaJaw, (int)NewEnemies.LonglegsSpider},
             },
             new int[][]
             {
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry },
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Frostfly, (int)MainManager.Enemies.Ironclad},
-                new int[] { (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.Ironclad, (int)NewEnemies.WormSwarm},
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw },
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.Frostfly, (int)MainManager.Enemies.Ironclad},
+                new int[] { (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.Ironclad, (int)NewEnemies.WormSwarm},
             },
             new int[][]
             {
@@ -463,21 +460,21 @@ namespace BFPlus.Extensions
             },
             new int[][]
             {
-                new int[] { (int)MainManager.Enemies.Ironclad, (int)MainManager.Enemies.Plumpling, (int)NewEnemies.SplotchSpider,(int)NewEnemies.Abomiberry },
+                new int[] { (int)MainManager.Enemies.Ironclad, (int)MainManager.Enemies.Plumpling, (int)NewEnemies.SplotchSpider,(int)NewEnemies.MechaJaw },
                 new int[] { (int)MainManager.Enemies.Ironclad, (int)NewEnemies.WormSwarm, (int)MainManager.Enemies.Ironclad},
                 new int[] { (int)MainManager.Enemies.Ironclad, (int)MainManager.Enemies.Ironclad, (int)MainManager.Enemies.Ironclad},
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.Ruffian, (int)MainManager.Enemies.Ruffian, (int)NewEnemies.Frostfly },
-                new int[] { (int)MainManager.Enemies.Ruffian, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Frostfly   },
-                new int[] { (int)MainManager.Enemies.Ruffian, (int)NewEnemies.LonglegsSpider, (int)NewEnemies.Abomiberry},
+                new int[] { (int)MainManager.Enemies.Ruffian, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.Frostfly   },
+                new int[] { (int)MainManager.Enemies.Ruffian, (int)NewEnemies.LonglegsSpider, (int)NewEnemies.MechaJaw},
             },
             new int[][]
             {
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Frostfly, (int)NewEnemies.Abomiberry, (int)NewEnemies.Frostfly},
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry},
-                new int[] { (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.Plumpling, (int)NewEnemies.Frostfly, (int)NewEnemies.LonglegsSpider },
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.Frostfly, (int)NewEnemies.MechaJaw, (int)NewEnemies.Frostfly},
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw},
+                new int[] { (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.Plumpling, (int)NewEnemies.Frostfly, (int)NewEnemies.LonglegsSpider },
             },
             new int[][]
             {
@@ -487,49 +484,49 @@ namespace BFPlus.Extensions
             new int[][]
             {
                 new int[] { (int)NewEnemies.Moeruki, (int)MainManager.Enemies.FireKrawler, (int)MainManager.Enemies.DeadLanderA },
-                new int[] { (int)NewEnemies.Moeruki, (int)NewEnemies.Abomiberry, (int)NewEnemies.Moeruki},
+                new int[] { (int)NewEnemies.Moeruki, (int)NewEnemies.MechaJaw, (int)NewEnemies.Moeruki},
                 new int[] { (int)NewEnemies.Moeruki, (int)MainManager.Enemies.FireCape, (int)MainManager.Enemies.FireWarden},
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.DeadLanderA, (int)MainManager.Enemies.DeadLanderB },
                 new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.Moeruki, (int)NewEnemies.Frostfly},
-                new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.Abomiberry},
+                new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.MechaJaw},
             },
             new int[][]
             {
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Moeruki},
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry },
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.WormSwarm },
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.Moeruki},
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw },
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.WormSwarm },
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.FireKrawler, (int)MainManager.Enemies.FireKrawler, (int)NewEnemies.Moeruki },
                 new int[] { (int)MainManager.Enemies.FireKrawler, (int)MainManager.Enemies.FireWarden, (int)MainManager.Enemies.FireCape },
-                new int[] { (int)MainManager.Enemies.FireKrawler, (int)NewEnemies.Moeruki, (int)NewEnemies.Abomiberry},
+                new int[] { (int)MainManager.Enemies.FireKrawler, (int)NewEnemies.Moeruki, (int)NewEnemies.MechaJaw},
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.DeadLanderA, (int)MainManager.Enemies.GoldenSeedling },
                 new int[] { (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.DeadLanderG, (int)NewEnemies.Moeruki},
-                new int[] { (int)MainManager.Enemies.DeadLanderB, (int)NewEnemies.Moeruki, (int)NewEnemies.Abomiberry},
+                new int[] { (int)MainManager.Enemies.DeadLanderB, (int)NewEnemies.Moeruki, (int)NewEnemies.MechaJaw},
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.FireCape, (int)MainManager.Enemies.DeadLanderG, (int)NewEnemies.FireAnt },
                 new int[] { (int)MainManager.Enemies.FireCape, (int)NewEnemies.FireAnt, (int)NewEnemies.Moeruki},
-                new int[] { (int)MainManager.Enemies.FireCape, (int)NewEnemies.FireAnt, (int)NewEnemies.Abomiberry },
+                new int[] { (int)MainManager.Enemies.FireCape, (int)NewEnemies.FireAnt, (int)NewEnemies.MechaJaw },
             },
             new int[][]
             {
-                new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.FireAnt, (int)NewEnemies.Moeruki,(int)NewEnemies.Abomiberry },
-                new int[] { (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.FireCape},
-                new int[] { (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.Frostfly},
+                new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.FireAnt, (int)NewEnemies.Moeruki,(int)NewEnemies.MechaJaw },
+                new int[] { (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.FireCape},
+                new int[] { (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.Frostfly},
             },
             new int[][]
             {
                 new int[] { (int)NewEnemies.Moeruki, (int)NewEnemies.Moeruki, (int)NewEnemies.FireAnt },
-                new int[] { (int)NewEnemies.Moeruki, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.FireAnt   },
+                new int[] { (int)NewEnemies.Moeruki, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.FireAnt   },
                 new int[] { (int)NewEnemies.Moeruki, (int)MainManager.Enemies.FireKrawler, (int)NewEnemies.FireAnt, (int)MainManager.Enemies.DeadLanderA},
             },
             new int[][]
@@ -559,26 +556,26 @@ namespace BFPlus.Extensions
             {
                 new int[] { (int)NewEnemies.MarsBud, (int)MainManager.Enemies.DeadLanderG, (int)NewEnemies.MarsBud, (int)MainManager.Enemies.DeadLanderB},
                 new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.FireAnt, (int)NewEnemies.WormSwarm },
-                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.Abomiberry, (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.GoldenSeedling },
+                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MechaJaw, (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.GoldenSeedling },
             },
             new int[][]
             {
                 new int[] { (int)NewEnemies.FireAnt, (int)NewEnemies.FireAnt,(int)NewEnemies.FireAnt, (int)NewEnemies.FireAnt },
                 new int[] { (int)NewEnemies.FireAnt, (int)NewEnemies.MarsBud, (int)MainManager.Enemies.FireCape, (int)NewEnemies.FireAnt },
-                new int[] { (int)NewEnemies.FireAnt, (int)MainManager.Enemies.DeadLanderG, (int)NewEnemies.FireAnt, (int)NewEnemies.Abomiberry},
+                new int[] { (int)NewEnemies.FireAnt, (int)MainManager.Enemies.DeadLanderG, (int)NewEnemies.FireAnt, (int)NewEnemies.MechaJaw},
             },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.DeadLanderA, (int)MainManager.Enemies.DeadLanderA, (int)MainManager.Enemies.DeadLanderA},
                 new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.FireAnt, (int)MainManager.Enemies.GoldenSeedling },
-                new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Moeruki },
+                new int[] { (int)MainManager.Enemies.DeadLanderA, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.Moeruki },
             },
             new int[][]
             {
                 new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.WormSwarm, (int)NewEnemies.WormSwarm},
-                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MarsBud, (int)NewEnemies.FireAnt, (int)NewEnemies.Abomiberry },
-                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.Abomiberry, (int)NewEnemies.Abomiberry, (int)NewEnemies.Moeruki },
-            }, 
+                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MarsBud, (int)NewEnemies.FireAnt, (int)NewEnemies.MechaJaw },
+                new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MechaJaw, (int)NewEnemies.MechaJaw, (int)NewEnemies.Moeruki },
+            },
             new int[][]
             {
                 new int[] { (int)MainManager.Enemies.DeadLanderB, (int)MainManager.Enemies.DeadLanderB, (int)NewEnemies.FireAnt},
@@ -589,13 +586,13 @@ namespace BFPlus.Extensions
             {
                 new int[] { (int)MainManager.Enemies.GoldenSeedling, (int)NewEnemies.WormSwarm, (int)MainManager.Enemies.GoldenSeedling },
                 new int[] { (int)MainManager.Enemies.GoldenSeedling, (int)NewEnemies.FireAnt, (int)NewEnemies.FireAnt, (int)NewEnemies.MarsBud},
-                new int[] { (int)MainManager.Enemies.GoldenSeedling, (int)NewEnemies.Abomiberry, (int)NewEnemies.MarsBud, (int)NewEnemies.FireAnt},
+                new int[] { (int)MainManager.Enemies.GoldenSeedling, (int)NewEnemies.MechaJaw, (int)NewEnemies.MarsBud, (int)NewEnemies.FireAnt},
             },
             new int[][]
             {
                 new int[] { (int)NewEnemies.Caveling, (int)NewEnemies.PirahnaChomp, (int)NewEnemies.FireAnt, (int)NewEnemies.Worm },
                 new int[] { (int)NewEnemies.BatteryShroom, (int)NewEnemies.SplotchSpider, (int)NewEnemies.Dewling, (int)NewEnemies.Moeruki },
-                new int[] { (int)NewEnemies.WormSwarm, (int)NewEnemies.Abomiberry, (int)NewEnemies.Mothmite, (int)NewEnemies.LonglegsSpider },
+                new int[] { (int)NewEnemies.WormSwarm, (int)NewEnemies.MechaJaw, (int)NewEnemies.Mothmite, (int)NewEnemies.LonglegsSpider },
                 new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.FirePopper, (int)NewEnemies.Frostfly, (int)NewEnemies.Spineling }
             }
         };
@@ -778,7 +775,7 @@ namespace BFPlus.Extensions
 
         int[][] bushTypes = new int[][]
         {
-            
+
             new int[]{ 0,1},//1-9
             new int[]{ 2 },//11-19
             new int[]{ 3},//21-29
@@ -864,7 +861,7 @@ namespace BFPlus.Extensions
                 bush.emoticonoffset = Vector3.zero;
 
                 //this control what type of bush it is
-                bush.npcdata.data = new int[] { bushTypes[floorid / 10][UnityEngine.Random.Range(0,bushTypes[floorid/10].Length)], -1 };
+                bush.npcdata.data = new int[] { bushTypes[floorid / 10][UnityEngine.Random.Range(0, bushTypes[floorid / 10].Length)], -1 };
 
                 //5% to have item in it
                 if (UnityEngine.Random.Range(0, 100) < 5)
@@ -879,12 +876,12 @@ namespace BFPlus.Extensions
                     bush.npcdata.vectordata = new Vector3[] { new Vector3(-1, -1, 0) };
                 }
             }
-        } 
+        }
 
 
         public int[] GetCurrentFloorEnemies()
         {
-            int currentFloor = MainManager.instance.flagvar[(int)NewFlagVar.Pit_Floor] -1;
+            int currentFloor = MainManager.instance.flagvar[(int)NewFlagVar.Pit_Floor] - 1;
             int maxFormations = floorEnemies[currentFloor].Length;
             return floorEnemies[currentFloor][UnityEngine.Random.Range(0, maxFormations)].ToArray();
         }
@@ -900,7 +897,7 @@ namespace BFPlus.Extensions
             Vector3[] itemDrops = new Vector3[1];
             var currentFloorItemDrops = floorItemDrops[floorid / 10];
 
-            for(int i =0; i != itemDrops.Length;i++)
+            for (int i = 0; i != itemDrops.Length; i++)
                 itemDrops[i] = new Vector3((int)currentFloorItemDrops[UnityEngine.Random.Range(0, currentFloorItemDrops.Length)], -1, 0);
 
             return itemDrops;
@@ -917,7 +914,7 @@ namespace BFPlus.Extensions
             rewardEntity.limit = new int[1] { rewardData.Value };
             rewardEntity.activationflag = rewardData.Value;
 
-            if(rewardData.Key == (int)NewItem.MysteryPouch)
+            if (rewardData.Key == (int)NewItem.MysteryPouch)
             {
                 rewardEntity.data = new int[] { itemType, (int)NewEvents.CollectMagicPouch, 1 };
             }
@@ -926,11 +923,11 @@ namespace BFPlus.Extensions
         public void SetupShop(MapControl map)
         {
             var itemEntities = map.entities.Where(e => e.name.Contains("Fixedshop")).ToList();
-            int floorid = (GetCurrentFloor()/10) - 1;
+            int floorid = (GetCurrentFloor() / 10) - 1;
 
             var currentFloorShopItems = shopItems[floorid];
 
-            for (int i=0; i!= currentFloorShopItems.Length; i++)
+            for (int i = 0; i != currentFloorShopItems.Length; i++)
             {
                 int item = (int)currentFloorShopItems[i][UnityEngine.Random.Range(0, currentFloorShopItems[i].Length)];
                 itemEntities[i].animstate = item;
@@ -964,10 +961,10 @@ namespace BFPlus.Extensions
             }
             else
             {
-                for(int i =0;i < 4; i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    data.Add(dataAsset[entityIndex+i]);
-                    names.Add(namesAsset[entityIndex+i].Trim('\r'));
+                    data.Add(dataAsset[entityIndex + i]);
+                    names.Add(namesAsset[entityIndex + i].Trim('\r'));
                 }
             }
         }
@@ -986,7 +983,7 @@ namespace BFPlus.Extensions
         }
 
         public static int GetCurrentFloor() => MainManager.instance.flagvar[(int)NewFlagVar.Pit_Floor];
-        
+
         public static PitData GetPitData()
         {
             if (MainManager.instance.GetComponent<PitData>() == null)
@@ -998,7 +995,7 @@ namespace BFPlus.Extensions
         {
             List<Vector3> positions = new List<Vector3>(enemyPos);
 
-            for(int i = 0; i < enemies.Length; i++)
+            for (int i = 0; i < enemies.Length; i++)
             {
                 int index = UnityEngine.Random.Range(0, positions.Count);
                 Vector3 pos = positions[index];

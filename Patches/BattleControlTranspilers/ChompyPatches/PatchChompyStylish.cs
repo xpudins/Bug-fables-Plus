@@ -1,13 +1,7 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
-using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.ChompyPatches
 {
@@ -18,7 +12,7 @@ namespace BFPlus.Patches.ChompyPatches
             priority = 41401;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcR4(0.4f));
             cursor.Prev.OpCode = OpCodes.Nop;

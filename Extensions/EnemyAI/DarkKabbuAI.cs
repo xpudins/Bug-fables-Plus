@@ -1,10 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 namespace BFPlus.Extensions.EnemyAI
 {
@@ -34,9 +30,9 @@ namespace BFPlus.Extensions.EnemyAI
         BattleControl battle = null;
         public override IEnumerator DoBattleAI(EntityControl entity, int actionid)
         {
-            List<Attacks> chances = new List<Attacks> 
-            { 
-                Attacks.Taunt, Attacks.Taunt, Attacks.Taunt, 
+            List<Attacks> chances = new List<Attacks>
+            {
+                Attacks.Taunt, Attacks.Taunt, Attacks.Taunt,
                 Attacks.HeavyStrike, Attacks.HeavyStrike, Attacks.HeavyStrike,
                 Attacks.PebbleToss, Attacks.PebbleToss, Attacks.PebbleToss,
                 Attacks.Understrike, Attacks.Understrike,
@@ -80,7 +76,7 @@ namespace BFPlus.Extensions.EnemyAI
             //frost bowling
             if (viIndex > -1 && leifIndex > -1 && hpPercent <= 0.7f && BattleControl_Ext.CanBeRelayed(battle.enemydata[leifIndex]) && BattleControl_Ext.CanBeRelayed(battle.enemydata[viIndex]))
             {
-                chances.AddRange(new Attacks[] { Attacks.FrostBowling, Attacks.FrostBowling, Attacks.FrostBowling});
+                chances.AddRange(new Attacks[] { Attacks.FrostBowling, Attacks.FrostBowling, Attacks.FrostBowling });
             }
 
             //relay 
@@ -96,14 +92,14 @@ namespace BFPlus.Extensions.EnemyAI
                     }
                 }
             }
-        
+
             Attacks action = chances[UnityEngine.Random.Range(0, chances.Count)];
 
             if (DarkTeamSnakemouth.CanUseMiracleShake())
                 action = Attacks.MiracleShake;
 
 
-            if(action != Attacks.MiracleShake && battle.enemydata.Length == 1 && battle.enemydata[actionid].charge < 3)
+            if (action != Attacks.MiracleShake && battle.enemydata.Length == 1 && battle.enemydata[actionid].charge < 3)
             {
                 battle.StartCoroutine(battle.ItemSpinAnim(entity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.Vengeance], true));
                 yield return EventControl.quartersec;
@@ -157,7 +153,7 @@ namespace BFPlus.Extensions.EnemyAI
                     yield return DarkTeamSnakemouth.DoFrostBowling(actionid, battle, battleDatas);
                     break;
                 case Attacks.QueenDinner:
-                    yield return DarkTeamSnakemouth.UseItem((int)MainManager.Items.KingDinner, entity,actionid);
+                    yield return DarkTeamSnakemouth.UseItem((int)MainManager.Items.KingDinner, entity, actionid);
                     break;
             }
         }
@@ -235,7 +231,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             MainManager.PlaySound("PebbleAtkHit1");
             battle.DoDamage(instance.enemydata[actionid], ref MainManager.instance.playerdata[playerTargetIDRef], BOULDER_DAMAGE, null, null, instance.commandsuccess);
-            
+
             bool wait = false;
             instance.StartCoroutine(MainManager.LateSound("PebbleAtkHit2", 0.5f));
             for (int i = 0; i < 2; i++)

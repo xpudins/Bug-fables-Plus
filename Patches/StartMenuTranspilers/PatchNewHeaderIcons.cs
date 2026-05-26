@@ -3,12 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BFPlus.Patches.StartMenuTranspilers
 {
@@ -18,15 +12,15 @@ namespace BFPlus.Patches.StartMenuTranspilers
         {
             priority = 480;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdstr("mode"));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("mode"));
 
             var spriteRef = cursor.Instrs[cursor.Index - 2].Operand;
             var scaleRef = cursor.Instrs[cursor.Index - 4].Operand;
 
             cursor.Prev.OpCode = OpCodes.Nop;
-            cursor.GotoNext(i=>i.MatchBox(out _));
+            cursor.GotoNext(i => i.MatchBox(out _));
 
             int cursorIndex = cursor.Index;
             cursor.GotoNext(i => i.MatchLdcR4(1f));

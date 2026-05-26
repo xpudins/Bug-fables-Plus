@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.SandCastleDepths
 {
@@ -19,7 +14,7 @@ namespace BFPlus.Extensions.Maps.SandCastleDepths
             map.fogend = 40;
 
             var baseObject = map.transform.Find("Base");
-            foreach(Transform statue in baseObject.Find("Statues"))
+            foreach (Transform statue in baseObject.Find("Statues"))
             {
                 statue.GetComponent<MeshRenderer>().materials = new Material[] { MainManager.Main3D, MainManager.outlinemain };
             }

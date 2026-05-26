@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -18,15 +13,15 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 200273;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdloc1(),i => i.MatchLdcI4(77));
+            cursor.GotoNext(i => i.MatchLdloc1(), i => i.MatchLdcI4(77));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchWebSheetCheck), "CheckWebSheetMedal"));
         }
 
         static void CheckWebSheetMedal()
         {
-            if(MainManager.instance.flagvar[1] == (int)NewItem.Arachnomuffins)
+            if (MainManager.instance.flagvar[1] == (int)NewItem.Arachnomuffins)
             {
                 if (!MainManager.instance.flags[879] && !MainManager.map.mapflags[1])
                 {

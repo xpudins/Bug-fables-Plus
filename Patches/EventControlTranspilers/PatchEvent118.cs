@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -21,10 +17,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 139999;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchCall(AccessTools.Method(typeof(MainManager), "GetPartyEntities", new Type[] {typeof(bool)})),
-                i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchCall(AccessTools.Method(typeof(MainManager), "GetPartyEntities", new Type[] { typeof(bool) })),
+                i => i.MatchStfld(out _));
 
             ILLabel label = cursor.DefineLabel();
             cursor.Emit(OpCodes.Ldc_I4, 937);
@@ -58,7 +54,7 @@ namespace BFPlus.Patches.EventControlTranspilers
             }
 
             if (MainManager.map.chompy != null)
-                MainManager.map.chompy.transform.position = positions[0] + new Vector3(0,0,0.1f);
+                MainManager.map.chompy.transform.position = positions[0] + new Vector3(0, 0, 0.1f);
 
             //unlock recharge
             MainManager.instance.badgeshops[1].Add((int)Medal.Recharge);

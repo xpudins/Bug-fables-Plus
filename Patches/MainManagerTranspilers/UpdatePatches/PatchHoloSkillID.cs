@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
 {
@@ -17,7 +12,7 @@ namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
         {
             priority = 2047;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             var fixHoloSkillIDRef = AccessTools.Method(typeof(MainManager_Ext), "FixHoloSkillID");
             cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(MainManager), "LoadLangSpecific")));

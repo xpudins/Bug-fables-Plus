@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Collections;
 
 namespace BFPlus.Extensions.Events
 {
@@ -13,7 +7,7 @@ namespace BFPlus.Extensions.Events
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
             int num = 0;
-            int dialogueId=0;
+            int dialogueId = 0;
             if ((int)MainManager.map.mapid == (int)NewMaps.BeehiveMinigame)
             {
                 num = (int)Medal.GourmetStomach;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events
@@ -44,7 +39,7 @@ namespace BFPlus.Extensions.Events
             {
                 mainLift = MainManager.map.transform.Find("LeafbugVillageWay(Clone)").Find("Lift");
                 targetPos = mainLift.transform.position;
-                mainLift.transform.position = mainLift.transform.position+Vector3.up*5;
+                mainLift.transform.position = mainLift.transform.position + Vector3.up * 5;
             }
             else
             {
@@ -53,8 +48,10 @@ namespace BFPlus.Extensions.Events
                 mainLift.transform.position = mainLift.position + Vector3.down * 5;
             }
 
-            yield return DoLift(mainLift, targetPos,false);
+            yield return DoLift(mainLift, targetPos, false);
 
+            MainManager.player.lastpos = MainManager.map.mapid == MainManager.Maps.Swamplands5 ?
+                new Vector3(-7f, 12.5f, -2f) : new Vector3(11.6f, -9.7f, -44.86f);
             MainManager.ShakeScreen(0.1f, 0.5f);
             MainManager.PlaySound("WoodEnd");
             MainManager.ResetCamera(true);
@@ -121,7 +118,5 @@ namespace BFPlus.Extensions.Events
             }
             UnityEngine.Object.Destroy(s);
         }
-
-
     }
 }

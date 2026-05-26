@@ -1,16 +1,13 @@
-﻿using HarmonyLib;
+﻿using BFPlus.Extensions;
+using BFPlus.Extensions.BattleStuff.StatusStuff;
+using HarmonyLib;
+using InputIOManager;
 using System;
-using System.IO;
-using UnityEngine;
-using BFPlus.Extensions;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using InputIOManager;
 using System.Reflection;
-using System.ComponentModel;
-using System.Threading;
-using System.Reflection.Emit;
+using UnityEngine;
+using static MainManager;
 
 namespace BFPlus.Patches
 {
@@ -22,12 +19,16 @@ namespace BFPlus.Patches
         {
             if (MainManager.instance.samiramusics != null && MainManager.instance.samiramusics.Count > 0)
             {
-                MainManager.instance.samiramusics.RemoveAll(s => 
+                MainManager.instance.samiramusics.RemoveAll(s =>
                     (MainManager.Musics)s[0] == (MainManager.Musics)NewMusic.AngryViTheme ||
                     (MainManager.Musics)s[0] == (MainManager.Musics)NewMusic.SadKabbuTheme ||
                     (MainManager.Musics)s[0] == (MainManager.Musics)NewMusic.Playroom ||
                     (MainManager.Musics)s[0] == (MainManager.Musics)NewMusic.DarkSnek
                 );
+                MainManager_Ext.Instance.FixSamiraFightMusic();
+
+                if (!instance.samiramusics.Any(s => s[0] == (int)NewMusic.EventBattle))
+                    instance.samiramusics.Add(new int[] { (int)NewMusic.EventBattle, -1 });
             }
         }
     }
@@ -45,7 +46,7 @@ namespace BFPlus.Patches
 
             __instance.badgeshops[1].AddRange(new int[]
             {
-                (int)Medal.HPDown, (int)Medal.Powerbank, (int)Medal.PurifyingPulse, (int)Medal.RevitalizingRipple
+                (int)Medal.HPDown, (int)Medal.Powerbank, (int)Medal.PurifyingPulse, (int)Medal.RevitalizingRipple, (int)Medal.Carousel
             });
             MainManager.instance.flags[768] = true;
             MainManager_Ext.SetupNewShops();
@@ -81,6 +82,7 @@ namespace BFPlus.Patches
         {
             List<int> tempList = new List<int>(__result);
             tempList.InsertRange(tempList.FindIndex(setting => setting == 16), new int[] { 26, 27, 28 });
+            tempList.Insert(tempList.Count - 1, 29);
             __result = tempList.ToArray();
         }
     }
@@ -98,6 +100,8 @@ namespace BFPlus.Patches
                     MainManager.instance.flags[830] = true;
                 }
             }
+
+            MainManager_Ext.Instance.CheckJumpAntHintsFlags();
         }
     }
 
@@ -106,11 +110,11 @@ namespace BFPlus.Patches
     {
         static void Prefix(string[] c)
         {
-            if (c.Length < 48)
+            if (c.Length < 49)
             {
                 MainManager_Ext.fastText = false;
                 MainManager_Ext.showResistance = true;
-                MainManager_Ext.newBattleThemes = true;
+                MainManager_Ext.musicOption = MusicSetting.Mix;
             }
             else
             {
@@ -126,7 +130,23 @@ namespace BFPlus.Patches
                     }
                 }
                 MainManager_Ext.showResistance = Convert.ToBoolean(c[46]);
-                MainManager_Ext.newBattleThemes = Convert.ToBoolean(c[47]);
+
+                //we changed this from a simple bool to multiple value possible
+                if (Enum.TryParse(c[47], out MusicSetting result))
+                    MainManager_Ext.musicOption = result;
+                else
+                    MainManager_Ext.musicOption = MusicSetting.Mix;
+
+                var changes = c[48].Split(';');
+
+                if (changes.Length <= MainManager_Ext.Instance.balanceChanges.Count)
+                {
+                    for (int i = 0; i < changes.Length; i++)
+                    {
+                        string[] temp = changes[i].Split(',');
+                        MainManager_Ext.Instance.balanceChanges[int.Parse(temp[0])] = Convert.ToBoolean(temp[1]);
+                    }
+                }
             }
         }
 
@@ -142,7 +162,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(int tpcost, int playerid, ref bool __result)
         {
-            int destinyDreamHolder = BattleControl_Ext.GetDestinyDreamBug();
+            int destinyDreamHolder = Sleep.GetDestinyDreamBug();
 
             if (destinyDreamHolder != -1)
             {
@@ -165,7 +185,9 @@ namespace BFPlus.Patches
                 "\n",
                 MainManager_Ext.showResistance,
                 "\n",
-                MainManager_Ext.newBattleThemes
+                MainManager_Ext.musicOption,
+                 "\n",
+                 string.Join(";", MainManager_Ext.Instance.balanceChanges.Select(b => $"{b.Key},{b.Value}"))
             });
             __result = newResult;
         }
@@ -224,6 +246,16 @@ namespace BFPlus.Patches
                             MainManager.instance.playerdata[i].skills.Insert(index, (int)NewSkill.Steal);
                         else
                             MainManager.instance.playerdata[i].skills.Add((int)NewSkill.Steal);
+                    }
+
+                    if (MainManager.BadgeIsEquipped((int)MainManager.BadgeTypes.ElecNeedles))
+                    {
+                        int index = MainManager.instance.inbattle ? 5 : 8;
+                        if (MainManager.instance.playerdata[i].skills.Count > index)
+                            MainManager.instance.playerdata[i].skills.Insert(index, (int)NewSkill.NeedleSurge);
+                        else
+                            MainManager.instance.playerdata[i].skills.Add((int)NewSkill.NeedleSurge);
+                        MainManager.skilldata[(int)NewSkill.NeedleSurge, 12] = MainManager.BadgeIsEquipped((int)Medal.FireNeedles).ToString();
                     }
                 }
                 else if (trueid == 1)
@@ -501,7 +533,7 @@ namespace BFPlus.Patches
                 typeof(EntityControl).GetField("recipepool", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, recipes.ToArray());
             }
             MainManager.librarylimit[0] = 50 + Enum.GetNames(typeof(NewDiscoveries)).Length;
-            MainManager.librarylimit[1] = 92 + Enum.GetNames(typeof(NewEnemies)).Length - 2 + 5;
+            MainManager.librarylimit[1] = 92 + Enum.GetNames(typeof(NewEnemies)).Length + 1;
             MainManager.librarylimit[2] = 70 + Enum.GetNames(typeof(NewRecipes)).Length;
             MainManager.librarylimit[3] = 30 + Enum.GetNames(typeof(NewAchievement)).Length;
         }
@@ -516,6 +548,7 @@ namespace BFPlus.Patches
             prizeenemyids.Add((int)NewEnemies.Patton);
             prizeenemyids.Add((int)NewEnemies.Levi);
             prizeenemyids.Add((int)NewEnemies.Mars);
+            prizeenemyids.Add((int)NewEnemies.JumpAnt);
             MainManager.instance.prizeenemyids = prizeenemyids.ToArray();
 
             var prizeflags = MainManager.instance.prizeflags.ToList();
@@ -525,6 +558,7 @@ namespace BFPlus.Patches
             prizeflags.Add((int)NewFlagVar.Patton_Reward);
             prizeflags.Add((int)NewFlagVar.TeamCelia_Reward);
             prizeflags.Add((int)NewFlagVar.Mars_Reward);
+            prizeflags.Add((int)NewFlagVar.JumpAnt_Reward);
             MainManager.instance.prizeflags = prizeflags.ToArray();
 
             var prizeids = MainManager.instance.prizeids.ToList();
@@ -534,6 +568,7 @@ namespace BFPlus.Patches
             prizeids.Add((int)Medal.Adrenaline);
             prizeids.Add((int)Medal.MPPlus);
             prizeids.Add((int)Medal.Mothflower);
+            prizeids.Add((int)Medal.MiniMegaMush);
             MainManager.instance.prizeids = prizeids.ToArray();
 
             MainManager_Ext.SetMenuText();
@@ -562,13 +597,23 @@ namespace BFPlus.Patches
             Sprite newStickyIcon = MainManager_Ext.assetBundle.LoadAsset<Sprite>("newGui_246");
 
             MainManager.guisprites[199] = newStickyIcon;
+
+            MainManager.instance.conditionsprites[9] = MainManager.guisprites[(int)NewGui.Unsteady];
+            MainManager.instance.conditionsprites[10] = MainManager.guisprites[(int)NewGui.Flipped];
             MainManager.instance.conditionsprites[20] = newStickyIcon;
+
+            MainManager.instance.conditionsprites = MainManager.instance.conditionsprites.AddRangeToArray(new Sprite[] { MainManager.guisprites[(int)NewGui.Tiny], MainManager.guisprites[(int)NewGui.Huge], MainManager.guisprites[(int)NewGui.Dizzy], MainManager.guisprites[(int)NewGui.InkBubble], MainManager.guisprites[(int)NewGui.Slugskin], MainManager.guisprites[(int)NewGui.Vitiation] });
 
             MainManager.commandhelptext = MainManager.commandhelptext.AddRangeToArray(MainManager_Ext.assetBundle.LoadAsset<TextAsset>("ActionCommands").ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             MainManager.musicnames = MainManager.musicnames.AddRangeToArray(MainManager_Ext.assetBundle.LoadAsset<TextAsset>("MusicList").ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             MainManager.commondialogue = MainManager.commondialogue.AddRangeToArray(MainManager_Ext.assetBundle.LoadAsset<TextAsset>("CommonDialogues").ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
 
             MainManager.musicnames[1] = "FIGHT!";
+
+            newsprites = new List<Sprite>(MainManager.grasssprite);
+            sprites = MainManager_Ext.assetBundle.LoadAllAssets<Sprite>().Where(sprite => sprite.name.Split('_')[0] == "bush").OrderBy(sprite => int.Parse(sprite.name.Split('_')[1])).ToArray();
+            newsprites.AddRange(sprites);
+            MainManager.grasssprite = newsprites.ToArray();
         }
     }
 
@@ -678,7 +723,7 @@ namespace BFPlus.Patches
 
                     //Fix vanilla file not having a way to have these music
                     int[] newMusics = new int[] { (int)NewMusic.KabbuTheme, (int)NewMusic.ViTheme };
-                    foreach(var music in newMusics)
+                    foreach (var music in newMusics)
                     {
                         if (!MainManager.instance.samiramusics.Any(array => array.Length > 0 && array[0] == music))
                         {
@@ -694,8 +739,74 @@ namespace BFPlus.Patches
                     if (MainManager.instance.flags[859])
                         MainManager.instance.flags[858] = true;
 
+                    //ink bubble under rock got
+                    MainManager.instance.flags[889] = true;
+
+                    MainManager_Ext.Instance.CheckJumpAntHintsFlags();
+                    MainManager_Ext.Instance.FixSamiraFightMusic();
+
+                    var inkBubbles = MainManager.instance.badges.Where(b => b[0] == (int)Medal.InkBubble).ToList();
+                    if (inkBubbles.Count >= 2)
+                    {
+                        MainManager.instance.badges.Remove(inkBubbles[0]);
+                    }
+
+                    //Pre-jumpant update save
+                    if (!MainManager.instance.flags[983])
+                    {
+                        MainManager.instance.flags[983] = true;
+
+                        if (MainManager.instance.flags[681] && flags.Length >= 900)
+                        {
+                            string medalList = MainManager.instance.flagstring[13];
+                            string newMedals = medalList == "" ? "" : ",";
+                            newMedals += "167,168,169,170,170,171,171,172,173,174,175";
+                            MainManager.instance.flagstring[13] += newMedals;
+                            MainManager.GetRandomMedal(true, true);
+                        }
+                        
+                        if (MainManager.instance.flags[88])
+                        {
+                            MainManager.instance.badgeshops[0].Add((int)Medal.DizzyResistance);
+                        }
+                        MainManager.instance.badgeshops[1].Add((int)Medal.Carousel);
+
+                        //bought all medals at the merab shop 
+                        MainManager.instance.flags[587] = false;
+
+                        //bought all shades medal
+                        MainManager.instance.flags[588] = false;
+
+                        //our job is done flag
+                        MainManager.instance.flags[63] = false;
+
+                        //completed all quests
+                        MainManager.instance.flags[671] = false;
+
+                        //if completed pattons request, add whirliwig to medal shop
+                        if (MainManager.instance.flags[934])
+                        {
+                            MainManager.instance.badgeshops[0].Add((int)Medal.Whirliwig);
+                        }
+
+
+
+                        int[] recordsId = { 1, 2, 3, 7, 8, 9, 27 };
+                        MainManager_Ext.ResetRecords(recordsId);
+                    }
+
+                    //vanilla save
                     if (flags.Length < 900)
                     {
+                        if (MainManager.instance.flags[681])
+                        {
+                            string medalList = MainManager.instance.flagstring[13];
+                            string newMedals = medalList == "" ? "" : ",";
+                            newMedals += MainManager_Ext.GetNewMedalsString();
+                            MainManager.instance.flagstring[13] += newMedals;
+                            MainManager.GetRandomMedal(true, true);
+                        }
+
                         if (MainManager.instance.flags[627])
                         {
                             MainManager.instance.badgeshops[0].Add((int)Medal.SleepSchedule);
@@ -727,19 +838,15 @@ namespace BFPlus.Patches
                         MainManager.instance.badgeshops[1].Add((int)Medal.Powerbank);
                         MainManager.instance.badgeshops[1].Add((int)Medal.RevitalizingRipple);
                         MainManager.instance.badgeshops[1].Add((int)Medal.PurifyingPulse);
-                        MainManager.instance.flags[587] = false;
-                        MainManager.instance.flags[588] = false;
+
+                        //completed all bounties flag
                         MainManager.instance.flags[612] = false;
+
+                        //Received the Mysterious Piece from Neolith after starting Chapter 4
                         if (MainManager.instance.flags[411])
                         {
                             MainManager.instance.flags[238] = false;
                         }
-
-                        //our job is done flag
-                        MainManager.instance.flags[63] = false;
-
-                        //completed all quests
-                        MainManager.instance.flags[671] = false;
 
                         //if chuck quest is completed, add grumble gravel to badgeshop
                         if (MainManager.instance.flags[45])
@@ -747,12 +854,8 @@ namespace BFPlus.Patches
                             MainManager.instance.badgeshops[0].Add((int)Medal.GrumbleGravel);
                         }
 
-                        int[] recordsId = { 1,2,3,4,7,8,9,10,27,28 };
-                        
-                        foreach(var record in recordsId)
-                        {
-                            MainManager.instance.librarystuff[(int)MainManager.Library.Logbook, record] = false;
-                        }
+                        int[] recordsId = { 1, 2, 3, 4, 7, 8, 9, 10, 27, 28 };
+                        MainManager_Ext.ResetRecords(recordsId);
 
                         Console.WriteLine("save is new to bf plus, adding medals in badge shop, resetting records flags");
                     }
@@ -769,11 +872,11 @@ namespace BFPlus.Patches
                             }
                         }
 
-                        if(data.Length > 19)
+                        if (data.Length > 19)
                         {
                             string[] presetData = data[19].Split(new char[] { '@' });
 
-                            for(int i=0;i<presetData.Length;i++)
+                            for (int i = 0; i < presetData.Length; i++)
                             {
                                 MainManager_Ext.Instance.medalPresets[i] = MainManager_Ext.MedalPreset.GetPresetFromString(presetData[i]);
                             }
@@ -826,7 +929,7 @@ namespace BFPlus.Patches
 
                         if (!bannedUsage.Contains(type))
                         {
-                            value = Mathf.Clamp(Mathf.CeilToInt(value / 2),1,99);
+                            value = Mathf.Clamp(Mathf.CeilToInt(value / 2), 1, 99);
                         }
                     }
 
@@ -872,11 +975,27 @@ namespace BFPlus.Patches
     [HarmonyPatch(typeof(MainManager), "SetCondition", new Type[] { typeof(MainManager.BattleCondition), typeof(MainManager.BattleData), typeof(int), typeof(int) }, new ArgumentType[] { ArgumentType.Normal, ArgumentType.Ref, ArgumentType.Normal, ArgumentType.Normal })]
     public class PatchMainManagerSetCondition
     {
+        public static MainManager.BattleCondition[] StickyExceptions()
+        {
+            return new MainManager.BattleCondition[] {
+                MainManager.BattleCondition.Eaten,
+                MainManager.BattleCondition.Topple,
+                MainManager.BattleCondition.EventStop,
+                MainManager.BattleCondition.Flipped,
+                MainManager.BattleCondition.Taunted,
+                MainManager.BattleCondition.Reflection,
+                MainManager.BattleCondition.Shield,
+                (MainManager.BattleCondition)NewCondition.Vitiation,
+                (MainManager.BattleCondition)NewCondition.Paintball,
+                (MainManager.BattleCondition)NewCondition.Slugskin
+            };
+        }
+
         static bool Prefix(ref MainManager.BattleCondition condition, ref MainManager.BattleData entity, ref int turns, int fromplayer)
         {
-            if(condition == MainManager.BattleCondition.Sturdy)
+            if (condition == MainManager.BattleCondition.Sturdy)
             {
-                if(entity.delayedcondition != null)
+                if (entity.delayedcondition != null)
                 {
                     entity.delayedcondition.Clear();
 
@@ -885,14 +1004,14 @@ namespace BFPlus.Patches
                 }
             }
 
-
             if (BattleControl_Ext.Instance.IsStatusImmune(entity, condition))
             {
                 return false;
             }
 
             //if the bug has sticky any other condition gets buffed by 1 turn.
-            if (MainManager.HasCondition(MainManager.BattleCondition.Sticky, entity) > -1)
+            if (MainManager.HasCondition(MainManager.BattleCondition.Sticky, entity) > -1 &&
+                !StickyExceptions().Contains(condition))
             {
                 int stickyBuff = 1 + MainManager.BadgeHowManyEquipped((int)Medal.SturdyStrands);
                 if (turns > 0)
@@ -900,14 +1019,28 @@ namespace BFPlus.Patches
                 else
                     turns -= stickyBuff;
             }
+
+            if (condition == MainManager.BattleCondition.Sticky && entity.animid == (int)NewEnemies.Mothmite)
+            {
+                MainManager.SetCondition((MainManager.BattleCondition)NewCondition.Slugskin, ref entity, Mathf.Max(1, turns / 2));
+                return false;
+            }
+
+            if (condition != (MainManager.BattleCondition)NewCondition.Paintball &&
+                MainManager.HasCondition(MainManager.BattleCondition.Inked, entity) > -1 &&
+                MainManager.BadgeIsEquipped((int)Medal.InkBubble))
+            {
+                MainManager.SetCondition((MainManager.BattleCondition)NewCondition.Paintball, ref entity, 1);
+            }
+
             return true;
         }
 
         static void Postfix(MainManager.BattleCondition condition, ref MainManager.BattleData entity, int turns, int fromplayer)
         {
-            if(condition == MainManager.BattleCondition.Sleep)
+            if (condition == MainManager.BattleCondition.Sleep)
             {
-                BattleControl_Ext.Instance.DoYawnCheck(entity, condition);
+                Sleep.DoYawnCheck(entity, condition);
             }
 
             var entityExt = Entity_Ext.GetEntity_Ext(entity.battleentity);
@@ -916,23 +1049,37 @@ namespace BFPlus.Patches
                 entityExt.CheckInkDebuff(ref entity);
                 entityExt.permanentInkTriggered = false;
             }
-        }
-    }
 
-    [HarmonyPatch(typeof(MainManager), "GetRandomMedal", new Type[] { typeof(bool), typeof(bool) })]
-    public class PatchMainManagerGetRandomMedal
-    {
-        static void Prefix(bool dontremove, bool random)
-        {
-            if (dontremove && random)
+            if ((int)condition == (int)NewCondition.Tiny || (int)condition == (int)NewCondition.Huge)
             {
-                var randomMedals = new List<int>(Enum.GetValues(typeof(Medal)).Cast<int>());
-                randomMedals.Remove((int)Medal.TPComa);
-                randomMedals.Remove((int)Medal.EverlastingFlame);
-                randomMedals.AddRange(MainManager_Ext.medalDupes.Cast<int>());
-                var stringBadges = ',' + String.Join(",", Array.ConvertAll(randomMedals.ToArray(), x => x.ToString()));
-                MainManager.instance.flagstring[13] += stringBadges;
+                BattleControl_Ext.Instance.DoTinyHugeEffect(condition, ref entity, entityExt);
             }
+
+            if ((int)condition == (int)NewCondition.Paintball && entity.battleentity != null)
+            {
+                entityExt.inkBubbleEnabled = true;
+                entityExt.CreateInkBubble();
+            }
+
+            if ((int)condition == (int)NewCondition.Slugskin && entity.battleentity != null)
+            {
+                entityExt.slugskinActive = true;
+                entityExt.CreateSlugskin();
+            }
+
+            if ((int)condition == (int)NewCondition.Vitiation && entity.battleentity != null)
+            {
+                entityExt.vitiation = true;
+                entityExt.CreateVitiationShield();
+            }
+
+            if ((int)condition == (int)NewCondition.Dizzy 
+                && MainManager.HasCondition((MainManager.BattleCondition)NewCondition.Dizzy, entity) > -1 
+                && entity.battleentity != null)
+            {
+                entityExt.isDizzy = true;
+            }
+
         }
     }
 
@@ -971,7 +1118,7 @@ namespace BFPlus.Patches
         {
             if (BattleControl_Ext.Instance.holoSkillID != -1)
             {
-                id = MainManager.battle.currentturn;
+                id = MainManager.instance.playerdata[MainManager.battle.currentturn].trueid;
             }
         }
     }
@@ -1034,7 +1181,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(ref bool __result)
         {
-            __result = MainManager.PurchasedMusicAmmount() >= Enum.GetNames(typeof(MainManager.Musics)).Length - 8 + Enum.GetNames(typeof(NewMusic)).Length -4;
+            __result = MainManager.PurchasedMusicAmmount() >= Enum.GetNames(typeof(MainManager.Musics)).Length - 8 + Enum.GetNames(typeof(NewMusic)).Length - 4;
         }
     }
 
@@ -1051,6 +1198,32 @@ namespace BFPlus.Patches
             if (MainManager.BadgeIsEquipped((int)Medal.SturdyStrands) && condition == MainManager.BattleCondition.Sticky)
             {
                 return false;
+            }
+            var entityExt = entity.battleentity == null ? null : Entity_Ext.GetEntity_Ext(entity.battleentity);
+            if ((int)condition == (int)NewCondition.Tiny || (int)condition == (int)NewCondition.Huge && entity.battleentity != null)
+            {
+                BattleControl_Ext.Instance.ResetTinyHugeEffect(entity.battleentity, entityExt);
+            }
+
+            if ((int)condition == (int)NewCondition.Paintball && entity.battleentity != null)
+            {
+                entityExt.inkBubbleEnabled = false;
+            }
+
+            if ((int)condition == (int)NewCondition.Slugskin && entity.battleentity != null)
+            {
+                entityExt.slugskinActive = false;
+            }
+
+            if ((int)condition == (int)NewCondition.Vitiation && entity.battleentity != null)
+            {
+                entityExt.vitiation = false;
+            }
+
+            if ((int)condition == (int)NewCondition.Dizzy && entity.battleentity != null)
+            {
+                entityExt.isDizzy = false;
+                entityExt.ResetDizzyAngle();
             }
             return true;
         }
@@ -1133,6 +1306,72 @@ namespace BFPlus.Patches
                 return false;
             }
             return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(MainManager), "ApplySettings")]
+    public class PatchApplySettings
+    {
+        static void Postfix()
+        {
+            MainManager_Ext.Instance.ReloadSkillData();
+        }
+    }
+
+    [HarmonyPatch(typeof(MainManager), "CheckIfCanExist")]
+    public class PatchCheckIfCanExist
+    {
+        static bool Prefix(int[] requires, int[] limit, int regionalflag, ref bool __result)
+        {
+            __result = NewCheckIfCanExist(requires, limit, regionalflag);
+            return false;
+        }
+
+        static bool NewCheckIfCanExist(int[] requires, int[] limit, int regionalflag)
+        {
+            if (CheckRequire(requires))
+                return true;
+
+            if (limit != null && limit.Length != 0)
+            {
+                bool hasPositiveLimitFlag = false;
+                bool allLimitFlagsTrue = true;
+
+                for (int i = 0; i < limit.Length; i++)
+                {
+                    int limitFlag = limit[i];
+
+                    if (limitFlag < -1)
+                    {
+                        if (MainManager.instance.flags[Mathf.Abs(limitFlag)])
+                            return true;
+                    }
+                    else if (limitFlag > -1)
+                    {
+                        hasPositiveLimitFlag = true;
+
+                        if (!MainManager.instance.flags[limitFlag])
+                        {
+                            allLimitFlagsTrue = false;
+                        }
+                    }
+                }
+
+                if (hasPositiveLimitFlag && allLimitFlagsTrue)
+                    return true;
+            }
+            return CheckRegionalFlags(regionalflag);
+        }
+
+        static bool CheckRequire(int[] requires)
+        {
+            return requires != null && requires.Length != 0 && requires[0] > -1
+                && !MainManager.CheckAllBool(MainManager.instance.flags, requires, true);
+        }
+
+        static bool CheckRegionalFlags(int regionalflag)
+        {
+            return regionalflag > -1 && MainManager.map != null && MainManager.instance.regionalflags[regionalflag];
         }
     }
 }

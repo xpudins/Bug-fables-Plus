@@ -1,51 +1,38 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.Experimental.UIElements;
 using UnityEngine;
 using static BattleControl;
-using static MainManager;
-using static BFPlus.Extensions.BattleControl_Ext;
 using static UnityEngine.ParticleSystem;
-using System.Security.Cryptography;
-using static FlappyBee;
-using System.Runtime.InteropServices;
 
 namespace BFPlus.Extensions.EnemyAI
 {
-//Attacks(Grounded) - focus on multi-target attacks, and buffing/debuffing
-//Empowering Breath(can only be used once per turn);
-//Gives another enemy an attack and defense buff for 3 turns.Same as Venus' Bud healing breath, but will use blue and red mist instead of pink/salmon.
-//Weakening Breath
-//goes into the ground and Re-appears in front of Team Snakemouth.It will then proceed to start blowing out a white mist towards towards the entire party.
-//The party must mash the A button to fill the bar to block the attack. (see Spuder's poison breath for reference). This attack will deal 3/4 damage to everyone. 
-//If not blocked, the entire party's attack AND defense will be lowered for 3 turns. If blocked the attack and denfense will only be lowered for 2 turns.
+    //Attacks(Grounded) - focus on multi-target attacks, and buffing/debuffing
+    //Empowering Breath(can only be used once per turn);
+    //Gives another enemy an attack and defense buff for 3 turns.Same as Venus' Bud healing breath, but will use blue and red mist instead of pink/salmon.
+    //Weakening Breath
+    //goes into the ground and Re-appears in front of Team Snakemouth.It will then proceed to start blowing out a white mist towards towards the entire party.
+    //The party must mash the A button to fill the bar to block the attack. (see Spuder's poison breath for reference). This attack will deal 3/4 damage to everyone. 
+    //If not blocked, the entire party's attack AND defense will be lowered for 3 turns. If blocked the attack and denfense will only be lowered for 2 turns.
 
-//Pollen Lob;
-//Will blow 4/5 pieces of pollen upward in a rythmic pattern, movig off-screen.Then they'll come back towards down towards random members of Team Snakemouth.
-//There will be two types of pollen for this attack selected at random, each with a side Effect other than just dealing 2 damage un-blocked;
-//A White pollen that will make the target unable to use items for 1 turn if not blocked, 
-//and a yellow pollen that will sap 2 TP from the party (1 TP if blocked).
+    //Pollen Lob;
+    //Will blow 4/5 pieces of pollen upward in a rythmic pattern, movig off-screen.Then they'll come back towards down towards random members of Team Snakemouth.
+    //There will be two types of pollen for this attack selected at random, each with a side Effect other than just dealing 2 damage un-blocked;
+    //A White pollen that will make the target unable to use items for 1 turn if not blocked, 
+    //and a yellow pollen that will sap 2 TP from the party (1 TP if blocked).
 
-//if grounded at the end of the turn, it will have a passive healing Effect, just like other grounded plant enemies. It will heal 2/3 HP.
+    //if grounded at the end of the turn, it will have a passive healing Effect, just like other grounded plant enemies. It will heal 2/3 HP.
 
-//It also shares Venus' Bud's mechanic of becoming airborn when struck with any attack.
-//When becoming airborne will scatter green particles around it, giving all other enemies +1 charge.
-//When airborn it can be knocked out of the air like any flying enemy.
+    //It also shares Venus' Bud's mechanic of becoming airborn when struck with any attack.
+    //When becoming airborne will scatter green particles around it, giving all other enemies +1 charge.
+    //When airborn it can be knocked out of the air like any flying enemy.
 
-//Attacks (Airborn) - focus on single target attacks, more straightforward attacks
-//Airborn Pollen Spit
-//Will spit a barrage of 4/5 pollen at a single target. These consist of the same two types of pollen for Pollen Lob and type is selected at random.
+    //Attacks (Airborn) - focus on single target attacks, more straightforward attacks
+    //Airborn Pollen Spit
+    //Will spit a barrage of 4/5 pollen at a single target. These consist of the same two types of pollen for Pollen Lob and type is selected at random.
 
-//Dive Bomb
-//Will hover a bit higher in the air, then diving bombing random target to deal 6/8 damage, while playing its "screaming" animation. 
-//This should ideally have an after-image effect too. (inspired by that funny bugged Abomniberry Dive bomb ⁠bug-reports⁠).
+    //Dive Bomb
+    //Will hover a bit higher in the air, then diving bombing random target to deal 6/8 damage, while playing its "screaming" animation. 
+    //This should ideally have an after-image effect too. (inspired by that funny bugged Abomniberry Dive bomb ⁠bug-reports⁠).
     public class MarsBudAI : AI
     {
         enum Attacks
@@ -96,18 +83,18 @@ namespace BFPlus.Extensions.EnemyAI
                 }
             }
 
-            if(battle.enemydata[actionid].position == BattleControl.BattlePosition.Ground)
+            if (battle.enemydata[actionid].position == BattleControl.BattlePosition.Ground)
             {
-                for(int i = 0; i < battle.enemydata.Length; i++)
+                for (int i = 0; i < battle.enemydata.Length; i++)
                 {
-                    if(i != actionid && battle.enemydata[i].position == BattleControl.BattlePosition.Ground)
+                    if (i != actionid && battle.enemydata[i].position == BattleControl.BattlePosition.Ground)
                     {
                         empowerBreathTarget = i;
                         break;
                     }
                 }
 
-                if(empowerBreathTarget != -1 && battle.enemydata[actionid].data[1] <= 0)
+                if (empowerBreathTarget != -1 && battle.enemydata[actionid].data[1] <= 0)
                 {
                     attacks.Add(Attacks.EmpowerBreath);
                 }
@@ -126,7 +113,7 @@ namespace BFPlus.Extensions.EnemyAI
                     yield return DoWeakeningBreath(entity, actionid);
                     break;
                 case Attacks.PollenLob:
-                    yield return DoPollenLob(entity,actionid);
+                    yield return DoPollenLob(entity, actionid);
                     break;
                 case Attacks.DiveBomb:
                     yield return DoDiveBomb(entity, actionid);
@@ -135,7 +122,7 @@ namespace BFPlus.Extensions.EnemyAI
                     yield return DoPollenSpit(entity, actionid);
                     break;
             }
-   
+
             //Passively heals if on the ground
             if (battle.enemydata[actionid].position == BattleControl.BattlePosition.Ground)
             {
@@ -254,7 +241,7 @@ namespace BFPlus.Extensions.EnemyAI
                 {
                     pollens[i].material.color = Color.yellow;
                 }
-                routines.Add(battle.StartCoroutine(PollenFall(actionid, pollens[i], playerTargetId, playerTargetEntity, isYellow, 35f,routines,i)));
+                routines.Add(battle.StartCoroutine(PollenFall(actionid, pollens[i], playerTargetId, playerTargetEntity, isYellow, 35f, routines, i)));
                 yield return new WaitForSeconds(hardmode ? 0.225f : 0.3f);
             }
             entity.animstate = 0;
@@ -271,7 +258,7 @@ namespace BFPlus.Extensions.EnemyAI
 
         IEnumerator DoPollenLob(EntityControl entity, int actionid)
         {
-            battle.nonphyscal=true;
+            battle.nonphyscal = true;
             int baseAmount = POLLEN_LOB_AMOUNT;
 
             if (battle.HardMode())
@@ -286,7 +273,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             SpriteRenderer[] pollens = new SpriteRenderer[baseAmount];
             int[] pollenType = new int[baseAmount];
-            for(int i = 0; i < pollens.Length; i++)
+            for (int i = 0; i < pollens.Length; i++)
             {
                 entity.animstate = 105;
                 yield return new WaitForSeconds(0.1f);
@@ -297,7 +284,7 @@ namespace BFPlus.Extensions.EnemyAI
                 pollenType[i] = UnityEngine.Random.Range(0, 2);
 
                 pollens[i] = MainManager.NewSpriteObject(entity.transform.position + new Vector3(0f, 2.25f, -0.1f), null, MainManager.instance.projectilepsrites[5]);
-                if(pollenType[i] == 1)
+                if (pollenType[i] == 1)
                 {
                     pollens[i].material.color = Color.yellow;
                 }
@@ -333,14 +320,14 @@ namespace BFPlus.Extensions.EnemyAI
             yield return new WaitUntil(() => MainManager.ArrayIsEmpty(routines.ToArray()));
             for (int i = 0; i < pollens.Length; i++)
             {
-                if (pollens[i] != null) 
+                if (pollens[i] != null)
                 {
                     UnityEngine.Object.Destroy(pollens[i].gameObject);
                 }
             }
         }
 
-        IEnumerator PollenFall(int actionid, SpriteRenderer pollen, int targetId, EntityControl targetEntity, bool isYellow, float speed, List<Coroutine> routines=null, int routineID=-1)
+        IEnumerator PollenFall(int actionid, SpriteRenderer pollen, int targetId, EntityControl targetEntity, bool isYellow, float speed, List<Coroutine> routines = null, int routineID = -1)
         {
             Vector3 startPos = pollen.transform.position;
             float a = 0;
@@ -442,7 +429,7 @@ namespace BFPlus.Extensions.EnemyAI
             GameObject smokeParticle = MainManager.PlayParticle("poisonsmoke", null, entity.transform.position + new Vector3(-1f, 1.3f), new Vector3(0f, -90f, 90f), 7.5f);
             ParticleSystem ps = smokeParticle.GetComponent<ParticleSystem>();
             var main = ps.main;
-            main.startColor = new MinMaxGradient(Color.white, new Color(1,1,1,0.5f));
+            main.startColor = new MinMaxGradient(Color.white, new Color(1, 1, 1, 0.5f));
 
             battle.CreateHelpBox(4);
 
@@ -554,7 +541,7 @@ namespace BFPlus.Extensions.EnemyAI
             main.startColor = new MinMaxGradient(Color.green);
 
             MainManager.PlaySound("Charge7");
-            for (int i=0;i < battle.enemydata.Length; i++)
+            for (int i = 0; i < battle.enemydata.Length; i++)
             {
                 battle.StartCoroutine(battle.StatEffect(battle.enemydata[i].battleentity, 4));
                 battle.enemydata[i].charge += 1;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.NewPowerPlant
 {
@@ -33,7 +28,7 @@ namespace BFPlus.Extensions.Maps.NewPowerPlant
         {
             GameObject battleMap = Instantiate(MainManager_Ext.mapPrefabs.LoadAsset("PowerPlantBossBattle")) as GameObject;
             FixPowerPlantBoss(battleMap.transform);
-            RenderSettings.skybox  = Resources.Load<Material>("materials/skybox/Black");
+            RenderSettings.skybox = Resources.Load<Material>("materials/skybox/Black");
             battleMap.transform.position = new Vector3(0, 0, 6);
             return battleMap;
         }

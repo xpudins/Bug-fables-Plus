@@ -1,10 +1,7 @@
-﻿using BFPlus.Patches.DoActionPatches;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Experimental.U2D;
 using static BattleControl;
 using static MainManager;
 namespace BFPlus.Extensions.EnemyAI
@@ -82,17 +79,17 @@ namespace BFPlus.Extensions.EnemyAI
                 battle.enemydata[actionid].data[6] = 2;
             }
 
-            if(battle.enemydata.Length <3 && battle.enemydata[actionid].data[0] > 0)
+            if (battle.enemydata.Length < 3 && battle.enemydata[actionid].data[0] > 0)
             {
-                int[] summonIds = { (int)NewEnemies.Abomiberry, (int)NewEnemies.LonglegsSpider };
+                int[] summonIds = { (int)NewEnemies.MechaJaw, (int)NewEnemies.LonglegsSpider };
                 var possibleRevive = summonIds.Where(id => !battle.enemydata.Any(enemy => enemy.animid == id)).ToList();
 
-                if(possibleRevive.Count != 0)
+                if (possibleRevive.Count != 0)
                     yield return ReviveEnemy(entity, actionid, possibleRevive);
             }
-            else if(battle.enemydata[actionid].data[0] >= 2)
+            else if (battle.enemydata[actionid].data[0] >= 2)
             {
-                yield return CheckHealing(entity,actionid);
+                yield return CheckHealing(entity, actionid);
             }
 
             Dictionary<Attacks, int> attacks = new Dictionary<Attacks, int>()
@@ -104,15 +101,15 @@ namespace BFPlus.Extensions.EnemyAI
             };
 
             List<int> possiblePointSwap = new List<int>();
-            for(int i = 0; i < battle.enemydata.Length; i++)
+            for (int i = 0; i < battle.enemydata.Length; i++)
             {
-                if(battle.HPPercent(battle.enemydata[i]) < 0.5f && battle.enemydata[i].hp < MainManager.instance.tp)
+                if (battle.HPPercent(battle.enemydata[i]) < 0.5f && battle.enemydata[i].hp < MainManager.instance.tp)
                 {
                     possiblePointSwap.Add(i);
                 }
             }
 
-            if(possiblePointSwap.Count != 0 && battle.enemydata[actionid].data[6] >0)
+            if (possiblePointSwap.Count != 0 && battle.enemydata[actionid].data[6] > 0)
             {
                 attacks.Add(Attacks.PointSwap, 20);
             }
@@ -146,7 +143,7 @@ namespace BFPlus.Extensions.EnemyAI
                 case Attacks.PointSwap:
                     int targetId = actionid;
 
-                    for(int i = 0; i < possiblePointSwap.Count; i++)
+                    for (int i = 0; i < possiblePointSwap.Count; i++)
                     {
                         if (battle.enemydata[possiblePointSwap[i]].hp < battle.enemydata[targetId].hp)
                             targetId = possiblePointSwap[i];
@@ -165,12 +162,12 @@ namespace BFPlus.Extensions.EnemyAI
                 yield break;
             }
 
-            var possibleHealingEnemies = battle.enemydata.Select((e,index)=>new {Enemy=e,Index=index}).Where(e => battle.HPPercent(e.Enemy) < 0.5f).Select(e => e.Index).ToArray();
+            var possibleHealingEnemies = battle.enemydata.Select((e, index) => new { Enemy = e, Index = index }).Where(e => battle.HPPercent(e.Enemy) < 0.5f).Select(e => e.Index).ToArray();
             if (possibleHealingEnemies.Length > 0)
             {
                 yield return ShowPotion(entity, actionid, MainManager.itemsprites[0, (int)MainManager.Items.HPPotion]);
                 int targetid = possibleHealingEnemies[UnityEngine.Random.Range(0, possibleHealingEnemies.Length)];
-                battle.Heal(ref battle.enemydata[targetid], HEALING_POTION_AMOUNT,false);
+                battle.Heal(ref battle.enemydata[targetid], HEALING_POTION_AMOUNT, false);
                 battle.ClearStatus(ref battle.enemydata[targetid]);
                 MainManager.PlaySound("Heal3");
                 MainManager.PlayParticle("MagicUp", battle.enemydata[targetid].battleentity.transform.position);
@@ -189,12 +186,15 @@ namespace BFPlus.Extensions.EnemyAI
                 battle.enemydata[actionid].data[0]--;
 
                 int reviveId = UnityEngine.Random.Range(0, possibleRevive.Count);
-                MainManager.PlaySound("ItemHold");
-                entity.animstate = (int)MainManager.Animations.ItemGet;
-                SpriteRenderer potion = MainManager.NewSpriteObject(entity.transform.position + battle.enemydata[actionid].itemoffset, battle.battlemap.transform, MainManager.itemsprites[0, (int)MainManager.Items.HPPotion]);
+                PlaySound("ItemHold");
+                entity.animstate = (int)Animations.ItemGet;
+                SpriteRenderer potion = NewSpriteObject(entity.transform.position + 
+                    battle.enemydata[actionid].itemoffset, battle.battlemap.transform, 
+                    itemsprites[0, (int)Items.HPPotion]);
+
                 yield return EventControl.halfsec;
                 entity.animstate = (int)MainManager.Animations.TossItem;
-                MainManager.PlaySound("Toss12",1.1f,1);
+                MainManager.PlaySound("Toss12", 1.1f, 1);
 
                 Vector3 battlePos = new Vector3(1, 0, 0);
 
@@ -211,6 +211,9 @@ namespace BFPlus.Extensions.EnemyAI
                 yield return EventControl.halfsec;
                 int dataId = 1;
                 battle.enemydata[battle.lastaddedid].exp = 0;
+                battle.enemydata[battle.lastaddedid].hp = Mathf.CeilToInt(
+                    Mathf.Clamp(battle.enemydata[battle.lastaddedid].hp * 0.5f, 1, 99));
+                battle.enemydata[battle.lastaddedid].maxhp = battle.enemydata[battle.lastaddedid].hp;
 
                 if (battle.enemydata[battle.lastaddedid].animid == (int)NewEnemies.LonglegsSpider)
                     dataId += 2;
@@ -219,7 +222,7 @@ namespace BFPlus.Extensions.EnemyAI
 
                 for (int j = 0; j < conditions.Length; j++)
                 {
-                    if (battle.enemydata[actionid].data[dataId+j] == 1)
+                    if (battle.enemydata[actionid].data[dataId + j] == 1)
                     {
                         MainManager.SetCondition(conditions[j], ref battle.enemydata[battle.lastaddedid], 9999999);
                     }
@@ -288,7 +291,7 @@ namespace BFPlus.Extensions.EnemyAI
                 }
             }
 
-            for(int i = 0; i < battle.enemydata.Length; i++)
+            for (int i = 0; i < battle.enemydata.Length; i++)
             {
                 battle.Heal(ref battle.enemydata[i], 3);
             }
@@ -327,7 +330,7 @@ namespace BFPlus.Extensions.EnemyAI
             Vector3 playerPos = battle.playertargetentity.transform.position;
 
             battle.CameraFocusTarget();
-            entity.MoveTowards(playerPos + Vector3.right*2f);
+            entity.MoveTowards(playerPos + Vector3.right * 2f);
             yield return new WaitUntil(() => !entity.forcemove);
 
             entity.animstate = 104;
@@ -336,7 +339,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.StartCoroutine(entity.ShakeSprite(0.2f, 60));
             yield return EventControl.sec;
 
-            entity.MoveTowards(playerPos +new Vector3(1.3f,0,0.05f),2,106,107);
+            entity.MoveTowards(playerPos + new Vector3(1.3f, 0, 0.05f), 2, 106, 107);
             yield return new WaitUntil(() => !entity.forcemove);
             battle.DoDamage(actionid, battle.playertargetID, EXTRACT_FIRST_HIT_DMG, null, battle.commandsuccess);
             SpriteBounce bounce = entity.sprite.gameObject.AddComponent<SpriteBounce>();
@@ -345,7 +348,7 @@ namespace BFPlus.Extensions.EnemyAI
             bounce.speed = 15f;
             for (int i = 0; i < 3; i++)
             {
-                MainManager.PlaySound("Kiss",0.9f, 1);
+                MainManager.PlaySound("Kiss", 0.9f, 1);
                 yield return EventControl.halfsec;
             }
 
@@ -365,7 +368,7 @@ namespace BFPlus.Extensions.EnemyAI
             }
 
             int maxHp = MainManager.instance.playerdata[battle.playertargetID].maxhp;
-            MainManager.instance.playerdata[battle.playertargetID].maxhp = Mathf.Clamp(maxHp-2,1,999);
+            MainManager.instance.playerdata[battle.playertargetID].maxhp = Mathf.Clamp(maxHp - 2, 1, 999);
             MainManager.instance.playerdata[battle.playertargetID].hp = Mathf.Clamp(MainManager.instance.playerdata[battle.playertargetID].hp, 0, MainManager.instance.playerdata[battle.playertargetID].maxhp);
             UnityEngine.Object.Destroy(bounce);
             BattleControl.SetDefaultCamera();
@@ -477,7 +480,7 @@ namespace BFPlus.Extensions.EnemyAI
                     if (battle.enemydata[enemySelected].animid != (int)NewEnemies.Patton)
                     {
                         int dataId = condition == BattleCondition.AttackUp ? 1 : 2;
-                        if(battle.enemydata[enemySelected].animid == (int)NewEnemies.LonglegsSpider)
+                        if (battle.enemydata[enemySelected].animid == (int)NewEnemies.LonglegsSpider)
                         {
                             dataId += 2;
                         }

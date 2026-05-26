@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
@@ -19,14 +14,14 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
             priority = 220;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("Flame"));
 
             // This is for jester fire healing him instead of damaging
             ILLabel label = null;
             cursor.GotoNext(i => i.MatchBrtrue(out label));
-            cursor.GotoPrev(i=>i.MatchLdarg0());
+            cursor.GotoPrev(i => i.MatchLdarg0());
 
             cursor.Emit(OpCodes.Ldarg_1);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchHeatingUp), "CheckFireDamage"));
@@ -37,26 +32,28 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
             cursor.Emit(OpCodes.Ldobj, typeof(MainManager.BattleData));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "DoHeatingUp"));
             Utils.RemoveUntilInst(cursor, i => i.MatchLdcI4(13));
+
+            //add status damage overide to overrides
+            cursor.GotoNext(i => i.MatchLdcI4(0));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "GetStatusDamageOverrides"));
         }
 
         static bool CheckFireDamage(ref MainManager.BattleData target)
         {
-            if(target.animid == (int)NewEnemies.Jester)
+            if (target.animid == (int)NewEnemies.Jester)
             {
-                MainManager.battle.Heal(ref target, 3);
+                MainManager.battle.Heal(ref target, BattleControl_Ext.DoHeatingUp(target));
                 return false;
             }
 
             if (target.animid == (int)NewEnemies.Moeruki)
             {
-                MainManager.PlaySound("StatUp");
-                target.charge = Mathf.Clamp(target.charge + 1, 1, 3);
-                MainManager.battle.StartCoroutine(MainManager.battle.StatEffect(target.battleentity, 4));
+                int newCharge = BattleControl_Ext.DoHeatingUp(target);
+                BattleControl_Ext.Instance.ChargeUp(ref target, newCharge, 0.25f);
                 return false;
             }
 
             return true;
         }
-
     }
 }

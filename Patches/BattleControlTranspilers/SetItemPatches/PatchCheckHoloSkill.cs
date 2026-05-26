@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.SetItemPatches
 {
@@ -19,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.SetItemPatches
             priority = 191596;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(6), i => i.MatchBneUn(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CheckHoloSkill"));

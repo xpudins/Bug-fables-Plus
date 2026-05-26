@@ -1,13 +1,5 @@
-﻿using BFPlus.Extensions.EnemyAI;
-using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions.Events.PitEvents
 {
@@ -29,14 +21,14 @@ namespace BFPlus.Extensions.Events.PitEvents
                 new Vector3(-9.5f,0f, -4f)
             };
 
-            for(int i=0; i< party.Length; i++)
+            for (int i = 0; i < party.Length; i++)
             {
                 party[i].transform.position = posArray[i];
                 party[i].FaceDown();
                 party[i].animstate = (int)MainManager.Animations.BattleIdle;
             }
 
-            if(chompy != null)
+            if (chompy != null)
                 chompy.transform.position = posArray[3];
 
             foreach (var e in party)
@@ -48,7 +40,7 @@ namespace BFPlus.Extensions.Events.PitEvents
                 chompy.flip = true;
 
             MainManager.FadeMusic(0.01f);
-            MainManager.SetCamera(caller.transform.position + Vector3.up * 5, new Vector3(-10, 0, 0), new Vector3(0,5, -25f), 0.01f);
+            MainManager.SetCamera(caller.transform.position + Vector3.up * 5, new Vector3(-10, 0, 0), new Vector3(0, 5, -25f), 0.01f);
             instance.StartCoroutine(caller.entity.ShakeSprite(0.1f, 120f));
             yield return EventControl.sec;
             yield return EventControl.sec;
@@ -79,7 +71,7 @@ namespace BFPlus.Extensions.Events.PitEvents
             if (!MainManager.instance.flags[857])
                 MainManager.SetCamera(party[1].transform, null, 1f, MainManager.defaultcamoffset, new Vector3(-5f, -55f, 0f));
             else
-                MainManager.SetCamera(caller.transform, null, 1f, new Vector3(-2,10,-15), new Vector3(-5f, 0, 0f));
+                MainManager.SetCamera(caller.transform, null, 1f, new Vector3(-2, 10, -15), new Vector3(-5f, 0, 0f));
 
 
             caller.entity.animstate = (int)MainManager.Animations.Idle;
@@ -103,7 +95,7 @@ namespace BFPlus.Extensions.Events.PitEvents
             Vector3 targetPos;
             for (int i = 0; i < buds.Length; i++)
             {
-                buds[i] = EntityControl.CreateNewEntity("bud" + i, (int)NewAnimID.MarsSummon, new Vector3(-5+ (10*i), 0, -1f));
+                buds[i] = EntityControl.CreateNewEntity("bud" + i, (int)NewAnimID.MarsSummon, new Vector3(-5 + (10 * i), 0, -1f));
                 buds[i].transform.parent = MainManager.map.transform;
                 buds[i].transform.localScale = Vector3.zero;
 
@@ -137,7 +129,7 @@ namespace BFPlus.Extensions.Events.PitEvents
 
                 yield return EventControl.tenthsec;
                 MainManager.PlaySound("VenusBudAppear", 0.8f, 1);
-                buds[i].StartCoroutine(GrowBud(buds[i], Vector3.one*2, 60f));
+                buds[i].StartCoroutine(GrowBud(buds[i], Vector3.one * 2, 60f));
             }
 
 
@@ -145,7 +137,7 @@ namespace BFPlus.Extensions.Events.PitEvents
             caller.entity.animstate = 103;
             yield return EventControl.halfsec;
             caller.entity.animstate = (int)MainManager.Animations.Idle;
-            foreach(var bud in buds)
+            foreach (var bud in buds)
             {
                 bud.animstate = 100;
             }
@@ -227,7 +219,7 @@ namespace BFPlus.Extensions.Events.PitEvents
 
             a = 0f;
             b = 40f;
-            targetPos = new Vector3(-5,0,0);
+            targetPos = new Vector3(-5, 0, 0);
             do
             {
                 itemSprite.transform.position = MainManager.BeizierCurve3(head.transform.position, targetPos, 10f, a / b);
@@ -303,7 +295,7 @@ namespace BFPlus.Extensions.Events.PitEvents
             }
             MainManager.instance.flags[857] = true;
             MainManager.ChangeMusic();
-            yield return EventControl.tenthsec; 
+            yield return EventControl.tenthsec;
             yield return null;
         }
 

@@ -3,11 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -18,7 +14,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 219675;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             //changes reward amount for dialogue check
             cursor.GotoNext(i => i.MatchLdcI4(10));

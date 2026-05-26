@@ -1,10 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.NewDungeonsEvents
@@ -14,7 +8,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
             Transform vineDoor = MainManager.map.mainmesh.Find("VinesDoor");
-            MainManager.SetCamera(null, vineDoor.transform.position + new Vector3(8,4,-1), 0.035f);
+            MainManager.SetCamera(null, vineDoor.transform.position + new Vector3(8, 4, -1), 0.035f);
             yield return EventControl.sec;
 
             MainManager.PlaySound("Rumble");

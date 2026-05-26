@@ -1,11 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static BattleControl;
 using UnityEngine;
 using static BFPlus.Extensions.BattleControl_Ext;
 namespace BFPlus.Extensions.EnemyAI
@@ -15,7 +11,7 @@ namespace BFPlus.Extensions.EnemyAI
         enum Attacks
         {
             ShieldThrow,
-            MultiPunch,
+            Kick,
             HealingItem,
             AttackingItem,
             BuffingItem,
@@ -25,7 +21,7 @@ namespace BFPlus.Extensions.EnemyAI
 
         BattleControl battle = null;
         const int SHIELD_DAMAGE = 2;
-        const int PUNCH_DAMAGE = 2;
+        const int KICK_DAMAGE = 3;
         public override IEnumerator DoBattleAI(EntityControl entity, int actionid)
         {
             battle = MainManager.battle;
@@ -71,7 +67,7 @@ namespace BFPlus.Extensions.EnemyAI
                 yield break;
             }
 
-            List<Attacks> chances = new List<Attacks>() { Attacks.ShieldThrow, Attacks.MultiPunch, Attacks.ShieldThrow };
+            List<Attacks> chances = new List<Attacks>() { Attacks.ShieldThrow, Attacks.Kick, Attacks.ShieldThrow };
 
             if (battle.enemydata[actionid].data[1] <= 0 && Instance.GetLowHPEnemy() > -1 && battle.enemydata[actionid].data[3] > 0)
             {
@@ -106,8 +102,8 @@ namespace BFPlus.Extensions.EnemyAI
                 case Attacks.ShieldThrow:
                     yield return DoShieldThrow(entity, actionid);
                     break;
-                case Attacks.MultiPunch:
-                    yield return DoMultiPunch(entity, actionid);
+                case Attacks.Kick:
+                    yield return DoKick(entity, actionid);
                     break;
 
                 case Attacks.HealingItem:
@@ -169,10 +165,9 @@ namespace BFPlus.Extensions.EnemyAI
             int hitTarget = 0;
             float a = 0f;
             float b = 40f;
-            bool block = false;
-            bool checkBlock = false;
+            int blocked = 0;
 
-            int damage = battle.HardMode() ? SHIELD_DAMAGE -1 : SHIELD_DAMAGE;
+            int damage = battle.HardMode() ? SHIELD_DAMAGE - 1 : SHIELD_DAMAGE;
 
             while (a <= b)
             {
@@ -180,21 +175,28 @@ namespace BFPlus.Extensions.EnemyAI
                 shield.localEulerAngles += Vector3.forward * 10f * MainManager.framestep;
                 p.startRotationMultiplier = shield.localEulerAngles.z;
 
-                if (hitTarget < battle.partypointer.Length && shield.position.x <= MainManager.instance.playerdata[battle.partypointer[hitTarget]].battleentity.transform.position.x)
+                if (hitTarget < battle.partypointer.Length &&
+                    shield.position.x <= MainManager.instance.playerdata[battle.partypointer[hitTarget]].battleentity.transform.position.x)
                 {
                     if (MainManager.instance.playerdata[battle.partypointer[hitTarget]].hp > 0)
                     {
-                        if (!checkBlock)
+                        if (blocked == 2)
                         {
-                            block = battle.commandsuccess;
-                            checkBlock = true;
+                            battle.superblockedthisframe = 3;
                         }
-
-                        battle.DoDamage(actionid, battle.partypointer[hitTarget], damage, null, block);
+                        else if (battle.superblockedthisframe > 0 || battle.GetSuperBlock(MainManager.instance.playerdata[battle.partypointer[hitTarget]].animid))
+                        {
+                            blocked = 2;
+                        }
+                        else if (blocked < 1 && battle.commandsuccess)
+                        {
+                            blocked = 1;
+                        }
+                        battle.DoDamage(actionid, battle.partypointer[hitTarget], damage, null, blocked > 0);
                     }
                     hitTarget++;
                 }
-                if(sound != null)
+                if (sound != null)
                 {
                     sound.volume = Mathf.Lerp(1f, 0f, a / b) * MainManager.soundvolume;
                 }
@@ -204,7 +206,7 @@ namespace BFPlus.Extensions.EnemyAI
             yield return EventControl.halfsec;
 
             int[] targets = battle.partypointer.Reverse().ToArray();
-            checkBlock = false;
+            blocked = 0;
             hitTarget = 0;
             a = 0f;
             b = 40f;
@@ -213,20 +215,28 @@ namespace BFPlus.Extensions.EnemyAI
                 shield.position = Vector3.Lerp(targetPos, startPos, a / b) + Vector3.up * 1.5f;
                 shield.localEulerAngles += Vector3.forward * (-10f * MainManager.framestep);
                 p.startRotationMultiplier = shield.localEulerAngles.z;
-                if (hitTarget < targets.Length && shield.position.x >= MainManager.instance.playerdata[targets[hitTarget]].battleentity.transform.position.x)
+                if (hitTarget < targets.Length &&
+                    shield.position.x >= MainManager.instance.playerdata[targets[hitTarget]].battleentity.transform.position.x)
                 {
                     if (MainManager.instance.playerdata[targets[hitTarget]].hp > 0)
                     {
-                        if (!checkBlock)
+                        if (blocked == 2)
                         {
-                            block = battle.commandsuccess;
-                            checkBlock = true;
+                            battle.superblockedthisframe = 3;
                         }
-                        battle.DoDamage(actionid, targets[hitTarget], damage, null, block);
+                        else if (battle.superblockedthisframe > 0 || battle.GetSuperBlock(MainManager.instance.playerdata[battle.partypointer[hitTarget]].animid))
+                        {
+                            blocked = 2;
+                        }
+                        else if (blocked < 1 && battle.commandsuccess)
+                        {
+                            blocked = 1;
+                        }
+                        battle.DoDamage(actionid, targets[hitTarget], damage, null, blocked > 0);
                     }
                     hitTarget++;
                 }
-                if(sound != null)
+                if (sound != null)
                     sound.volume = Mathf.Lerp(0f, 1f, a / b) * MainManager.soundvolume;
                 yield return null;
                 a += MainManager.framestep;
@@ -236,32 +246,55 @@ namespace BFPlus.Extensions.EnemyAI
             MainManager.PlaySound("Ding2");
             UnityEngine.Object.Destroy(shield.gameObject);
             entity.animstate = 104;
-            yield return entity.SlowSpinStop(Vector3.up * -50f,100f);
+            yield return entity.SlowSpinStop(Vector3.up * -50f, 100f);
             entity.spin = Vector3.zero;
         }
 
-        IEnumerator DoMultiPunch(EntityControl entity, int actionid)
+        IEnumerator DoKick(EntityControl entity, int actionid)
         {
             battle.GetSingleTarget();
             battle.CameraFocusTarget();
+            EntityControl targetEntity = battle.playertargetentity;
 
-            entity.MoveTowards(battle.playertargetentity.transform.position + new Vector3(1.5f, 0f, -0.1f), 2f, 101, 101);
+            entity.MoveTowards(targetEntity.transform.position + new Vector3(1.5f, 0f, -0.1f), 2f, 101, 101);
             while (entity.forcemove)
             {
                 yield return null;
             }
 
-            yield return EventControl.tenthsec;
-            int punchs = 2;
-            for(int i = 0; i < punchs; i++)
+            entity.animstate = 106;
+            yield return EventControl.halfsec;
+
+            entity.StartCoroutine(entity.ShakeSprite(0.1f, 30));
+            yield return EventControl.halfsec;
+
+            entity.animstate = 107;
+            battle.DoDamage(actionid, battle.playertargetID, KICK_DAMAGE, null, battle.commandsuccess);
+
+            int behindPlayer = Instance.GetPlayerBehind(battle.playertargetID);
+            if (behindPlayer != -1)
             {
-                entity.animstate = 102;
-                battle.DoDamage(actionid, battle.playertargetID, PUNCH_DAMAGE, null, battle.commandsuccess);
-                yield return EventControl.tenthsec;
-                entity.animstate = 103;
-                yield return EventControl.thirdsec;
-                yield return EventControl.tenthsec;
+                targetEntity.LockRigid(true);
+                targetEntity.overrideanim = true;
+                targetEntity.overrridejump = true;
+                targetEntity.animstate = (int)MainManager.Animations.Hurt;
+                Vector3 baseAngle = targetEntity.transform.localEulerAngles;
+
+                Vector3 startPos = targetEntity.transform.position;
+                Vector3 targetPos = MainManager.instance.playerdata[behindPlayer].battleentity.transform.position;
+
+                yield return MainManager.ArcMovement(targetEntity.gameObject, startPos, targetPos, new Vector3(0, 20), 2, 30, false);
+
+                battle.DoDamage(actionid, behindPlayer, KICK_DAMAGE - 1, null, battle.commandsuccess);
+                yield return MainManager.ArcMovement(targetEntity.gameObject, targetPos, startPos, new Vector3(0, 20), 2, 30, false);
+
+                targetEntity.transform.position = startPos;
+                targetEntity.LockRigid(false);
+                targetEntity.overrideanim = false;
+                targetEntity.overrridejump = false;
+                targetEntity.transform.localEulerAngles = baseAngle;
             }
+            yield return EventControl.halfsec;
             BattleControl.SetDefaultCamera();
         }
     }

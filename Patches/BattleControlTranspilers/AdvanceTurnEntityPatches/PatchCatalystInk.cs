@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
@@ -19,9 +14,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
             priority = 58;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdloc(out _),i => i.MatchSwitch(out _));
+            cursor.GotoNext(i => i.MatchLdloc(out _), i => i.MatchSwitch(out _));
             int cursorIndex = cursor.Index;
             cursor.GotoPrev(i => i.MatchLdloc(out _));
 
@@ -49,7 +44,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
 
         static void DoCatalystSpill(ref MainManager.BattleData target)
         {
-            var damageOverrides = new BattleControl.DamageOverride[] { BattleControl.DamageOverride.NoFall, BattleControl.DamageOverride.NoIceBreak, BattleControl.DamageOverride.FakeAnim, BattleControl.DamageOverride.DontAwake, BattleControl.DamageOverride.IgnoreNumb };
+            var damageOverrides = new BattleControl.DamageOverride[] { BattleControl.DamageOverride.NoFall, BattleControl.DamageOverride.NoIceBreak, BattleControl.DamageOverride.FakeAnim, BattleControl.DamageOverride.DontAwake, BattleControl.DamageOverride.IgnoreNumb, (BattleControl.DamageOverride)NewDamageOverride.StatusDamage };
             int conditionAmount = target.condition.Count - 1;
             int damage = conditionAmount * MainManager.BadgeHowManyEquipped((int)Medal.CatalystSpill);
 

@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
 {
@@ -18,16 +13,20 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             priority = 70776;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchStloc2());
+            cursor.GotoNext(MoveType.After, i => i.MatchStloc2());
             int cursorIndex = cursor.Index;
 
             ILLabel label = null;
-            cursor.GotoNext(i=>i.MatchInitobj(out _),i => i.MatchBr(out label));
+            cursor.GotoNext(i => i.MatchInitobj(out _), i => i.MatchBr(out label));
+            cursor.GotoNext(i => i.MatchLdcI4(681));
+            cursor.GotoNext(i => i.MatchStarg(out _));
+            var showDescRef = cursor.Next.Operand;
             cursor.Goto(cursorIndex);
 
             cursor.Emit(OpCodes.Ldarg_0);
+            cursor.Emit(OpCodes.Ldarga, showDescRef);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckListType"));
             cursor.Emit(OpCodes.Brtrue, label);
         }
@@ -40,26 +39,26 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             priority = 71654;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
-                i=>i.MatchLdarg0(),
-                i=>i.MatchLdcI4(22),
-                i=>i.MatchBneUn(out _), 
+                i => i.MatchLdarg0(),
+                i => i.MatchLdcI4(22),
+                i => i.MatchBneUn(out _),
                 i => i.MatchLdstr("Data/Dialogues"));
 
             int cursorIndex = cursor.Index;
 
-            cursor.GotoPrev(MoveType.After,i => i.MatchLdstr(""), i => i.MatchStloc(out _));
+            cursor.GotoPrev(MoveType.After, i => i.MatchLdstr(""), i => i.MatchStloc(out _));
             var textRef = cursor.Prev.Operand;
-            cursor.GotoNext(MoveType.After,i => i.MatchLdstr("Bar"), i=>i.MatchLdloc(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("Bar"), i => i.MatchLdloc(out _));
             var idRef = cursor.Prev.Operand;
             cursor.GotoNext(i => i.MatchStloc(out _));
             var barRef = cursor.Next.Operand;
 
             cursor.GotoNext(i => i.MatchLdcR4(0.7f));
             var barYOffsetRef = cursor.Prev.Operand;
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcR4(-2));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcR4(-2));
             var textSizeX = cursor.Next.Operand;
             cursor.GotoNext(MoveType.After, i => i.MatchLdcR4(-0.15f));
             var textSizeY = cursor.Next.Operand;
@@ -84,10 +83,10 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             priority = 75145;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "listdescbox")));
-            cursor.GotoNext(MoveType.After,i => i.MatchStloc(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchStloc(out _));
 
             int cursorIndex = cursor.Index;
             cursor.GotoPrev(i => i.MatchStloc(out _), i => i.MatchLdstr(""), i => i.MatchStloc(out _));

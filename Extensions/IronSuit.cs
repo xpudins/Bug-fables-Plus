@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions
@@ -37,7 +35,7 @@ namespace BFPlus.Extensions
 
         void LateUpdate()
         {
-            if (entity.sprite != null && entity.sprite.sprite != null) 
+            if (entity.sprite != null && entity.sprite.sprite != null)
             {
                 if (lastSprite != entity.sprite.sprite)
                 {
@@ -49,7 +47,7 @@ namespace BFPlus.Extensions
             }
         }
 
-        
+
 
         public Suit GetNewSuit()
         {

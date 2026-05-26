@@ -1,17 +1,9 @@
-﻿using BepInEx;
-using HarmonyLib;
-using MonoMod.Cil;
+﻿using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.DoActionPatches
 {
@@ -19,16 +11,16 @@ namespace BFPlus.Patches.DoActionPatches
     {
         public bool multiPatch;
         public bool patched;
-
+        
         public MethodInfo TargetMethod { get; set; }
         public int indexInserted = -1;
         public int priority;
-        protected abstract void ApplyPatch(ILCursor cursor);
+        protected abstract void ApplyPatch(ILCursor cursor, ILContext context);
 
 
-        public void TryApplyPatch(ILCursor cursor)
+        public void TryApplyPatch(ILCursor cursor, ILContext context)
         {
-            ApplyPatch(cursor);
+            ApplyPatch(cursor, context);
             if (!multiPatch)
             {
                 patched = true;
@@ -63,7 +55,7 @@ namespace BFPlus.Patches.DoActionPatches
             for (int i = 0; i < patches.Count; i++)
             {
                 //Console.WriteLine($"patching {patches[i].GetType().Name}");
-                patches[i].TryApplyPatch(cursor);
+                patches[i].TryApplyPatch(cursor, il);
                 if (!patches[i].patched)
                     i--;
             }
@@ -270,5 +262,36 @@ namespace BFPlus.Patches.DoActionPatches
     public abstract class PatchBaseNPCControlCreateDescWindow : PatchBase { }
 
     public abstract class PatchBaseBattleControlVineAttack : PatchBase { }
+    public abstract class PatchBaseEntityControlUpdateSprite : PatchBase { }
 
+    public abstract class PatchBaseEntityControlFollow : PatchBase { }
+
+    public abstract class PatchBaseBattleControlAddNewEnemy : PatchBase { }
+
+    public abstract class PatchBaseApplyBadges : PatchBase { }
+
+    public abstract class PatchBasePlayerControlCancelAction : PatchBase { }
+
+    public abstract class PatchBaseCardGameLateUpdate : PatchBase { }
+
+    public abstract class PatchBaseNPCControlSetup : PatchBase { }
+
+    public abstract class PatchBaseMainManagerFixCondition : PatchBase { }
+
+    public abstract class PatchBaseMainManagerLoadItemSprites : PatchBase { }
+
+    public abstract class PatchBaseEvent215 : PatchBase { }
+
+    public abstract class PatchBaseRefreshEnemyHP : PatchBase { }
+    public abstract class PatchBasePlayerTurn : PatchBase { }
+
+    public abstract class PatchBaseGlowTriggerLateUpdate : PatchBase { }
+
+    public abstract class PatchBaseDoClock : PatchBase { }
+    public abstract class PatchBaseEntityControlRefreshTrail : PatchBase { }
+
+    public abstract class PatchBaseEvent222 : PatchBase { }
+
+    public abstract class PatchBaseBattleControlSwitchPos : PatchBase { }
+    public abstract class PatchBaseBattleControlSwitchParty : PatchBase { }
 }

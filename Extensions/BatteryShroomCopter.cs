@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions
 {
@@ -17,7 +13,7 @@ namespace BFPlus.Extensions
         // Update is called once per frame
         void Update()
         {
-            if(entity.extras != null && entity.extras.Length > 0 && entity.extras[0] != null )
+            if (entity.extras != null && entity.extras.Length > 0 && entity.extras[0] != null)
             {
                 if (entity.animstate == 100)
                 {

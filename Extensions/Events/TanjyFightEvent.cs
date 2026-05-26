@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace BFPlus.Extensions.Events
 {
@@ -22,7 +17,7 @@ namespace BFPlus.Extensions.Events
             MainManager.instance.StartCoroutine(BattleControl.StartBattle(new int[]
             {
                 (int)MainManager.Enemies.TANGYBUG
-            }, -1, -1, "Battle6", null, true));
+            }, -1, -1, NewMusic.PlusBosses.ToString(), null, true));
             yield return EventControl.sec;
 
             while (MainManager.battle != null)

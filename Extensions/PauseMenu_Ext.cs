@@ -1,11 +1,8 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
-using System;
-using System.Reflection;
 using System.Linq;
-using BFPlus.Patches;
+using UnityEngine;
 using static BFPlus.Extensions.MainManager_Ext;
 
 namespace BFPlus.Extensions
@@ -51,7 +48,19 @@ namespace BFPlus.Extensions
             if (settingID == (int)NewMenuText.NewBattleThemes)
             {
                 MainManager.pausemenu.SettingsToggleSound();
-                MainManager_Ext.newBattleThemes = !MainManager_Ext.newBattleThemes;
+                if (MainManager.GetKey(3, false))
+                {
+                    musicOption++;
+                    if (musicOption > MusicSetting.Off)
+                        musicOption = MusicSetting.Mix;
+                }
+
+                if (MainManager.GetKey(2, false))
+                {
+                    musicOption--;
+                    if (musicOption < 0)
+                        musicOption = MusicSetting.Off;
+                }
                 MainManager.pausemenu.UpdateText();
             }
         }
@@ -65,7 +74,7 @@ namespace BFPlus.Extensions
         {
             if (MainManager.instance.flags[(int)NewCode.BIGFABLE])
             {
-                icons.Add(MainManager.NewUIObject("bigFable", MainManager.pausemenu.boxes[1].transform, new Vector3(2f, 4.5f, -0.1f), Vector3.one * 0.8f, MainManager.itemsprites[0,142]).transform);
+                icons.Add(MainManager.NewUIObject("bigFable", MainManager.pausemenu.boxes[1].transform, new Vector3(2f, 4.5f, -0.1f), Vector3.one * 0.8f, MainManager.itemsprites[0, 142]).transform);
             }
 
             if (MainManager.instance.flags[(int)NewCode.EVEN])
@@ -80,7 +89,7 @@ namespace BFPlus.Extensions
 
             if (MainManager.instance.flags[(int)NewCode.SCAVENGE])
             {
-                icons.Add(MainManager.NewUIObject("scavenge",  MainManager.pausemenu.boxes[1].transform, new Vector3(2f, 4.5f, -0.1f), Vector3.one * 0.5f, MainManager.guisprites[22]).transform);
+                icons.Add(MainManager.NewUIObject("scavenge", MainManager.pausemenu.boxes[1].transform, new Vector3(2f, 4.5f, -0.1f), Vector3.one * 0.5f, MainManager.guisprites[22]).transform);
             }
         }
 
@@ -100,7 +109,7 @@ namespace BFPlus.Extensions
             string[] allAreasDatas = MainManager_Ext.assetBundle.LoadAsset<TextAsset>("AreaItemsData").ToString().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
             areaItems = new AreaItem[allAreasDatas.Length];
-            for(int i=0;i <allAreasDatas.Length; i++)
+            for (int i = 0; i < allAreasDatas.Length; i++)
             {
                 areaItems[i] = new AreaItem();
                 string[] areaData = allAreasDatas[i].Split(new char[] { '{' });
@@ -142,7 +151,7 @@ namespace BFPlus.Extensions
                 }
             }
 
-            if(categoryIcons == null)
+            if (categoryIcons == null)
             {
                 categoryIcons = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("medalIcons").OrderBy(s => int.Parse(s.name.Split('_')[1])).ToArray();
             }
@@ -155,7 +164,7 @@ namespace BFPlus.Extensions
 
             List<int> obtainedCategories = new List<int>() { 0 };
 
-            for (int i = 0; i< medalCategories.Length; i++)
+            for (int i = 0; i < medalCategories.Length; i++)
             {
                 for (int j = 0; j < MainManager.instance.badges.Count; j++)
                 {
@@ -268,10 +277,10 @@ namespace BFPlus.Extensions
 
             if (HasAllBadges(preset.medals) && HasEnoughMp(preset) && MainManager.instance.playerdata.Length == 3)
             {
-                for(int i=0;i < preset.medals.Count; i++)
+                for (int i = 0; i < preset.medals.Count; i++)
                 {
                     int index = MainManager.instance.badges.FindIndex(b => b[0] == preset.medals[i][0] && b[1] == -2);
-                    if(index != -1)
+                    if (index != -1)
                     {
                         MainManager.instance.badges[index][1] = preset.medals[i][1];
                     }
@@ -317,13 +326,13 @@ namespace BFPlus.Extensions
 
             while (!MainManager.GetKey(5, false))
             {
-                if(lastClipboard != GUIUtility.systemCopyBuffer)
+                if (lastClipboard != GUIUtility.systemCopyBuffer)
                 {
                     lastClipboard = GUIUtility.systemCopyBuffer;
                     string presetString = Compressor.DecodeAndDecompress(lastClipboard);
 
                     var preset = MedalPreset.GetPresetFromString(presetString);
-                    if(preset != null)
+                    if (preset != null)
                     {
                         UpdateDesc(MainManager.menutext[290]);
                         MainManager.PlaySound("ATKSuccess");
@@ -350,7 +359,7 @@ namespace BFPlus.Extensions
         void CalculatePresetMpNeeded(MedalPreset preset)
         {
             preset.mpNeeded = 0;
-            for(int i = 0; i < preset.medals.Count; i++)
+            for (int i = 0; i < preset.medals.Count; i++)
             {
                 preset.mpNeeded += Mathf.Clamp(Convert.ToInt32(MainManager.badgedata[preset.medals[i][0], 2]), 0, MainManager.instance.flags[613] ? 1 : 999);
             }
@@ -364,8 +373,8 @@ namespace BFPlus.Extensions
 
         public bool HasEnoughMp(MedalPreset preset)
         {
-            int tpNeeded = preset.medals.Count(m => m[0] == (int)Medal.MPPlus) * 3;        
-            if(!(MainManager.instance.maxbp >= preset.mpNeeded - tpNeeded && MainManager.instance.maxtp > tpNeeded))
+            int tpNeeded = preset.medals.Count(m => m[0] == (int)Medal.MPPlus) * 3;
+            if (!(MainManager.instance.maxbp >= preset.mpNeeded - tpNeeded && MainManager.instance.maxtp > tpNeeded))
             {
                 UpdateDesc(MainManager.menutext[307]);
                 return false;

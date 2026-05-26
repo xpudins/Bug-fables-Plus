@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static MainManager;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions
 {
@@ -27,7 +21,7 @@ namespace BFPlus.Extensions
 
                 Sprite itemSprite;
 
-                if(itemType == 2)
+                if (itemType == 2)
                 {
                     itemSprite = !MainManager.instance.flags[681] ? MainManager.itemsprites[1, itemId] : MainManager.guisprites[190];
                 }
@@ -48,7 +42,7 @@ namespace BFPlus.Extensions
             {
                 MainManager.HitPart(other.transform.position + Vector3.up);
                 MainManager.PlaySound("Damage0", -1, 0.7f, 1f);
-                
+
                 if (!spitItem && !MainManager.instance.flags[flag])
                 {
                     Destroy(item);
@@ -67,7 +61,7 @@ namespace BFPlus.Extensions
             comp.itemType = itemType;
             comp.itemPos = itemPos;
             comp.bouncepos = bouncePos;
-            comp.flag = flag;   
+            comp.flag = flag;
         }
     }
 

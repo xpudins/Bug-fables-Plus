@@ -4,10 +4,7 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static MainManager;
 
@@ -20,34 +17,31 @@ namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
             priority = 12597;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("Battle6"));
-            cursor.GotoNext(MoveType.After,i => i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(out _));
             var jingleRef = cursor.Prev.Operand;
 
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Ldfld, jingleRef);  
+            cursor.Emit(OpCodes.Ldfld, jingleRef);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchWinJingleCheck), "CheckJingleValue"));
             cursor.Emit(OpCodes.Stfld, jingleRef);
         }
 
         static bool CheckJingleValue(bool jingle)
         {
+            //right before game destroys switch icon and stuff so best place
+            BattleControl_Ext.Instance.statusInfo.DestroyHelpBox();
+
             if (MainManager.musicvolume > 0f && MainManager.music[0].clip != null)
             {
-                if (MainManager.music[0].clip.name == "Battle6")
+                if (MainManager.music[0].clip.name == NewMusic.EventBattle.ToString())
                     return false;
 
-                string[] possibleBattleTheme = new string[] { 
-                    NewMusic.BattleRubberPrison.ToString(), NewMusic.BattleGoldenHills.ToString(),
-                    NewMusic.BattleLostSands.ToString(),  NewMusic.BattleFactory.ToString(),NewMusic.BattleOutskirts.ToString(),
-                    NewMusic.BattleMetalLake.ToString(),NewMusic.BattleForsakenLands.ToString(),NewMusic.BattleCaves.ToString(),
-                    NewMusic.BattleSandCastle.ToString(), NewMusic.BattleFarGrasslands.ToString(),NewMusic.BattleSwamplands.ToString(),
-                    NewMusic.BattleSnakemouthLab.ToString()
-                };
-                if (possibleBattleTheme.Contains(MainManager.music[0].clip.name))
+                if (Enum.TryParse(MainManager.music[0].clip.name, out NewMusic newMusic) &&
+                    (MainManager_Ext.Instance.IsNewFightMusic(newMusic) || NewMusic.JumpAntTheme == newMusic))
                 {
                     return true;
                 }
@@ -64,7 +58,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
             priority = 12669;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("BattleWon"));
             ILLabel label = cursor.DefineLabel();
@@ -108,12 +102,15 @@ namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
                 return true;
             }
 
+            if (MainManager.battle.sdata.enemies.Contains((int)NewEnemies.JumpAnt))
+                return true;
+
             return false;
         }
 
         static AudioSource GetWinJingle()
         {
-            if (!MainManager_Ext.newBattleThemes)
+            if (MainManager_Ext.musicOption == MusicSetting.Off)
             {
                 return MainManager.PlaySound("BattleWon");
             }
@@ -208,6 +205,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
             {
                 newJingle = "BattleWonCaves";
             }
+
+            if (MainManager.battle.sdata.enemies.Contains((int)NewEnemies.JumpAnt))
+                newJingle = "BattleWonJumpAnt";
 
             if (newJingle != "")
             {

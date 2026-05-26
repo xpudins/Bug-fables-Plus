@@ -1,11 +1,4 @@
-﻿using BFPlus.Extensions.Maps.SandCastleDepths;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MainManager;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.DeepCave
 {

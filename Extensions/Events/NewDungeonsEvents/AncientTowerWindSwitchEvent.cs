@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.NewDungeonsEvents
@@ -13,9 +9,9 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
             List<EntityControl> downPipes = new List<EntityControl>();
-            foreach(var entity in MainManager.map.entities)
+            foreach (var entity in MainManager.map.entities)
             {
-                if(entity.name.Contains("windDown"))
+                if (entity.name.Contains("windDown"))
                     downPipes.Add(entity);
             }
 

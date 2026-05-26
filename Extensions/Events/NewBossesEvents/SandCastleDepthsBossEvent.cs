@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Events.NewBossesEvents
@@ -36,7 +31,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             float b = 120f;
             Vector3 basePos = icecube.position;
             do
-            { 
+            {
                 icecube.position = new Vector3(basePos.x + UnityEngine.Random.Range(-0.1f, 0.1f), basePos.y, basePos.z + UnityEngine.Random.Range(-0.1f, 0.1f));
                 a += MainManager.TieFramerate(1f);
                 yield return null;
@@ -60,7 +55,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             yield return EventControl.halfsec;
             yield return EventControl.quartersec;
             yield return StartBattle(new int[] { (int)NewEnemies.DullScorp });
-            yield return DoWinFightEvent(instance, caller, scorp, party, (int)NewItem.SilverClaw, 856, 1, new Vector3(scorp[0].startpos.Value.x, -6.8f,scorp[0].startpos.Value.z));
+            yield return DoWinFightEvent(instance, caller, scorp, party, (int)NewItem.SilverClaw, 856, 1, new Vector3(scorp[0].startpos.Value.x, -6.8f, scorp[0].startpos.Value.z));
         }
     }
 }

@@ -4,12 +4,10 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MainManager;
+using System.Collections;
 using UnityEngine;
+using static BattleControl;
+using static MainManager;
 
 namespace BFPlus.Patches.BattleControlTranspilers.AdvanceMainTurnPatches
 {
@@ -23,14 +21,14 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceMainTurnPatches
             priority = 10231;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchPop(), i=>i.MatchLdloc1());
+            cursor.GotoNext(MoveType.After, i => i.MatchPop(), i => i.MatchLdloc1());
             cursor.Prev.OpCode = OpCodes.Nop;
             ILLabel label = cursor.DefineLabel();
             int cursorIndex = cursor.Index;
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
             var indexRef = cursor.Prev.Operand;
             cursor.Goto(cursorIndex);
 
@@ -48,83 +46,76 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceMainTurnPatches
 
         static bool CheckSkipMovement(int index)
         {
-            return MainManager.battle.delprojs[index].areadamage >0;
+            return MainManager.battle.delprojs[index].areadamage > 0;
         }
 
     }
 
-    public class PatchDelProjAreaDamage : PatchBaseAdvanceMainTurn
+    public class PatchDelProjExtraEffects : PatchBaseAdvanceMainTurn
     {
-        public PatchDelProjAreaDamage()
+        public PatchDelProjExtraEffects()
         {
             priority = 10360;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor c, ILContext context)
         {
+            c.GotoNext(x => x.MatchCall(AccessTools.Method(typeof(UnityEngine.Object), "Destroy", new Type[] { typeof(UnityEngine.Object) })));
+            c.GotoPrev(MoveType.After, x => x.MatchLdarg(0));
+            var currentDelProjIndex = c.Next.Operand;
+            c.GotoPrev(MoveType.After, x => x.MatchLdloc(1));
+            int destroyIndex = c.Index;
 
-            cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(UnityEngine.Object), "Destroy", new Type[] { typeof(UnityEngine.Object) })));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDelProjAreaDamage), "GetCurrentDelayedProjExtra"));
-            cursor.GotoNext(MoveType.After, i => i.MatchCall(out _));
+            c.GotoNext(x => x.MatchCall(AccessTools.Method(typeof(BattleControl), nameof(BattleControl.RemoveDelayedProjectile))));
+            c.GotoPrev(x => x.MatchLdloc(1));
+            ILLabel skipToLabel = c.MarkLabel();
+            c.Goto(destroyIndex);
 
-            int cursorIndex = cursor.Index;
-            cursor.GotoPrev(MoveType.After, i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
-            var indexRef = cursor.Prev.Operand;
-            cursor.Goto(cursorIndex);
-
-            ILLabel label = cursor.DefineLabel();
-            ILLabel jumpLabel = cursor.DefineLabel();
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Ldfld, indexRef);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDelProjMovement), "CheckSkipMovement"));
-            cursor.Emit(OpCodes.Brfalse, label);
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Ldfld, indexRef);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDelProjAreaDamage), "DoAreaDamageProj"));
-            cursor.Emit(OpCodes.Br, jumpLabel);
-
-            cursor.MarkLabel(label);
-
-            cursor.GotoNext(MoveType.After,i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "commandsuccess")), i => i.MatchCall(out _));
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Ldfld, indexRef);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDelProjAreaDamage), "DoExtraEffect"));
-            cursor.Remove();
-
-            cursor.GotoNext(MoveType.After,i=>i.MatchStfld(AccessTools.Field(typeof(MainManager.BattleData), "turnssincedeath")));
-            cursor.MarkLabel(jumpLabel);
+            c.Prev.OpCode = OpCodes.Nop;
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Ldfld, currentDelProjIndex);
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDelProjExtraEffects), "DoExtraEffect"));
+            Utils.InsertYieldReturn(c);
+            c.Emit(OpCodes.Br, skipToLabel);
+            c.Emit(OpCodes.Ldloc_1);
         }
 
-        static void DoAreaDamageProj(int index)
+        static IEnumerator DoExtraEffect(int projIndex)
         {
-            for (int i = 0; i < MainManager.instance.playerdata.Length; i++) 
-            {
-                if (MainManager.instance.playerdata[i].hp > 0)
-                {
-                    battle.DoDamage(null, ref MainManager.instance.playerdata[i], MainManager.battle.delprojs[index].areadamage, null, null, false);
-                    MainManager.SetCondition(BattleCondition.Sticky, ref MainManager.instance.playerdata[i], 4);
-                    MainManager.PlayParticle("StickyGet", MainManager.instance.playerdata[i].battleentity.transform.position + Vector3.up);
-                    MainManager.PlaySound("WaterSplash2", -1, 0.8f, 1f);
-                }
-            
-            }
-        }
-
-        static GameObject GetCurrentDelayedProjExtra(GameObject obj)
-        {
+            GameObject obj = battle.delprojs[projIndex].obj;
             BattleControl_Ext.Instance.currentDelayedProj = obj.GetComponentInChildren<DelayedProjExtra>();
             if (BattleControl_Ext.Instance.currentDelayedProj != null)
-            {
                 BattleControl_Ext.Instance.currentDelayedProj.transform.parent = battle.battlemap.transform;
-            }
-            return obj;
-        }
 
-        static void DoExtraEffect(int damageDone, int projIndex)
-        {
-            if(BattleControl_Ext.Instance.currentDelayedProj != null)
+            int mainTargetID = battle.partypointer[battle.delprojs[projIndex].position];
+            int mainTargetDamage = 0;
+            DamageOverride[] delProjOverrides = BattleControl_Ext.Instance.currentDelayedProj?.overrides?.ToArray();
+
+            for (int i = 0; i < instance.playerdata.Length; i++)
             {
-                BattleControl_Ext.Instance.currentDelayedProj.DoExtraEffect(damageDone, projIndex);
+                if (instance.playerdata[i].hp <= 0 || instance.playerdata[i].eatenby != null)
+                {
+                    continue;
+                }
+
+                if (i == mainTargetID)
+                {
+                    mainTargetDamage = battle.delprojs[projIndex].damage + battle.delprojs[projIndex].areadamage;
+                    mainTargetDamage = battle.DoDamage(null, ref instance.playerdata[i], mainTargetDamage, battle.delprojs[projIndex].property, delProjOverrides, battle.commandsuccess);
+                }
+                else if (battle.delprojs[projIndex].areadamage > 0)
+                {
+                    battle.DoDamage(null, ref instance.playerdata[i], battle.delprojs[projIndex].areadamage, battle.delprojs[projIndex].property, delProjOverrides, battle.commandsuccess);
+                }
+
+                if (instance.playerdata[i].hp <= 0)
+                    instance.playerdata[i].turnssincedeath = -1;
+            }
+            UnityEngine.Object.Destroy(battle.delprojs[projIndex].obj);
+            if (BattleControl_Ext.Instance.currentDelayedProj != null)
+            {
+                yield return BattleControl_Ext.Instance.currentDelayedProj.DoExtraEffect(mainTargetDamage, projIndex);
                 UnityEngine.Object.Destroy(BattleControl_Ext.Instance.currentDelayedProj.gameObject);
             }
         }

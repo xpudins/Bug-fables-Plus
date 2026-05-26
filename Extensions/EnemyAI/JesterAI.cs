@@ -1,56 +1,47 @@
-﻿using BFPlus.Patches;
-using HarmonyLib;
-using Microsoft.SqlServer.Server;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static FlappyBee;
 using static MainManager;
 
 namespace BFPlus.Extensions.EnemyAI
 {
-//    Giant's Jester
+    //    Giant's Jester
 
-//The jester would also have a passive ability where it HEALS from being on fire instead of taking damage
+    //The jester would also have a passive ability where it HEALS from being on fire instead of taking damage
 
-//Gets +1 action per turn att 65% HP.
-//Gets Def Up at 35 % HP
+    //Gets +1 action per turn att 65% HP.
+    //Gets Def Up at 35 % HP
 
-//Attacks:
+    //Attacks:
 
-//"Fiery Wind-Up Punch"
-//The Jester will lean back and wind up its left hand for a punch across the screen[a good reference for the anim would be Sonic's forward smash in Smash Bros Ultimate]. Right before releasing the punch, it would make some sort of sound que and change its facial expression, to let you know when the punch is coming, and it would be amazing if it could hold the wind-up for a random amount of time between 2-5 seconds . The attack would deal 4 damage to a single target (6 on hard mode) and it would light the target on fire for 1 turn if blocked, and for 3 turns if unblocked (in hard mode it increases to 2 turns if blocked and 4 turns if unblocked).
+    //"Fiery Wind-Up Punch"
+    //The Jester will lean back and wind up its left hand for a punch across the screen[a good reference for the anim would be Sonic's forward smash in Smash Bros Ultimate]. Right before releasing the punch, it would make some sort of sound que and change its facial expression, to let you know when the punch is coming, and it would be amazing if it could hold the wind-up for a random amount of time between 2-5 seconds . The attack would deal 4 damage to a single target (6 on hard mode) and it would light the target on fire for 1 turn if blocked, and for 3 turns if unblocked (in hard mode it increases to 2 turns if blocked and 4 turns if unblocked).
 
-//"Fireball Juggler"
-//The jester would juggle 3 fireballs(4 in hard mode) for a brief moment before lobbing the balls at a random party memeber.These fireballs would deal 3 damage(4 on hard mode) and would light the target on fire for 2 turns if unblocked(3 turns in Hard Mode).
-//It would have a 50 % chance to drop the last fireball, healing itself the 4 HP(6 HP on Hard Mode), but it will be lit on fire for 2 / 3 turns
+    //"Fireball Juggler"
+    //The jester would juggle 3 fireballs(4 in hard mode) for a brief moment before lobbing the balls at a random party memeber.These fireballs would deal 3 damage(4 on hard mode) and would light the target on fire for 2 turns if unblocked(3 turns in Hard Mode).
+    //It would have a 50 % chance to drop the last fireball, healing itself the 4 HP(6 HP on Hard Mode), but it will be lit on fire for 2 / 3 turns
 
-//"Mega-Fire-Cherry Surprise"
-//The Jester would go into its box before re - emerging with a giant cherry bomb on fire(will draw sprite for this in a bit.) held over its head.
-//The jester would lift the bomb upwards and off - screen as a coundown ranging from 4 - 8 seconds start counting down.
-//The second the counter hits 0, the jester insantly slams down the bomb in the middle of the party, dealing 5 damage to the party(7 in hard mode), inflicting burn for 2 turns if unblocked, as well as another unavoidable random negative status effect to each party memer(aside from Freeze, Sleep or Numb) for 2 turns.
+    //"Mega-Fire-Cherry Surprise"
+    //The Jester would go into its box before re - emerging with a giant cherry bomb on fire(will draw sprite for this in a bit.) held over its head.
+    //The jester would lift the bomb upwards and off - screen as a coundown ranging from 4 - 8 seconds start counting down.
+    //The second the counter hits 0, the jester insantly slams down the bomb in the middle of the party, dealing 5 damage to the party(7 in hard mode), inflicting burn for 2 turns if unblocked, as well as another unavoidable random negative status effect to each party memer(aside from Freeze, Sleep or Numb) for 2 turns.
 
-//"Jester Says"
-//The jester would dive into its box and re - emerge with a sign displaying either the A, B, or X button.The party would have a bried window of time to press the correct button, making the Jester go back into its box and re - emerge with another button.
-//This would repeat 3 times on normal mode and 4 times on hard mode.failing at any of these will make the jester re - emerge and snap it's fingers on its right hand, and everyone would be set on fire for 3 turns. Succeeding would instead make the jester heal everyone for 3 HP.
+    //"Jester Says"
+    //The jester would dive into its box and re - emerge with a sign displaying either the A, B, or X button.The party would have a bried window of time to press the correct button, making the Jester go back into its box and re - emerge with another button.
+    //This would repeat 3 times on normal mode and 4 times on hard mode.failing at any of these will make the jester re - emerge and snap it's fingers on its right hand, and everyone would be set on fire for 3 turns. Succeeding would instead make the jester heal everyone for 3 HP.
 
-//"Bug Catcher"
-//The Jester would hop over to the bug at the front of the party and grab it with both hands and slowly lift them upwards.The caught bug would have to quickly mash to not get caught, similar to a Mantidfly attack.If the Jester catches the bug, it will hold it hostage until its next turn.
+    //"Bug Catcher"
+    //The Jester would hop over to the bug at the front of the party and grab it with both hands and slowly lift them upwards.The caught bug would have to quickly mash to not get caught, similar to a Mantidfly attack.If the Jester catches the bug, it will hold it hostage until its next turn.
 
-//"Bug Bullseye"
-//if the Jester has captured a bug, it will always do this on its next turn.It will use the caught bug as a projectile.It will first light the caught bug on fire for 2 turns(3 turns in hard mode) with a finger snap, and then throw the bug at another party member, dealing 6 damage to both party members(8 in hard mode).If not blocked, the targeted bug would also catch fire for as many turns.
+    //"Bug Bullseye"
+    //if the Jester has captured a bug, it will always do this on its next turn.It will use the caught bug as a projectile.It will first light the caught bug on fire for 2 turns(3 turns in hard mode) with a finger snap, and then throw the bug at another party member, dealing 6 damage to both party members(8 in hard mode).If not blocked, the targeted bug would also catch fire for as many turns.
 
-//"Jumping Jack"
-//The jester would retreat into its box, becoming sturdy and gaining 3 charge.After a turn, the jester would preform a big jump with its entire box, landing on the team and setting them on fire for 1 turn if blocked, and 3 turns if unblocked(2 / 4 turns in hard mode) whilst dealing 5 ? damage to the party(7 in hard mode)
+    //"Jumping Jack"
+    //The jester would retreat into its box, becoming sturdy and gaining 3 charge.After a turn, the jester would preform a big jump with its entire box, landing on the team and setting them on fire for 1 turn if blocked, and 3 turns if unblocked(2 / 4 turns in hard mode) whilst dealing 5 ? damage to the party(7 in hard mode)
 
     public class JesterAI : AI
-    { 
+    {
         enum Attacks
         {
             Punch,
@@ -75,7 +66,7 @@ namespace BFPlus.Extensions.EnemyAI
             battle.SetData(actionid, 13);
             float hpPercent = battle.HPPercent(battle.enemydata[actionid]);
 
-            if(battle.enemydata[actionid].data[0] != 1)
+            if (battle.enemydata[actionid].data[0] != 1)
             {
                 int count = 0;
                 for (int i = 7; i < 12; i++)
@@ -91,7 +82,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             if (hpPercent <= 0.65f && battle.enemydata[actionid].data[4] == 0)
             {
-                if(battle.enemydata[actionid].data[0] == 0)
+                if (battle.enemydata[actionid].data[0] == 0)
                     entity.animstate = 129;
                 MainManager.PlaySound("Charge7", -1, 1.2f, 1f);
                 battle.StartCoroutine(entity.ShakeSprite(0.1f, 30f));
@@ -182,7 +173,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             Attacks attack = MainManager_Ext.GetWeightedResult(attacks);
 
-            if(attack != Attacks.BugCatcher && battle.enemydata[actionid].ate == null)
+            if (attack != Attacks.BugCatcher && battle.enemydata[actionid].ate == null)
             {
                 battle.enemydata[actionid].data[3]++;
             }
@@ -201,7 +192,7 @@ namespace BFPlus.Extensions.EnemyAI
                     break;
                 case Attacks.CherryBomb:
                     battle.enemydata[actionid].data[12] = 1;
-                    yield return DoCherryBomb(entity,actionid);
+                    yield return DoCherryBomb(entity, actionid);
                     break;
                 case Attacks.ChargeBox:
                     yield return DoBoxCharge(entity, actionid);
@@ -217,7 +208,7 @@ namespace BFPlus.Extensions.EnemyAI
 
         IEnumerator TellJoke(int jokeId, EntityControl entity, int flag, int actionid)
         {
-            MainManager.SetCamera(new Vector3(entity.transform.position.x -2, entity.sprite.transform.localPosition.y + 3f, 1f));
+            MainManager.SetCamera(new Vector3(entity.transform.position.x - 2, entity.sprite.transform.localPosition.y + 3f, 1f));
             yield return EventControl.halfsec;
             string[] jokes = MainManager_Ext.assetBundle.LoadAsset<TextAsset>("JesterJokes").ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             MainManager.DialogueText(jokes[jokeId],
@@ -238,7 +229,7 @@ namespace BFPlus.Extensions.EnemyAI
             battle.dontusecharge = true;
             battle.enemydata[actionid].data[1] = 1;
             bool hardmode = battle.HardMode();
-            int amount = hardmode ? JESTER_SAYS_AMOUNT+1:JESTER_SAYS_AMOUNT;
+            int amount = hardmode ? JESTER_SAYS_AMOUNT + 1 : JESTER_SAYS_AMOUNT;
 
             entity.animstate = 117;
             yield return EventControl.halfsec;
@@ -248,24 +239,26 @@ namespace BFPlus.Extensions.EnemyAI
 
             SpriteRenderer card = MainManager.NewSpriteObject(mainParts[0].transform.position, battle.battlemap.transform, MainManager_Ext.assetBundle.LoadAsset<Sprite>("JesterCard"));
             int buttonId = UnityEngine.Random.Range(4, 7);
-            ButtonSprite button = new GameObject("Button").AddComponent<ButtonSprite>().SetUp(buttonId, -1, "", new Vector3(0,0,-0.1f), Vector3.one * 1.3f, -1, card.transform, Color.white);
+            ButtonSprite button = new GameObject("Button").AddComponent<ButtonSprite>().SetUp(buttonId, -1, "", new Vector3(0, 0, -0.1f), Vector3.one * 1.3f, -1, card.transform, Color.white);
             button.tridimentional = true;
 
             SpriteRenderer barHolder = MainManager.NewUIObject("barHolder", card.transform, new Vector3(-0.9f, 2f, -0.1f), new Vector3(2f, 1f, 1f), MainManager.guisprites[64], 0).GetComponent<SpriteRenderer>();
-            SpriteRenderer bar = MainManager.NewUIObject("bar", barHolder.transform, new Vector3(0,0,-0.1f), Vector3.one, MainManager.guisprites[58], 0).GetComponent<SpriteRenderer>();
+            SpriteRenderer bar = MainManager.NewUIObject("bar", barHolder.transform, new Vector3(0, 0, -0.1f), Vector3.one, MainManager.guisprites[58], 0).GetComponent<SpriteRenderer>();
             bar.color = Color.yellow;
             float a = 0;
             float b = 20f;
             Vector3 startPos = card.transform.position;
             Vector3 targetPos = card.transform.position + new Vector3(-2.2f, 3.5f, -0.3f);
+            Vector3 targetScale = Vector3.one * 0.8f;
             do
             {
                 card.transform.position = Vector3.Lerp(startPos, targetPos, a / b);
-                card.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one*0.8f, a / b);
+                card.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one * 0.8f, a / b);
                 a += MainManager.TieFramerate(1f);
                 yield return null;
             } while (a < b);
-                
+
+            card.transform.localScale = targetScale;
             card.transform.parent = mainParts[0].transform;
 
             bool failed = false;
@@ -274,11 +267,11 @@ namespace BFPlus.Extensions.EnemyAI
             for (int i = 0; i < amount; i++)
             {
                 a = 0;
-                b = 35f - (i *2);
+                b = 35f - (i * 2);
                 bool success = false;
                 do
                 {
-                    bar.transform.localScale = new Vector3(Mathf.Lerp(1,0,a/b), 1f, 1f);
+                    bar.transform.localScale = new Vector3(Mathf.Lerp(1, 0, a / b), 1f, 1f);
                     if (MainManager.GetKey(buttonId, false))
                     {
                         success = true;
@@ -286,7 +279,7 @@ namespace BFPlus.Extensions.EnemyAI
                         button.basesprite.color = Color.green;
                         break;
                     }
-                    else if(MainManager.GetKey(-4, false))
+                    else if (MainManager.GetKey(-4, false))
                     {
                         failed = true;
                         button.basesprite.color = Color.red;
@@ -295,7 +288,7 @@ namespace BFPlus.Extensions.EnemyAI
                     }
                     a += MainManager.TieFramerate(1f);
                     yield return null;
-                } while (a < b+1);
+                } while (a < b + 1);
 
                 if (!success)
                 {
@@ -322,9 +315,9 @@ namespace BFPlus.Extensions.EnemyAI
                 MainManager.PlaySound("Toss6", 0.8f, 1);
                 yield return EventControl.tenthsec;
 
-                battle.StartCoroutine(MainManager.ArcMovement(tempCard.gameObject, tempCard.transform.position, tempCard.transform.position + Vector3.right * 15,new Vector3(0,0,20), 10, 30f,true));
+                battle.StartCoroutine(MainManager.ArcMovement(tempCard.gameObject, tempCard.transform.position, tempCard.transform.position + Vector3.right * 15, new Vector3(0, 0, 20), 10, 30f, true));
 
-                if (!failed && i < amount-1)
+                if (!failed && i < amount - 1)
                 {
                     bar.transform.localScale = Vector3.one;
                     buttonId = UnityEngine.Random.Range(4, 7);
@@ -358,7 +351,7 @@ namespace BFPlus.Extensions.EnemyAI
             else
                 battle.Heal(ref battle.enemydata[actionid], 3);
 
-            for (int i=0; i< MainManager.instance.playerdata.Length; i++)
+            for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
                 if (MainManager.instance.playerdata[i].hp > 0 && MainManager.instance.playerdata[i].eatenby == null)
                 {
@@ -416,17 +409,17 @@ namespace BFPlus.Extensions.EnemyAI
             entity.overrridejump = true;
 
             entity.StartCoroutine(entity.ShakeSprite(0.1f, 60f));
-            MainManager.PlaySound("AhoneynationBodySlamCharge",1.2f,1);
+            MainManager.PlaySound("AhoneynationBodySlamCharge", 1.2f, 1);
             Vector3 startScale = entity.model.transform.localScale;
-            Vector3 targetScale = new Vector3(startScale.x, 0.5f,startScale.z);
+            Vector3 targetScale = new Vector3(startScale.x, 0.5f, startScale.z);
 
             yield return MainManager.GradualScale(entity.model.transform, targetScale, 60f, false);
             battle.StartCoroutine(MainManager.GradualScale(entity.model.transform, startScale, 10f, false));
             Vector3 baseRotation = entity.model.localEulerAngles;
 
             MainManager.PlaySound("Boing0", 0.8f, 1);
-            MainManager.PlaySound("BeetleDash",-1, 0.8f, 0.7f,true);
-            yield return MainManager.ArcMovement(entity.model.gameObject, entity.model.position, battle.partymiddle + Vector3.up, new Vector3(-30,0,30), 15, 60f, false);
+            MainManager.PlaySound("BeetleDash", -1, 0.8f, 0.7f, true);
+            yield return MainManager.ArcMovement(entity.model.gameObject, entity.model.position, battle.partymiddle + Vector3.up, new Vector3(-30, 0, 30), 15, 60f, false);
             MainManager.StopSound("BeetleDash");
             entity.model.localEulerAngles = baseRotation;
 
@@ -434,7 +427,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             MainManager.PlaySound("BigHit");
             MainManager.PlayParticle("impactsmoke", battle.partymiddle);
-            
+
             int damage = hardmode ? JUMPING_JACK_DAMAGE + 1 : JUMPING_JACK_DAMAGE;
             for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
@@ -454,13 +447,13 @@ namespace BFPlus.Extensions.EnemyAI
 
                 }
             }
-            
+
             yield return EventControl.quartersec;
 
             MainManager.PlaySound("Boing0", 0.8f, 1);
             MainManager.PlaySound("BeetleDash", -1, 0.8f, 0.7f, true);
             battle.StartCoroutine(MainManager.GradualScale(entity.model.transform, startScale, 10f, false));
-            yield return MainManager.ArcMovement(entity.model.gameObject, entity.model.position, basePos, new Vector3(-30,0,30), 15, 30f, false);
+            yield return MainManager.ArcMovement(entity.model.gameObject, entity.model.position, basePos, new Vector3(-30, 0, 30), 15, 30f, false);
             MainManager.StopSound("BeetleDash");
             entity.model.localEulerAngles = baseRotation;
             entity.model.localScale = startScale;
@@ -480,7 +473,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.overrideanim = false;
         }
 
-        IEnumerator DoWindUpPunch(EntityControl entity, int actionid) 
+        IEnumerator DoWindUpPunch(EntityControl entity, int actionid)
         {
             bool hardmode = battle.HardMode();
             battle.GetSingleTarget();
@@ -512,13 +505,13 @@ namespace BFPlus.Extensions.EnemyAI
             leftSpring.SetPartPos(leftSpring.mainPart.position, playertargetentityRef.transform.position + new Vector3(1f, 1f, -0.2f), 10f);
             yield return EventControl.tenthsec;
 
-            battle.DoDamage(actionid, battle.playertargetID, hardmode ? PUNCH_DAMAGE+1 : PUNCH_DAMAGE, null, battle.commandsuccess);
+            battle.DoDamage(actionid, battle.playertargetID, hardmode ? PUNCH_DAMAGE + 1 : PUNCH_DAMAGE, null, battle.commandsuccess);
             int fireTurns = hardmode ? 4 : 3;
             if (battle.commandsuccess)
             {
                 fireTurns = hardmode ? 2 : 1;
             }
-            if(MainManager.instance.playerdata[battle.playertargetID].hp > 0)
+            if (MainManager.instance.playerdata[battle.playertargetID].hp > 0)
             {
                 battle.TryCondition(ref MainManager.instance.playerdata[battle.playertargetID], MainManager.BattleCondition.Fire, fireTurns);
             }
@@ -552,18 +545,18 @@ namespace BFPlus.Extensions.EnemyAI
             int fireballAmount = hardmode ? 4 : 3;
             Transform[] fireballs = new Transform[fireballAmount];
 
-            Vector3 fireballPos = mainParts[1].position + new Vector3(-0.5f,0);
+            Vector3 fireballPos = mainParts[1].position + new Vector3(-0.5f, 0);
             Vector3 offset = new Vector3(0, 0.5f, -0.2f);
-            int[] order = { 0, 2, 1};
+            int[] order = { 0, 2, 1 };
 
-            if(hardmode)
-                order = new int[]{ 0,3,1,2};
+            if (hardmode)
+                order = new int[] { 0, 3, 1, 2 };
 
             for (int i = 0; i < order.Length; i++)
             {
                 int index = order[i];
                 fireballPos = index > 1 ? mainParts[0].position : mainParts[1].position + new Vector3(-0.5f, 0);
- 
+
                 battle.StartCoroutine(CreateFireballs(fireballs, index, fireballPos + offset));
             }
             yield return EventControl.halfsec;
@@ -578,12 +571,12 @@ namespace BFPlus.Extensions.EnemyAI
                 targetPos = index > 1 ? mainParts[1].position : mainParts[0].position;
 
                 yield return new WaitForSeconds(0.03f);
-                coroutines[index] = battle.StartCoroutine(StartJuggling(fireballs[index],targetPos + offset, 6+i*2, coroutines, index));
+                coroutines[index] = battle.StartCoroutine(StartJuggling(fireballs[index], targetPos + offset, 6 + i * 2, coroutines, index));
                 yield return new WaitForSeconds(0.05f);
             }
 
 
-            for(int i = 0; i < order.Length; i++)
+            for (int i = 0; i < order.Length; i++)
             {
                 int index = order[i];
                 yield return new WaitUntil(() => coroutines[index] == null);
@@ -615,12 +608,12 @@ namespace BFPlus.Extensions.EnemyAI
                         if (battle.GetSuperBlock(0))
                             tpdrain -= 1;
                     }
-                    if(tpdrain > 0)
+                    if (tpdrain > 0)
                         BattleControl_Ext.Instance.RemoveTP(-tpdrain, startPos, endPos);
                 }
                 else
                 {
-                    
+
                     Vector3 startPos = fireballs[index].position;
                     targetPos = entity.model.GetChild(0).GetChild(6).position;
 
@@ -635,7 +628,7 @@ namespace BFPlus.Extensions.EnemyAI
             }
 
 
-            for(int i=0; i < fireballs.Length; i++)
+            for (int i = 0; i < fireballs.Length; i++)
             {
                 if (fireballs[i] != null)
                     UnityEngine.Object.Destroy(fireballs[i].gameObject);
@@ -660,15 +653,15 @@ namespace BFPlus.Extensions.EnemyAI
         {
             Vector3 tempPos;
             Vector3 startPos = fireball.position;
-            for(int i=0; i < juggleCount;i++)
+            for (int i = 0; i < juggleCount; i++)
             {
                 MainManager.PlaySound("WaspKingMFireball2", 1.2f, 0.5f);
-                yield return MainManager.ArcMovement(fireball.gameObject, startPos,targetPos, new Vector3(0,0,20), 7, 25f,false);
+                yield return MainManager.ArcMovement(fireball.gameObject, startPos, targetPos, new Vector3(0, 0, 20), 7, 25f, false);
                 tempPos = startPos;
                 startPos = targetPos;
                 targetPos = tempPos;
             }
-            coroutines[index] = null; 
+            coroutines[index] = null;
         }
 
         IEnumerator DoBugCatcher(EntityControl entity, int actionid)
@@ -678,7 +671,7 @@ namespace BFPlus.Extensions.EnemyAI
             Vector3 basePos = entity.transform.position;
             battle.GetSingleTarget();
 
-            MainManager.SetCamera(battle.playertargetentity.transform, battle.playertargetentity.transform.position + new Vector3(0,4,0), 0.02f, new Vector3(0f, 4f, -7f));
+            MainManager.SetCamera(battle.playertargetentity.transform, battle.playertargetentity.transform.position + new Vector3(0, 4, 0), 0.02f, new Vector3(0f, 4f, -7f));
             entity.MoveTowards(battle.playertargetentity.transform.position + new Vector3(4f, 0f, 0.1f), 1f);
             while (entity.forcemove)
             {
@@ -702,7 +695,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             JesterSprings leftSpring = mainParts[0].GetComponentInParent<JesterSprings>();
             leftSpring.SetPartPos(leftSpring.mainPart.position, battle.playertargetentity.transform.position + new Vector3(1f, 1f, -0.2f), 10f);
-            
+
             JesterSprings rightSpring = mainParts[1].GetComponentInParent<JesterSprings>();
             rightSpring.SetPartPos(rightSpring.mainPart.position, battle.playertargetentity.transform.position + new Vector3(1f, 1f, 0.2f), 10f);
             battle.playertargetentity.animstate = (int)MainManager.Animations.Hurt;
@@ -795,9 +788,9 @@ namespace BFPlus.Extensions.EnemyAI
 
                         int[] targets = { playerTargetId, i };
 
-                        for(int j=0; j<targets.Length; j++)
+                        for (int j = 0; j < targets.Length; j++)
                         {
-                            if(MainManager.instance.playerdata[targets[j]].hp > 0)
+                            if (MainManager.instance.playerdata[targets[j]].hp > 0)
                             {
                                 battle.DoDamage(actionid, targets[j], damage, null, battle.commandsuccess);
 
@@ -816,7 +809,7 @@ namespace BFPlus.Extensions.EnemyAI
                             playerEntity.transform.position = MainManager.BeizierCurve3(startPos, playerPos, 3f, a / b);
                             a += MainManager.TieFramerate(1f);
                             yield return null;
-                        } while (a <b);
+                        } while (a < b);
                     }
 
                     if (MainManager.instance.playerdata[i].hp > 0)
@@ -858,7 +851,7 @@ namespace BFPlus.Extensions.EnemyAI
             MainManager.PlaySound("BagRustle");
             Transform[] mainParts = GetMainParts(entity);
 
-            int time = UnityEngine.Random.Range(5, hardmode ? 9 :8);
+            int time = UnityEngine.Random.Range(5, hardmode ? 9 : 8);
             SpriteRenderer cherryBomb = MainManager.NewSpriteObject(mainParts[0].transform.position, battle.battlemap.transform, MainManager_Ext.assetBundle.LoadAsset<Sprite>("JesterCherryBomb"));
             cherryBomb.transform.localScale = Vector3.one;
             cherryBomb.transform.localPosition += new Vector3(0.3f, 0.5f);
@@ -905,8 +898,8 @@ namespace BFPlus.Extensions.EnemyAI
             Vector3 startPos = cherryBomb.transform.position;
             do
             {
-                cherryBomb.transform.position = MainManager.BeizierCurve3(startPos, startPos + Vector3.up*20, 10, a / b);
-                for(int i = 0; i < sounds.Length; i++)
+                cherryBomb.transform.position = MainManager.BeizierCurve3(startPos, startPos + Vector3.up * 20, 10, a / b);
+                for (int i = 0; i < sounds.Length; i++)
                 {
                     if (sounds[i] != null)
                     {
@@ -928,7 +921,7 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 cherryBomb.transform.position = Vector3.Lerp(startPos, new Vector3(startPos.x, 10, startPos.z), a / b);
 
-                for(int i=0; i<sounds.Length; i++)
+                for (int i = 0; i < sounds.Length; i++)
                 {
                     if (sounds[i] != null)
                     {
@@ -949,8 +942,8 @@ namespace BFPlus.Extensions.EnemyAI
             UnityEngine.Object.Destroy(cherryBomb.gameObject);
 
             MainManager.BattleCondition[] conditions = { MainManager.BattleCondition.Taunted, MainManager.BattleCondition.AttackDown, MainManager.BattleCondition.DefenseDown, MainManager.BattleCondition.Inked, MainManager.BattleCondition.Poison, MainManager.BattleCondition.Sticky };
-            
-            for(int i = 0; i < MainManager.instance.playerdata.Length; i++)
+
+            for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
                 if (MainManager.instance.playerdata[i].hp > 0 && MainManager.instance.playerdata[i].eatenby == null)
                 {
@@ -1003,7 +996,7 @@ namespace BFPlus.Extensions.EnemyAI
                 yield return EventControl.sec;
                 baseTime--;
                 timer.text = baseTime.ToString();
-                if(baseTime != 0 && beepSound != null)
+                if (baseTime != 0 && beepSound != null)
                 {
                     beepSound.Play();
                 }
@@ -1046,7 +1039,7 @@ namespace BFPlus.Extensions.EnemyAI
         {
             if (target != Vector3.zero)
             {
-                if(Vector3.Distance(mainPart.position, target) < 0.01f)
+                if (Vector3.Distance(mainPart.position, target) < 0.01f)
                 {
                     time = 0;
                     mainPart.position = target;

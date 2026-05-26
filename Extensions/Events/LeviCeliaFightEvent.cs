@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Collections;
 
 namespace BFPlus.Extensions.Events
 {
@@ -17,9 +11,17 @@ namespace BFPlus.Extensions.Events
                 yield return null;
 
             EntityControl[] party = MainManager.GetPartyEntities(true);
-            EntityControl[] teamCelia = MainManager.GetEntities(new int[] { 11,12});
+            EntityControl[] teamCelia = MainManager.GetEntities(new int[] { 11, 12 });
+            var anim = teamCelia[0].GetComponent<AnimNPC>();
+            float a = 0;
+            float b = 180;
+            do
+            {
+                a += MainManager.TieFramerate(1f);
+                yield return null;
+            } while (anim.doingAnim && a < b);
 
-            yield return new WaitUntil(() => !teamCelia[0].GetComponent<TrainingNPC>().doingAnim);
+            teamCelia[0].StopAllCoroutines();
 
             teamCelia[0].animstate = (int)MainManager.Animations.Idle;
 
@@ -54,7 +56,7 @@ namespace BFPlus.Extensions.Events
                 MainManager.instance.StartCoroutine(BattleControl.StartBattle(new int[]
                 {
                 (int)NewEnemies.Levi, (int)NewEnemies.Celia
-                }, -1, -1, NewMusic.PlusBosses.ToString(), null, false));
+                }, -1, -1, NewMusic.NewMiniboss.ToString(), null, false));
                 yield return EventControl.sec;
 
                 while (MainManager.battle != null)
@@ -63,11 +65,11 @@ namespace BFPlus.Extensions.Events
                 bool lost = !MainManager.battleresult;
                 foreach (var e in party)
                     e.animstate = lost ? (int)MainManager.Animations.WeakBattleIdle : (int)MainManager.Animations.BattleIdle;
-                
+
                 foreach (var e in teamCelia)
                     e.animstate = !lost ? (int)MainManager.Animations.WeakBattleIdle : (int)MainManager.Animations.Idle;
 
-                if(!lost && MainManager.instance.flagvar[(int)NewFlagVar.TeamCelia_Reward] == 0)
+                if (!lost && MainManager.instance.flagvar[(int)NewFlagVar.TeamCelia_Reward] == 0)
                     MainManager.AddPrizeMedal((int)NewPrizeFlag.TeamCelia);
 
                 MainManager.ResetCamera(true);

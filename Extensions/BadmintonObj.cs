@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions
@@ -24,16 +19,16 @@ namespace BFPlus.Extensions
 
             sr = gameObject.AddComponent<SpriteRenderer>();
             sr.sprite = MainManager.itemsprites[0, (int)NewItem.InkBomb];
-            transform.position = entities[0].transform.position + offsets[0];         
+            transform.position = entities[0].transform.position + offsets[0];
         }
 
         void Update()
         {
-            if(time < duration)
+            if (time < duration)
             {
                 int target = fromTarget == 0 ? 1 : 0;
                 time += MainManager.TieFramerate(1f);
-                transform.position = MainManager.BeizierCurve3(entities[fromTarget].transform.position+ offsets[fromTarget], entities[target].transform.position+ offsets[target], 5, time / duration);
+                transform.position = MainManager.BeizierCurve3(entities[fromTarget].transform.position + offsets[fromTarget], entities[target].transform.position + offsets[target], 5, time / duration);
                 transform.localEulerAngles += new Vector3(0, 0, 20);
             }
             else
@@ -47,11 +42,11 @@ namespace BFPlus.Extensions
         IEnumerator DoAnim(EntityControl entity)
         {
             entity.animstate = 102;
-            entity.PlaySound("Death3",0.5f);
+            entity.PlaySound("Death3", 0.5f);
             yield return EventControl.tenthsec;
             entity.animstate = 100;
         }
 
-        
+
     }
 }

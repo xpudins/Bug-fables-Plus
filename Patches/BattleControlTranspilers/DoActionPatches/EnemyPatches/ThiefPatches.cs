@@ -1,14 +1,8 @@
-﻿using BFPlus.Patches.DoActionPatches.EnemyPatches;
+﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
-using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Cecil.Cil;
-using BFPlus.Extensions;
+using MonoMod.Cil;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.EnemyPatches
 {
@@ -19,13 +13,13 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.EnemyPatches
             priority = 69134;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(321));
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "barfill")));
             cursor.GotoPrev(i => i.MatchLdloca(out _));
             cursor.RemoveRange(3);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "GetStickyProperty"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Utils), "GetDizzyProperty"));
         }
     }
 }

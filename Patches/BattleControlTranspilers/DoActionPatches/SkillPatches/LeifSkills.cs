@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
 {
@@ -21,18 +16,27 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             priority = 49495;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("crosshair"));
             cursor.GotoNext(i => i.MatchLdcI4(4));
-            cursor.Emit(OpCodes.Ldc_I4, 3);
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchLeifIceRainHits), "GetIceRainHits"));
             cursor.Remove();
+        }
+
+        static int GetIceRainHits()
+        {
+            if (MainManager_Ext.Instance.GetBalanceChangeState((int)NewMenuText.IceRain))
+            {
+                return 3;
+            }
+            return 4;
         }
     }
 
 
     /// <summary>
-    /// We make ice rain cost 2 turns
+    /// we make ice rain cost 2 turns
     /// </summary>
     public class PatchLeifResetIceRainHits : PatchBaseDoAction
     {
@@ -41,18 +45,21 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             priority = 49796;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(102), i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(102), i => i.MatchStfld(out _));
             cursor.GotoNext(i => i.MatchLdcI4(65));
             cursor.GotoNext(i => i.MatchLdnull(), i => i.MatchStfld(out _));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchLeifResetIceRainHits), "IncreaseIceRainCantMove"));
-        
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchLeifResetIceRainHits), "ResetIceRainHits"));
+
         }
 
-        static void IncreaseIceRainCantMove()
+        static void ResetIceRainHits()
         {
-            MainManager.instance.playerdata[MainManager.battle.currentturn].cantmove++;
+            if (MainManager_Ext.Instance.GetBalanceChangeState((int)NewMenuText.IceRain))
+            {
+                MainManager.instance.playerdata[MainManager.battle.currentturn].cantmove++;
+            }
         }
     }
 }

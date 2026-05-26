@@ -1,12 +1,7 @@
-﻿using HarmonyLib;
-using Steamworks;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
-using static BattleControl;
 
 namespace BFPlus.Extensions.EnemyAI
 {
@@ -119,7 +114,7 @@ namespace BFPlus.Extensions.EnemyAI
                 entities[1].animstate = 111;
                 MainManager.PlayParticle("mothicenormal", battle.CenterPos(MainManager.instance.playerdata[playerTargetIDRef], true) - Vector3.up);
                 MainManager.PlaySound("IceMothHit");
-                battle.DoDamage(battle.enemydata[1], ref MainManager.instance.playerdata[playerTargetIDRef], Mathf.Clamp(atk[1] - (it - times), 0, 99), BattleControl.AttackProperty.Freeze,null, battle.commandsuccess);
+                battle.DoDamage(battle.enemydata[1], ref MainManager.instance.playerdata[playerTargetIDRef], Mathf.Clamp(atk[1] - (it - times), 0, 99), BattleControl.AttackProperty.Freeze, null, battle.commandsuccess);
 
                 battle.enemydata[2].charge = 0;
                 yield return new WaitForSeconds(Mathf.Clamp01(0.5f - battle.combo * 0.025f));
@@ -358,7 +353,7 @@ namespace BFPlus.Extensions.EnemyAI
                         entityHit[i] = true;
                         if (MainManager.instance.playerdata[i].hp > 0)
                         {
-                            battle.DoDamage(null, ref MainManager.instance.playerdata[i], Mathf.Clamp(Mathf.CeilToInt((float)partydam * a), 2, 99), BattleControl.AttackProperty.Freeze,null, battle.commandsuccess);
+                            battle.DoDamage(null, ref MainManager.instance.playerdata[i], Mathf.Clamp(Mathf.CeilToInt((float)partydam * a), 2, 99), BattleControl.AttackProperty.Freeze, null, battle.commandsuccess);
                         }
                     }
                 }
@@ -379,7 +374,7 @@ namespace BFPlus.Extensions.EnemyAI
             MainManager.ShakeScreen(0.3f, 1.25f, dontreset: true);
             MainManager.PlayParticle("mothicenormal", entities[0].battleentity.transform.position + Vector3.up).transform.localScale = Vector3.one * 4f * a;
             battle.PartyDamage(actionid, Mathf.FloorToInt(Mathf.Clamp((float)partydam / 2f * a, 1f, partydam)), BattleControl.AttackProperty.Freeze, battle.commandsuccess);
-            
+
             startTime = 0f;
             endTime = 60f;
             entities[0].battleentity.spin = new Vector3(0f, 30f);
@@ -464,7 +459,7 @@ namespace BFPlus.Extensions.EnemyAI
             battle.StartCoroutine(MainManager.ArcMovement(iceDrill, iceDrill.transform.position + new Vector3(2f, -5f), 3f, 40f));
             UnityEngine.Object.Destroy(iceDrill, 2f);
             MainManager.PlaySound("Dig");
-   
+
             yield return battle.KabbuDig(entities[0]);
 
             yield return EventControl.halfsec;
@@ -507,7 +502,7 @@ namespace BFPlus.Extensions.EnemyAI
                     playerTargetEntityRef.onground = false;
                 }
                 MainManager.PlaySound("ShieldHit", -1, 1f, 0.65f);
-                battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage, BattleControl.AttackProperty.Pierce,null, battle.commandsuccess);
+                battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage, BattleControl.AttackProperty.Pierce, null, battle.commandsuccess);
                 entities[1].animstate = 104;
                 yield return EventControl.halfsec;
                 yield return EventControl.tenthsec;
@@ -536,8 +531,8 @@ namespace BFPlus.Extensions.EnemyAI
                 playerTargetEntityRef.onground = false;
             }
 
-            battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage + 2, BattleControl.AttackProperty.Pierce,null, battle.commandsuccess);
-            
+            battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage + 2, BattleControl.AttackProperty.Pierce, null, battle.commandsuccess);
+
             battle.StartCoroutine(MainManager.ArcMovement(entities[0].gameObject, startEntitiesPos[0] + Vector3.up, 10f, 60f));
             yield return EventControl.sec;
 
@@ -658,7 +653,7 @@ namespace BFPlus.Extensions.EnemyAI
             MainManager.ShakeScreen(0.2f, 0.5f, dontreset: true);
             MainManager.PlaySound("HugeHit");
 
-            battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage, BattleControl.AttackProperty.Pierce, null,battle.commandsuccess);
+            battle.DoDamage(null, ref MainManager.instance.playerdata[playerTargetIDRef], damage, BattleControl.AttackProperty.Pierce, null, battle.commandsuccess);
             do
             {
                 entities[1].transform.position += new Vector3(0f, 0f - MainManager.TieFramerate(0.25f));

@@ -1,14 +1,8 @@
 ﻿using BFPlus.Extensions;
-using BFPlus.Patches.BattleControlTranspilers.GetChoiceInput;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -17,10 +11,10 @@ namespace BFPlus.Patches.BattleControlTranspilers
     {
         public PatchCheckCanUseSkill()
         {
-            priority = 50;
+            priority = 113;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(18));
             Utils.RemoveUntilInst(cursor, i => i.MatchBle(out _));
@@ -37,12 +31,31 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 165;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(19));
             Utils.RemoveUntilInst(cursor, i => i.MatchBle(out _));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CantUseSkillSticky"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CantUseItemSticky"));
             cursor.Next.OpCode = OpCodes.Brtrue;
+        }
+
+    }
+
+    public class PatchCheckCanUseAttack : PatchBaseBattleControlSetMaxOptions
+    {
+        public PatchCheckCanUseAttack()
+        {
+            priority = 207;
+        }
+
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
+        {
+            ILLabel label = null;
+
+            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(MainManager.BattleData), "haspassed")), i => i.MatchBrtrue(out label));
+
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CantUseRelayDizzy"));
+            cursor.Emit(OpCodes.Brtrue, label);
         }
 
     }

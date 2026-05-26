@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions
 {
@@ -12,7 +7,7 @@ namespace BFPlus.Extensions
         bool itemspitout;
         int flag = 57;
         Vector3 itempos = new Vector3(4.5f, 2f, -9.4f);
-        Vector3 bouncepos = new Vector3(10f,10f,0f);
+        Vector3 bouncepos = new Vector3(10f, 10f, 0f);
 
 
         void Start()

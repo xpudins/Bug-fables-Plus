@@ -3,13 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BFPlus.Patches.ShowItemListPatches
 {
@@ -19,7 +12,7 @@ namespace BFPlus.Patches.ShowItemListPatches
         {
             priority = 72090;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
                 i => i.MatchLdcI4(77),

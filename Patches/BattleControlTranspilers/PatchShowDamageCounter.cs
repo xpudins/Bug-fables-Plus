@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -19,9 +14,9 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 0;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "counterspriteindex")), i=>i.MatchLdarg1());
+            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "counterspriteindex")), i => i.MatchLdarg1());
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchShowDamageCounter), "GetCounterSprite"));
             cursor.Remove();
         }
@@ -29,7 +24,7 @@ namespace BFPlus.Patches.BattleControlTranspilers
 
         static int GetCounterSprite(int[] counterSprite, int type)
         {
-            if(type == 3)
+            if (type == 3)
             {
                 return (int)NewGui.TPLossFront;
             }

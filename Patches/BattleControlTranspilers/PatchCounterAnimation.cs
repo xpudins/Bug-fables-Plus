@@ -3,12 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.BattleControlTranspilers
@@ -20,20 +14,20 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 26542;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchBleUn(out _));
             cursor.Next.OpCode = OpCodes.Br;
             cursor.GotoPrev(i => i.MatchLdloc2());
             cursor.RemoveRange(4);
- 
+
             cursor.GotoNext(i => i.MatchLdcR4(20f));
-            cursor.GotoNext(MoveType.After,i => i.MatchLdnull(),i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdnull(), i => i.MatchStfld(out _));
 
             var sRef = cursor.Prev.Operand;
-            var typeRef = cursor.Instrs[cursor.Index+1].Operand;
+            var typeRef = cursor.Instrs[cursor.Index + 1].Operand;
 
-            int cursorIndex=  cursor.Index;
+            int cursorIndex = cursor.Index;
 
             cursor.GotoNext(i => i.MatchLdcI4(102));
 

@@ -3,12 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using static MainManager;
 
 namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
@@ -20,9 +15,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             priority = 1463;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, j => j.MatchLdfld(AccessTools.Field(typeof(MainManager), "areaid")), j=> j.MatchStloc(out _));
+            cursor.GotoNext(MoveType.After, j => j.MatchLdfld(AccessTools.Field(typeof(MainManager), "areaid")), j => j.MatchStloc(out _));
 
             int cursorIndex = cursor.Index;
             ILLabel label = null;
@@ -34,104 +29,139 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 
         static bool CheckNewAreaMusic()
         {
-            string newMusic = "";
+            string fightRemix = "";
+            string tigsRemix = "";
+
             switch (MainManager.instance.areaid)
             {
                 case (int)MainManager.Areas.RubberPrison:
-                    newMusic = NewMusic.BattleRubberPrison.ToString();
+                    fightRemix = NewMusic.BattleRubberPrison.ToString();
+                    tigsRemix = NewMusic.TigsPrison.ToString();
                     break;
 
                 case (int)MainManager.Areas.GoldenHills:
                 case (int)MainManager.Areas.GoldenWay:
                 case (int)MainManager.Areas.GoldenSettlement:
-                    newMusic = NewMusic.BattleGoldenHills.ToString();
+                    tigsRemix = NewMusic.TigsHills.ToString();
+                    fightRemix = NewMusic.BattleGoldenHills.ToString();
                     break;
 
                 case (int)MainManager.Areas.Desert:
                 case (int)MainManager.Areas.DefiantRoot:
                 case (int)MainManager.Areas.BanditHideout:
-                    newMusic = NewMusic.BattleLostSands.ToString();
+                    fightRemix = NewMusic.BattleLostSands.ToString();
+                    tigsRemix = NewMusic.TigsDesert.ToString();
                     break;
 
-                case (int)MainManager.Areas.HoneyFactory:               
-                    newMusic = NewMusic.BattleFactory.ToString();
+                case (int)MainManager.Areas.HoneyFactory:
+                    fightRemix = NewMusic.BattleFactory.ToString();
+                    tigsRemix = NewMusic.TigsFactory.ToString();
                     break;
 
                 case (int)MainManager.Areas.BugariaOutskirts:
-                    newMusic = NewMusic.BattleOutskirts.ToString();
+                    fightRemix = NewMusic.BattleOutskirts.ToString();
+                    tigsRemix = NewMusic.TigsOutskirts.ToString();
                     break;
 
                 case (int)MainManager.Areas.MetalLake:
-                    newMusic = NewMusic.BattleMetalLake.ToString();
+                    fightRemix = NewMusic.BattleMetalLake.ToString();
+                    tigsRemix = NewMusic.TigsLake.ToString();
                     break;
 
                 case (int)MainManager.Areas.BarrenLands:
-                    newMusic = NewMusic.BattleForsakenLands.ToString();
+                    fightRemix = NewMusic.BattleForsakenLands.ToString();
+                    tigsRemix = NewMusic.TigsForsaken.ToString();
                     break;
 
                 case (int)MainManager.Areas.Snakemouth:
                 case (int)MainManager.Areas.ChomperCaves:
                 case (int)MainManager.Areas.StreamMountain:
-                    newMusic = NewMusic.BattleCaves.ToString();
+                    fightRemix = NewMusic.BattleCaves.ToString();
+                    tigsRemix = NewMusic.TigsCave.ToString();
                     break;
 
                 case (int)MainManager.Areas.SandCastle:
-                    newMusic = NewMusic.BattleSandCastle.ToString();
+                    fightRemix = NewMusic.BattleSandCastle.ToString();
+                    tigsRemix = NewMusic.TigsCastle.ToString();
                     break;
 
                 case (int)MainManager.Areas.FarGrasslands:
-                    newMusic = NewMusic.BattleFarGrasslands.ToString();
+                    fightRemix = NewMusic.BattleFarGrasslands.ToString();
+                    tigsRemix = NewMusic.TigsGrasslands.ToString();
                     break;
 
                 case (int)MainManager.Areas.WildGrasslands:
-                    newMusic = NewMusic.BattleSwamplands.ToString();
+                    fightRemix = NewMusic.BattleSwamplands.ToString();
+                    tigsRemix = NewMusic.TigsSwamp.ToString();
                     break;
 
                 case (int)MainManager.Areas.UpperSnakemouth:
-                    newMusic = NewMusic.BattleSnakemouthLab.ToString();
+                    fightRemix = NewMusic.BattleSnakemouthLab.ToString();
+                    tigsRemix = NewMusic.TigsLab.ToString();
                     break;
             }
 
 
-            int mapid = MainManager_Ext.GetNewAreaId((int)MainManager.map.mapid);
-            if (mapid > -1)
+            int newAreaId = MainManager_Ext.GetNewAreaId((int)MainManager.map.mapid);
+            if (newAreaId > -1)
             {
-                switch (mapid)
+                switch (newAreaId)
                 {
                     //powerPlant
                     case 1:
-                        newMusic = NewMusic.BattleFactory.ToString();
+                        fightRemix = NewMusic.BattleFactory.ToString();
+                        tigsRemix = NewMusic.TigsFactory.ToString();
                         break;
 
                     // irontower
                     case 2:
-                        newMusic = NewMusic.BattleForsakenLands.ToString();
+                        fightRemix = NewMusic.BattleForsakenLands.ToString();
+                        tigsRemix = NewMusic.TigsForsaken.ToString();
                         break;
 
                     //leafbug village
                     case 6:
-                        newMusic = NewMusic.BattleSwamplands.ToString();
+                        fightRemix = NewMusic.BattleSwamplands.ToString();
+                        tigsRemix = NewMusic.TigsSwamp.ToString();
                         break;
 
                     // playroom
                     case 7:
-                        newMusic = NewMusic.BattleRubberPrison.ToString();
+                        fightRemix = NewMusic.BattleRubberPrison.ToString();
+                        tigsRemix = NewMusic.TigsPrison.ToString();
                         break;
                 }
             }
 
-            if(MainManager.map.mapid == Maps.GoldenPathTunnel || MainManager.map.mapid == Maps.GoldenPathTunnel2)
+            if (MainManager.map.mapid == Maps.GoldenPathTunnel || MainManager.map.mapid == Maps.GoldenPathTunnel2)
             {
-                newMusic = NewMusic.BattleCaves.ToString();
+                fightRemix = NewMusic.BattleCaves.ToString();
+                tigsRemix = NewMusic.TigsCave.ToString();
             }
 
-            if (newMusic != "" && MainManager_Ext.newBattleThemes)
+            if (fightRemix != "" && MainManager_Ext.musicOption != MusicSetting.Off)
             {
-                MainManager.ChangeMusic(newMusic, 1f);
+                if(MainManager_Ext.musicOption == MusicSetting.Mix)
+                {
+                    Areas[] tigsAreas = { 
+                        Areas.BarrenLands, Areas.FarGrasslands, Areas.WildGrasslands, 
+                        Areas.RubberPrison, Areas.MetalLake, Areas.StreamMountain    
+                    };
+
+                    if(MainManager.instance.areaid == (int)MainManager.Areas.UpperSnakemouth || newAreaId == 1 || newAreaId == 5 || newAreaId == 7
+                        || (MainManager.instance.flags[348] && tigsAreas.Contains((Areas)instance.areaid)))
+                        MainManager.ChangeMusic(tigsRemix, 1f);
+                    else
+                        MainManager.ChangeMusic(fightRemix, 1f);
+                }
+                else if(MainManager_Ext.musicOption == MusicSetting.OnlyFight)
+                    MainManager.ChangeMusic(fightRemix, 1f);
+                else
+                    MainManager.ChangeMusic(tigsRemix, 1f);
                 return true;
             }
 
-
+            //i forgor why i put that here, might be dumb or a prophet who knows
             if (MainManager.instance.areaid == (int)MainManager.Areas.GiantLair)
             {
                 MainManager.ChangeMusic("Battle6", 1f);

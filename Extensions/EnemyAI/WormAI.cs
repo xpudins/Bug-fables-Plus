@@ -1,9 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
@@ -36,7 +32,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             yield return DoDig(entity);
             float a = 0f;
-            float b = 100f;
+            float b = 90f;
             Vector3 pos = entity.transform.position;
             Vector3 target = isSwarm ? instance.partymiddle + new Vector3(-0.25f, 0f, 0f) : instance.playertargetentity.transform.position + new Vector3(0f, 0f, -0.25f);
             MainManager.PlaySound("Digging", 9, 1.1f, 0.75f, true);
@@ -47,9 +43,9 @@ namespace BFPlus.Extensions.EnemyAI
                 yield return null;
             }
             while (a < b);
-            yield return EventControl.quartersec;
-
             MainManager.StopSound(9);
+            MainManager.PlaySound("DigPop3", isSwarm ? 1f : 1.4f, 1);
+            yield return new WaitForSeconds(isSwarm ? 0.5f : 0.4f);
 
             yield return WormAttacks(entity, worms, actionid, instance);
 
@@ -88,19 +84,33 @@ namespace BFPlus.Extensions.EnemyAI
                     MainManager.PlaySound("DigPop2");
 
                     if (isSwarm)
+                    {
                         instance.PartyDamage(actionid, damage, null, instance.commandsuccess);
+                    }
                     else
+                    {
                         instance.DoDamage(actionid, playerTargetIDRef, damage, null, instance.commandsuccess);
+                    }
+
+                    instance.blockcooldown = instance.caninputcooldown = Mathf.Min(14, instance.caninputcooldown);
 
                     yield return EventControl.quartersec;
                     worm.digging = true;
                     if (!isSwarm)
+                    {
                         yield return DoDig(entity);
+                    }
+                    else
+                    {
+                        yield return DoFakeDig();
+                    }
 
                     if (MainManager.GetAlivePlayerAmmount() == 0)
+                    {
                         yield break;
+                    }
 
-                    float waitTime = isSwarm ? 0.45f : 0.25f;
+                    float waitTime = 0.25f;
                     waitTime -= hardmode ? 0.1f : 0f;
                     yield return new WaitForSeconds(waitTime);
                     hitCount++;
@@ -116,11 +126,21 @@ namespace BFPlus.Extensions.EnemyAI
             }
         }
 
+        IEnumerator DoFakeDig()
+        {
+            float timer = 0;
+            while (timer < 29f)
+            {
+                timer += MainManager.framestep * 2f;
+                yield return null;
+            }
+        }
         IEnumerator DoDig(EntityControl entity)
         {
             entity.digging = true;
             while (entity.digtime < 29f)
             {
+                entity.digtime += MainManager.framestep;
                 yield return null;
             }
         }

@@ -1,6 +1,5 @@
-﻿using BFPlus.Extensions;
+using BFPlus.Extensions;
 using HarmonyLib;
-using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,15 +7,25 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static MainManager;
+using static BattleControl;
+using BFPlus.Extensions.EnemyAI;
+using BFPlus.Extensions.BattleStuff;
+using BFPlus.Extensions.BattleStuff.StatusStuff;
 
 namespace BFPlus.Patches
 {
     [HarmonyPatch(typeof(BattleControl), "EndEnemyTurn")]
     public class PatchBattleControlEndEnemyTurn
     {
-        static void Prefix(BattleControl __instance)
+        static void Prefix(BattleControl __instance, int id)
         {
             BattleControl_Ext.enemyUsedItem = false;
+
+            //If we are HUGE, action cost one more turn
+            if (!__instance.enemydata[id].hitaction)
+            {
+                BattleControl_Ext.Instance.CheckHugeAction(ref __instance.enemydata[id]);
+            }
         }
     }
 
@@ -46,8 +55,17 @@ namespace BFPlus.Patches
 
             entityExt.slugskinActive = false;
             entityExt.vitiation = false;
-            entityExt.vitiationDmg = 0;
             entityExt.healedThisTurn = 0;
+            entityExt.inkBubbleEnabled = false;
+            entityExt.isDizzy = false;
+            entityExt.ResetDizzyAngle();
+
+            if (target.hp <= 0)
+            {
+                if (entityExt.scaleChanged)
+                    BattleControl_Ext.Instance.ResetTinyHugeEffect(target.battleentity, entityExt);
+                entityExt.tinyMovesAdded = false;
+            }
 
             if (target.battleentity.playerentity && conditionAmount > target.condition.Count)
             {
@@ -66,7 +84,7 @@ namespace BFPlus.Patches
     {
         static bool Prefix(BattleControl __instance, int id)
         {
-            if ((id == 50 || id == 51 || id == 52) && (MainManager.listtype < 0 && __instance.currentaction == BattleControl.Pick.SkillList && MainManager.BadgeIsEquipped((int)Medal.HoloSkill, __instance.currentturn)))
+            if ((id == 50 || id == 51 || id == 52) && (MainManager.listtype < 0 && __instance.currentaction == BattleControl.Pick.SkillList && MainManager.BadgeIsEquipped((int)Medal.HoloSkill, MainManager.instance.playerdata[__instance.currentturn].trueid)))
             {
                 __instance.StartCoroutine(BattleControl_Ext.Instance.GetSkillList(id));
                 return false;
@@ -80,9 +98,15 @@ namespace BFPlus.Patches
     {
         static void Postfix(int thisid, ref bool __result)
         {
-            if (thisid == (int)NewEnemies.MarsSprout)
+            switch (thisid)
             {
-                __result = MainManager.instance.librarystuff[1, (int)NewEnemies.Mars];
+                case (int)NewEnemies.MarsSprout:
+                    __result = MainManager.instance.librarystuff[1, (int)NewEnemies.Mars];
+                    break;
+                case (int)NewEnemies.RedSeedling:
+                case (int)NewEnemies.BlueSeedling:
+                    __result = true;
+                    break;
             }
         }
     }
@@ -93,6 +117,9 @@ namespace BFPlus.Patches
         static bool Prefix(int id, int hp, bool showcounter)
         {
             BattleControl_Ext.Instance.InVengeance = false;
+            var ext = Entity_Ext.GetEntity_Ext(instance.playerdata[id].battleentity); 
+            ext.diedFromDizzy = null;
+            ext.ResetCarousel();
             return true;
         }
     }
@@ -105,7 +132,7 @@ namespace BFPlus.Patches
             __instance.StartCoroutine(BattleControl_Ext.Instance.ResetHoloID(__instance));
             int currentTurn = __instance.currentturn;
 
-            for(int i = 0; i < MainManager.instance.playerdata.Length; i++)
+            for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
                 if (MainManager.instance.playerdata[i].hp > 0)
                 {
@@ -132,18 +159,15 @@ namespace BFPlus.Patches
                 }
             }
             BattleControl_Ext.Instance.gourmetItemUse = -1;
+            BattleControl_Ext.Instance.stylishCountThisAction = 0;
+
+            //If we are HUGE, every action cost one more turn
+            BattleControl_Ext.Instance.CheckHugeAction(ref MainManager.instance.playerdata[currentTurn]);
+
             return true;
         }
     }
 
-    [HarmonyPatch(typeof(BattleControl), "UpdateEntities")]
-    public class PatchBattleControlUpdateEntities
-    {
-        static void Postfix(BattleControl __instance)
-        {
-            //BattleControl_Ext.Instance.CheckEntitiesSprites();
-        }
-    }
 
     [HarmonyPatch(typeof(BattleControl), "PlayerTurn")]
     public class PatchBattleControlPlayerTurn
@@ -154,7 +178,7 @@ namespace BFPlus.Patches
             {
                 for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
                     MainManager.instance.playerdata[i].cantmove = 1;
-   
+
                 __instance.chompyattacked = true;
                 __instance.aiattacked = true;
                 __instance.enemy = true;
@@ -198,6 +222,13 @@ namespace BFPlus.Patches
 
             BattleControl_Ext.Instance.ResetStuff();
         }
+
+
+        //attempt at fixing some music fuckery
+        static void Postfix(BattleControl __instance, string music)
+        {
+            __instance.sdata.music = music;
+        }
     }
 
     [HarmonyPatch(typeof(BattleControl), "AddDelayedCondition")]
@@ -205,14 +236,13 @@ namespace BFPlus.Patches
     {
         static bool Prefix(BattleControl __instance, int enid)
         {
-            if(MainManager.HasCondition(MainManager.BattleCondition.Sturdy, MainManager.battle.enemydata[enid]) > -1)
+            if (MainManager.HasCondition(MainManager.BattleCondition.Sturdy, MainManager.battle.enemydata[enid]) > -1)
             {
                 return false;
             }
             return true;
         }
     }
-
 
     //randomize commands but data field isnt right for each command
     [HarmonyPatch(typeof(BattleControl), "DoCommand")]
@@ -235,8 +265,6 @@ namespace BFPlus.Patches
                 }
             }
         }
-
-
         static float[] GetRandomCommandData(object commandType, ref float timer)
         {
             float[] data = new float[1];
@@ -342,6 +370,12 @@ namespace BFPlus.Patches
 
         static void Prefix(BattleControl __instance, ref object commandtype, ref float[] data, ref float timer)
         {
+            if (__instance.enemy)
+            {
+                BattleControl_Ext.mashSuperblockThreshold = timer * 0.3f;
+                BattleControl_Ext.mashSuperblockTimer = timer;
+            }
+
             if (MainManager.instance.flags[(int)NewCode.COMMAND])
             {
                 int commandsAmount = Enum.GetNames(typeof(BattleControl.ActionCommands)).Length;
@@ -375,6 +409,7 @@ namespace BFPlus.Patches
                 __result += BattleControl_Ext.Instance.CheckKineticEnergy(attacker);
                 __result += BattleControl_Ext.Instance.CheckTeamGleam();
                 __result += BattleControl_Ext.Instance.CheckOddWarrior(__instance, attacker);
+                __result += BattleControl_Ext.Instance.GetTinyHugeStat(attacker);
             }
         }
     }
@@ -382,56 +417,20 @@ namespace BFPlus.Patches
     [HarmonyPatch(typeof(BattleControl), "DefaultDamageCalc")]
     public class PatchBattleControlDefaultDamageCalc
     {
-        static int damageTemp = 0;
-
-        static void Prefix(BattleControl __instance, MainManager.BattleData target, ref int basevalue, bool pierce, bool blocked, int def)
+        static bool Prefix(BattleControl __instance, BattleData target, ref int basevalue, bool pierce, bool blocked, int def)
         {
-            damageTemp = basevalue;
+            return false;
         }
+    }
 
-        static void Postfix(BattleControl __instance, MainManager.BattleData target, ref int basevalue, bool pierce, bool blocked, int def)
+    [HarmonyPatch(typeof(BattleControl), "AddDelayedProjectile")]
+    public class PatchBattleControlAddDelayedProjectile
+    {
+        static void Postfix(BattleControl __instance)
         {
-
-            bool isPlayer = target.battleentity.CompareTag("Player");
-
-            if (isPlayer)
-            {
-
-                //shock trooper halves damage
-                if(MainManager.HasCondition(MainManager.BattleCondition.Numb, target) > -1 && MainManager.BadgeIsEquipped(34, target.trueid))
-                {
-                    basevalue /= 2;
-                }
-
-                if (!pierce && MainManager.HasCondition(MainManager.BattleCondition.Sleep, target) > -1 && MainManager.BadgeIsEquipped((int)Medal.SweetDreams))
-                {
-                    int defSweetDreams = MainManager.BadgeHowManyEquipped((int)Medal.SweetDreams, target.trueid) * 1;
-                    basevalue += defSweetDreams;
-                    BattleControl_Ext.Instance.realDamage += defSweetDreams;
-                }
-
-                if (MainManager.BadgeIsEquipped((int)Medal.NoPainNoGain))
-                {
-                    int defNPNG = MainManager.BadgeHowManyEquipped((int)Medal.NoPainNoGain);
-                    basevalue += defNPNG;
-                    BattleControl_Ext.Instance.realDamage += defNPNG;
-                }
-
-
-                if (def < 0 && !pierce)
-                {
-                    BattleControl_Ext.Instance.realDamage -= def;
-                }
-            }
-            else
-            {
-                if(target.animid == (int)NewEnemies.LeafbugShaman && target.charge > 0)
-                {
-                    MainManager.battle.StartCoroutine(MainManager.battle.ItemSpinAnim(target.battleentity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.ChargeGuard], true));
-                    MainManager.battle.enemydata[target.battleentity.battleid].def = MainManager.battle.enemydata[target.battleentity.battleid].basedef;
-                    MainManager.battle.enemydata[target.battleentity.battleid].charge = 0;
-                }
-            }
+            // lets delayed attacks benefit from attacker-based dmg bonuses
+            if (BattleControl_Ext.Instance.enemyDelProjUsesAtkBonuses)
+                DamagePipelineHandler.BonusATKForDelProjs(ref __instance.delprojs[__instance.delprojs.Length - 1], null, true);
         }
     }
 
@@ -439,28 +438,29 @@ namespace BFPlus.Patches
     [HarmonyPatch(typeof(BattleControl), "AdvanceTurnEntity")]
     public class PatchBattleControlAdvanceTurnEntity
     {
+        public static bool wasDizzy;
+        static void Prefix(BattleControl __instance, ref MainManager.BattleData t)
+        {
+            wasDizzy = HasCondition((BattleCondition)NewCondition.Dizzy, t) > -1;
+        }
         static void Postfix(BattleControl __instance, ref MainManager.BattleData t)
         {
-            BattleControl_Ext.Instance.CheckSweetDreams(t);
+            if (!wasDizzy)
+                wasDizzy = HasCondition((BattleCondition)NewCondition.Dizzy, t) > -1;
+
+            Sleep.CheckSweetDreams(t);
             var entityExt = Entity_Ext.GetEntity_Ext(t.battleentity);
+
+            if (t.cantmove != 0 && t.moves > 1)
+            {
+                t.cantmove -= t.moves - 1;
+            }
+
             if (MainManager.HasCondition(MainManager.BattleCondition.Taunted, t) == -1)
             {
                 entityExt.tauntedBy = -1;
             }
 
-            if (entityExt.vitiation)
-            {
-                entityExt.vitiationDmg = 0;
-                entityExt.vitiation = false;
-                t.battleentity.shieldenabled = false;
-            }
-
-            if(entityExt.isPlayer && t.hp > 0 &&MainManager.BadgeIsEquipped((int)BadgeTypes.LastWind, t.trueid) && entityExt.lastTurnHp > t.hp && entityExt.lastTurnHp - t.hp >= 8)
-            {
-                MainManager.battle.StartCoroutine(battle.ItemSpinAnim(t.battleentity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)BadgeTypes.LastWind], true));
-                t.cantmove--;
-            }
-            entityExt.lastTurnHp = t.hp;
             if (MainManager.HasCondition(MainManager.BattleCondition.Inked, t) == -1 && entityExt.inkDebuffed)
             {
                 if (MainManager.BadgeIsEquipped((int)Medal.PermanentInk) && !entityExt.permanentInkTriggered)
@@ -473,6 +473,8 @@ namespace BFPlus.Patches
                     entityExt.permanentInkTriggered = false;
                 }
             }
+
+            Dizzy.DoAfterEffect(ref t, entityExt, wasDizzy);
         }
     }
 
@@ -486,26 +488,14 @@ namespace BFPlus.Patches
                 MainManager.PlaySound("Numb");
                 MainManager.SetCondition(MainManager.BattleCondition.Numb, ref MainManager.instance.playerdata[target.battleid], 2);
                 MainManager.instance.playerdata[target.battleid].isnumb = true;
+
+                //fix if you roll charge on random start and get numbed
+                if (MainManager.battle.chompyattack == null && !BattleControl_Ext.Instance.inAiAttack && !MainManager.battle.enemy && MainManager.battle.currentturn == -1)
+                {
+                    MainManager.battle.SetLastTurns();
+                }
             }
 
-        }
-    }
-
-    [HarmonyPatch(typeof(BattleControl), "PincerStatus")]
-    public class PatchBattleControlPincerStatus
-    {
-        static bool Prefix(BattleControl __instance, ref MainManager.BattleData data)
-        {
-            if (MainManager.BadgeIsEquipped((int)Medal.FrostNeedles))
-            {
-                __instance.TryCondition(ref data, MainManager.BattleCondition.Freeze, 2);
-            }
-
-            if (MainManager.BadgeIsEquipped((int)Medal.FireNeedles))
-            {
-                __instance.TryCondition(ref data, MainManager.BattleCondition.Fire, 2);
-            }
-            return true;
         }
     }
 
@@ -537,16 +527,6 @@ namespace BFPlus.Patches
     }
 
 
-    [HarmonyPatch(typeof(BattleControl), "SeedlingTackle")]
-    public class PatchBattleControlSeedlingTackle
-    {
-        static void Prefix(BattleControl __instance, ref int damage, int attackerid, BattleControl.AttackProperty? property)
-        {
-            if (__instance.enemydata[attackerid].animid == (int)NewEnemies.Caveling)
-                damage = 3;
-        }
-    }
-
     [HarmonyPatch]
     public class PatchBattleControlDoDamage
     {
@@ -555,24 +535,23 @@ namespace BFPlus.Patches
             IEnumerable methods = typeof(BattleControl).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(method => method.Name == "DoDamage").Cast<MethodBase>();
             return typeof(BattleControl).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(method => method.Name == "DoDamage" && method.GetParameters().Length == 6).FirstOrDefault();
         }
-        static bool isFireOrPoison = false;
         static bool hadPlating = false;
         static int beforeDoDamageHp = -1;
         static bool superBlocked = false;
 
-        static bool Prefix(BattleControl __instance, MethodBase __originalMethod, MainManager.BattleData? attacker, ref MainManager.BattleData target, ref int damageammount, BattleControl.AttackProperty? property, ref BattleControl.DamageOverride[] overrides, bool block)
+        static bool attackerIsInked = false;
+        static bool Prefix(BattleControl __instance, MethodBase __originalMethod, BattleData? attacker, ref BattleData target, ref int damageammount, BattleControl.AttackProperty? property, ref BattleControl.DamageOverride[] overrides, bool block)
         {
-            var damageOverrides = new object[] { 16, 17, 18, 19, 20 };
-            isFireOrPoison = overrides != null && damageOverrides.Length == overrides.Length && !block && property == BattleControl.AttackProperty.NoExceptions;
-            BattleControl_Ext.Instance.targetIsPlayer = target.battleentity.CompareTag("Player");
+            bool isDotDamage = BattleControl_Ext.Instance.IsDotDamage(overrides);
+            bool targetIsPlayer = target.battleentity.CompareTag("Player");
 
-            if (BattleControl_Ext.Instance.targetIsPlayer)
+            if (targetIsPlayer)
             {
                 superBlocked = (__instance.GetSuperBlock(target.battleentity.animid) || __instance.superblockedthisframe > 0f) && !__instance.IsStopped(target);
             }
 
             int twinedfateBug = BattleControl_Ext.GetEquippedMedalBug(Medal.TwinedFate, (i) => MainManager.instance.playerdata[i].hp > 0 && MainManager.instance.playerdata[i].eatenby == null);
-            if (BattleControl_Ext.Instance.targetIsPlayer && !isFireOrPoison && twinedfateBug != -1 && !BattleControl_Ext.Instance.twinedFateUsed && target.trueid != twinedfateBug && target.hp <= 4)
+            if (targetIsPlayer && !isDotDamage && twinedfateBug != -1 && !BattleControl_Ext.Instance.twinedFateUsed && target.trueid != twinedfateBug && target.hp <= 4)
             {
                 BattleControl_Ext.Instance.twinedFateUsed = true;
                 __instance.DoDamage(attacker, ref MainManager.instance.playerdata[twinedfateBug], damageammount, property, overrides, block);
@@ -581,7 +560,7 @@ namespace BFPlus.Patches
 
             var entityExt = Entity_Ext.GetEntity_Ext(target.battleentity);
 
-            if (BattleControl_Ext.Instance.targetIsPlayer && MainManager.BadgeIsEquipped((int)Medal.Revengarang) && attacker != null && !isFireOrPoison && target.trueid == 0 && block && __instance.nonphyscal)
+            if (targetIsPlayer && MainManager.BadgeIsEquipped((int)Medal.Revengarang) && attacker != null && !isDotDamage && target.trueid == 0 && block && __instance.nonphyscal && !battle.IsStopped(target))
             {
                 BattleControl_Ext.Instance.revengarangIsActive = true;
                 BattleControl_Ext.Instance.revengarangDMG = 1 + MainManager.BadgeHowManyEquipped((int)Medal.Revengarang);
@@ -601,7 +580,7 @@ namespace BFPlus.Patches
 
             hadPlating = target.plating;
 
-            if (__instance.chompyattack == null && MainManager.BadgeIsEquipped((int)Medal.Blightfury) && !BattleControl_Ext.Instance.inAiAttack && !isFireOrPoison)
+            if (__instance.chompyattack == null && MainManager.BadgeIsEquipped((int)Medal.Blightfury) && !BattleControl_Ext.Instance.inAiAttack && !isDotDamage)
             {
                 if (attacker == null)
                 {
@@ -619,58 +598,51 @@ namespace BFPlus.Patches
                 }
             }
 
-            if (!isFireOrPoison && !BattleControl_Ext.Instance.firstHitMulti && MainManager.BadgeIsEquipped((int)Medal.IgnitedMite) && MainManager.HasCondition(MainManager.BattleCondition.Fire, target) > -1)
+            if (!isDotDamage &&
+                !BattleControl_Ext.Instance.firstHitMulti &&
+                MainManager.BadgeIsEquipped((int)Medal.IgnitedMite) &&
+                MainManager.HasCondition(MainManager.BattleCondition.Fire, target) > -1)
             {
-                if (__instance.chompyattack == null && (BattleControl_Ext.actionID == 18 || BattleControl_Ext.actionID == 2) && BattleControl_Ext.Instance.entityAttacking != null && BattleControl_Ext.Instance.entityAttacking.CompareTag("Player") && BattleControl_Ext.Instance.entityAttacking.animid == 0)
+                if (__instance.chompyattack == null &&
+                    (BattleControl_Ext.actionID == (int)Skills.BeeRangMultiHit || BattleControl_Ext.actionID == (int)Skills.HurricaneBeemerang) &&
+                    BattleControl_Ext.Instance.entityAttacking != null &&
+                    BattleControl_Ext.Instance.entityAttacking.CompareTag("Player") &&
+                    BattleControl_Ext.Instance.entityAttacking.animid == 0)
                 {
                     BattleControl_Ext.Instance.firstHitMulti = true;
                 }
-                damageammount += 1;
             }
 
-            if (attacker != null && !isFireOrPoison && __instance.chompyattack == null && BattleControl_Ext.Instance.entityAttacking.CompareTag("Player"))
-            {
-                damageammount += BattleControl_Ext.Instance.CheckTeamGleam();
-                damageammount += BattleControl_Ext.Instance.CheckOddWarrior(__instance, attacker.Value);
-                damageammount += BattleControl_Ext.Instance.CheckKineticEnergy(attacker.Value);
-            }
-
-            if (!__instance.enemy && !isFireOrPoison && __instance.chompyattack == null && BattleControl_Ext.Instance.entityAttacking != null)
+            if (!__instance.enemy && !isDotDamage && __instance.chompyattack == null && BattleControl_Ext.Instance.entityAttacking != null)
             {
                 BattleControl_Ext.Instance.attackedThisTurn.Add(BattleControl_Ext.Instance.entityAttacking.battleid);
             }
 
-            bool attackerIsInked = attacker != null && !isFireOrPoison && MainManager.HasCondition(MainManager.BattleCondition.Inked, attacker.Value) > -1;
+            attackerIsInked = attacker != null && !isDotDamage && MainManager.HasCondition(MainManager.BattleCondition.Inked, attacker.Value) > -1;
             //Smearcharge check
-            if (BattleControl_Ext.Instance.targetIsPlayer && attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Smearcharge, target.trueid)) 
+            if (targetIsPlayer && attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Smearcharge, target.trueid))
             {
                 entityExt.smearchargeActive = true;
             }
-
-            if (attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Inkblot))
-            {
-                var attackerExt = Entity_Ext.GetEntity_Ext(attacker.Value.battleentity);
-
-                if (!attackerExt.inkblotActive)
-                {
-                    Vector3 particlePos = target.battleentity.transform.position + Vector3.up + target.battleentity.height * Vector3.up;
-                    BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Inked, ref target, 2, "WaterSplash2", 0.8f, 1, "InkGet", particlePos, Vector3.one);
-                    attackerExt.inkblotActive = true;
-                }
-            }
-
             return true;
         }
 
-        static void Postfix(BattleControl __instance, MethodBase __originalMethod, MainManager.BattleData? attacker, ref MainManager.BattleData target, ref int damageammount, bool block, int __result)
+        static void Postfix(BattleControl __instance, MethodBase __originalMethod, BattleData? attacker, ref BattleData target, ref int damageammount, AttackProperty? property, DamageOverride[] overrides, bool block, int __result)
         {
-            if (!isFireOrPoison && BattleControl_Ext.Instance.targetIsPlayer && target.hp - __result > 0 && MainManager.BadgeIsEquipped((int)Medal.FlashFreeze, target.trueid) && target.hp > 4 && !isFireOrPoison && MainManager.HasCondition(MainManager.BattleCondition.Sturdy, target) == -1)
+            bool isDotDamage = BattleControl_Ext.Instance.IsDotDamage(overrides);
+            bool targetIsPlayer = target.battleentity.CompareTag("Player");
+
+            if (!isDotDamage)
+                Dizzy.CheckRecoilDamage(attacker, BattleControl_Ext.Instance.realDamage);
+
+            if (!isDotDamage && targetIsPlayer && target.hp - __result > 0 && MainManager.BadgeIsEquipped((int)Medal.FlashFreeze, target.trueid) && target.hp > 4 && MainManager.HasCondition(MainManager.BattleCondition.Sturdy, target) == -1)
             {
                 MainManager.RemoveCondition(MainManager.BattleCondition.Freeze, target);
                 MainManager.SetCondition(MainManager.BattleCondition.Freeze, ref target, 3);
                 target.battleentity.inice = true;
                 target.weakness = new List<BattleControl.AttackProperty>(new BattleControl.AttackProperty[] { BattleControl.AttackProperty.HornExtraDamage });
-                target.battleentity.Freeze();
+                if(target.battleentity.icecube == null)
+                    target.battleentity.Freeze();
             }
 
             if (MainManager.BadgeIsEquipped((int)Medal.Perkfectionist) && !__instance.enemy && beforeDoDamageHp - __result == 0 && __result != 0 && beforeDoDamageHp != 0)
@@ -679,104 +651,215 @@ namespace BFPlus.Patches
                 BattleControl_Ext.Instance.perfectKillAmount++;
             }
             var entityExt = Entity_Ext.GetEntity_Ext(target.battleentity);
-            if (attacker != null && entityExt.vitiation && BattleControl_Ext.Instance.realDamage - __result > 0)
+
+            if (targetIsPlayer && attacker != null && !isDotDamage && target.trueid == 2)
             {
-                int enemyID = attacker.Value.battleentity.battleid;
-                int vitiationDamage = BattleControl_Ext.Instance.realDamage - __result;
-
-                if (entityExt.slugskinActive)
-                    vitiationDamage++;
-
-                entityExt.vitiationDmg += vitiationDamage;
-
-                if(entityExt.vitiationDmg > Entity_Ext.MAX_VITIATION_DMG)
-                {
-                    entityExt.vitiation = false;
-                    target.battleentity.shieldenabled = false;
-                }
-                BattleControl_Ext.Instance.DoFakeDamage(enemyID, vitiationDamage);
-                BattleControl_Ext.Instance.realDamage = 0;
+                BattleControl_Ext.Instance.CheckMothflower(superBlocked, block, target);
             }
 
-            if (MainManager.BadgeIsEquipped((int)Medal.Mothflower) && BattleControl_Ext.Instance.targetIsPlayer && block && attacker != null && !isFireOrPoison && target.trueid == 2)
-            {
-                BattleControl_Ext.Instance.mothFlowerHits++;
-
-                if (MainManager.BadgeIsEquipped((int)MainManager.BadgeTypes.SuperBlock, target.trueid) && superBlocked)
-                    BattleControl_Ext.Instance.mothFlowerHits += MainManager.BadgeHowManyEquipped((int)MainManager.BadgeTypes.SuperBlock,target.trueid);
-
-                if (BattleControl_Ext.Instance.mothFlowerHits >= 3)
-                {
-                    BattleControl_Ext.Instance.mothFlowerHits -= 3;
-                    int enemyID = attacker.Value.battleentity.battleid;
-                    int damage = 2;
-
-                    if (entityExt.slugskinActive && superBlocked)
-                        damage++;
-
-                    MainManager.PlayParticle("mothicenormal", __instance.enemydata[enemyID].battleentity.transform.position + __instance.enemydata[enemyID].battleentity.height * Vector3.up, 1.5f);
-                    MainManager.PlaySound("IceMothHit", 1.1f, 1f);
-                    BattleControl_Ext.Instance.DoFakeDamage(enemyID, damage);
-                    if (MainManager.BadgeIsEquipped((int)Medal.Blightfury))
-                    {
-                        BattleControl_Ext.Instance.DoPoison(ref __instance.enemydata[enemyID]);
-                    }
-                }
-            }
-
-            if (BattleControl_Ext.Instance.targetIsPlayer && target.hp > 0)
+            if (targetIsPlayer && target.hp > 0)
             {
                 if (__result > 0)
                     BattleControl_Ext.Instance.PotentialEnergyCheck(ref target);
             }
 
-            if (!isFireOrPoison)
+            if (!isDotDamage)
             {
-                //Nerfs Bubble shield by only allowing to block 1 attack.
-                int zommothId = battle.EnemyInField((int)MainManager.Enemies.Zommoth);
-                if (MainManager.HasCondition(MainManager.BattleCondition.Shield, target) > -1 && !(MainManager.lastevent == 182 && zommothId != -1 && battle.enemydata[zommothId].data != null & battle.enemydata[zommothId].data.Length >=0 && battle.enemydata[zommothId].data[0] == 0))
+                for (int i = 0; i < target.condition.Count; i++)
                 {
-                    MainManager.RemoveCondition(MainManager.BattleCondition.Shield, target);
-                    target.battleentity.shieldenabled = false;
+                    // Nerfs Bubble shield by limiting how many attacks it can block
+                    // Duration lowers by 1 per hit taken; shield is removed when duration runs out
+                    if (target.condition[i][0] == (int)BattleCondition.Shield)
+                    {
+                        CheckBubbleShieldDamage(ref target, i);
+                        continue;
+                    }
+
+                    if (target.condition[i][0] == (int)NewCondition.Vitiation &&
+                        BattleControl_Ext.Instance.realDamage - __result > 0)
+                    {
+                        CheckVitiationDamage(ref target, i, ref attacker, __result, entityExt, targetIsPlayer);
+                        continue;
+                    }
+
+                    if (!(overrides?.Contains((DamageOverride)NewDamageOverride.IgnorePaintball) ?? false) && target.condition[i][0] == (int)NewCondition.Paintball && entityExt.inkBubbleEnabled && entityExt.inkBubble != null && Vector3.Distance(entityExt.inkBubble.transform.localScale, entityExt.extraData.inkBubbleScale) < 0.01f)
+                    {
+                        CheckInkBubbleDamage(ref target, i, ref attacker, __result, overrides?.ToList(), targetIsPlayer);
+                        continue;
+                    }
+
+                    if (!(overrides?.Contains((DamageOverride)NewDamageOverride.IgnoreSlugskin) ?? false) && target.condition[i][0] == (int)NewCondition.Slugskin)
+                    {
+                        CheckSlugskinDamage(ref target, i, ref attacker);
+                        continue;
+                    }
                 }
 
-                if (BattleControl_Ext.Instance.targetIsPlayer && target.hp > 0)
+
+                if (targetIsPlayer && target.hp > 0)
                 {
                     if (MainManager.BadgeIsEquipped((int)Medal.Slugskin, target.trueid) & superBlocked && MainManager.HasCondition(MainManager.BattleCondition.Sticky, target) != -1)
                     {
-                        entityExt.CreateSlugskin();
-                        entityExt.slugskinActive = true;
+                        MainManager.SetCondition((BattleCondition)NewCondition.Slugskin, ref target, 1);
                         MainManager.PlaySound("Shield", 1.4f, 1);
                     }
-
-                    if (!superBlocked)
-                        entityExt.slugskinActive = false;
                 }
 
-                if (!BattleControl_Ext.Instance.targetIsPlayer)
+                if (!targetIsPlayer)
                 {
-                    BattleControl_Ext.Instance.CheckStrikeBlasters(__instance, target, beforeDoDamageHp);
+                    BattleControl_Ext.Instance.CheckStrikeBlasters(__instance, target, beforeDoDamageHp, entityExt);
                 }
 
-                if (!__instance.enemy && !BattleControl_Ext.Instance.targetIsPlayer && __result > BattleControl_Ext.Instance.trustFallDamage)
+                if (!__instance.enemy && !targetIsPlayer && __result > BattleControl_Ext.Instance.trustFallDamage)
                 {
                     if (__instance.turns == BattleControl_Ext.Instance.trustFallTurn + 1 && BattleControl_Ext.Instance.trustFallTurn != -1)
                         BattleControl_Ext.Instance.trustFallDamage = __result;
                 }
 
-                if(__instance.chompyattack == null)
+                if (__instance.chompyattack == null)
                 {
-                    BattleControl_Ext.Instance.DoInkWellCheck(__result, ref target);
-                    BattleControl_Ext.Instance.DoWebsheetCheck(attacker, ref target);
+                    BattleControl_Ext.Instance.DoInkWellCheck(__result, ref target, targetIsPlayer);
+                    BattleControl_Ext.Instance.DoWebsheetCheck(attacker, ref target, targetIsPlayer);
+                }
+
+                if (attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Inkblot))
+                {
+                    var attackerExt = Entity_Ext.GetEntity_Ext(attacker.Value.battleentity);
+
+                    if (!attackerExt.inkblotActive)
+                    {
+                        Vector3 particlePos = target.battleentity.transform.position + Vector3.up + target.battleentity.height * Vector3.up;
+                        BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Inked, ref target, 2, "WaterSplash2", 0.8f, 1, "InkGet", particlePos, Vector3.one);
+                        attackerExt.inkblotActive = true;
+                    }
                 }
             }
 
-
-            if (BattleControl_Ext.Instance.targetIsPlayer && __result > 0 && MainManager.BadgeIsEquipped((int)Medal.NoPainNoGain))
+            if (targetIsPlayer && __result > 0 && MainManager.BadgeIsEquipped((int)Medal.NoPainNoGain))
             {
-                MainManager.PlaySound("Heal2");
-                MainManager.instance.tp = Mathf.Clamp(MainManager.instance.tp + 1, 0, MainManager.instance.maxtp);
-                __instance.ShowDamageCounter(2, 1, target.battleentity.transform.position + target.cursoroffset + Vector3.up, target.battleentity.transform.position + target.cursoroffset + Vector3.up * 2);
+                BattleControl_Ext.Instance.RecoverPlayerTP(1, target);
+            }
+
+            if (!isDotDamage && target.animid == (int)NewEnemies.FireAnt && !__instance.IsStopped(target))
+            {
+                FireAntAI.FireAntHustle(ref target);
+            }
+
+            if(!__instance.enemy && !isDotDamage && __instance.chompyattack == null 
+                && BattleControl_Ext.Instance.entityAttacking != null 
+                && BattleControl_Ext.Instance.entityAttacking.CompareTag("Player") && __instance.currentturn != -1)
+            {
+                if(BadgeIsEquipped((int)Medal.Carousel, instance.playerdata[__instance.currentturn].trueid))
+                {
+                    var ext = Entity_Ext.GetEntity_Ext(BattleControl_Ext.Instance.entityAttacking);
+                    ext?.ResetCarousel();
+                }
+            }
+        }
+
+        static void CheckBubbleShieldDamage(ref BattleData target, int c)
+        {
+            int zommothId = battle.EnemyInField((int)Enemies.Zommoth);
+            if (lastevent == 182 &&
+                zommothId != -1 &&
+                battle.enemydata[zommothId].data != null &
+                battle.enemydata[zommothId].data.Length >= 0 &&
+                battle.enemydata[zommothId].data[0] == 0)
+            {
+                return;
+            }
+            target.condition[c][1]--;
+            if (target.condition[c][1] < 1)
+            {
+                RemoveCondition(BattleCondition.Shield, target);
+                target.battleentity.shieldenabled = false;
+            }
+        }
+        static void CheckVitiationDamage(ref BattleData target, int conditionIndex, ref BattleData? attacker,
+            int vitiationDamage, Entity_Ext extEnt, bool targetIsPlayer)
+        {
+            vitiationDamage = Mathf.Min(BattleControl_Ext.Instance.realDamage - vitiationDamage, target.condition[conditionIndex][1]);
+
+            target.condition[conditionIndex][1] -= vitiationDamage;
+            if (target.condition[conditionIndex][1] < 1)
+                RemoveCondition((BattleCondition)target.condition[conditionIndex][0], target);
+
+            if (extEnt.slugskinActive)
+                vitiationDamage++;
+
+            if ((attacker.HasValue || BattleControl_Ext.Instance.entityAttacking) && !BattleControl_Ext.Instance.inAiAttack && !battle.chompyaction)
+            {
+                if (targetIsPlayer)
+                {
+                    int id = -1;
+
+                    if(BattleControl_Ext.Instance.entityAttacking != null)
+                        id = BattleControl_Ext.Instance.entityAttacking.battleid;
+
+                    if (attacker.HasValue)
+                        id = attacker.Value.battleentity.battleid;
+
+                    if(id != -1)
+                        BattleControl_Ext.Instance.DoFakeDamage(id, vitiationDamage);
+                }
+                else
+                {
+                    BattleControl_Ext.Instance.DoFakeDamage(ref instance.playerdata[battle.currentturn], vitiationDamage);
+                }
+            }
+
+            BattleControl_Ext.Instance.realDamage = 0;
+        }
+        static void CheckInkBubbleDamage(ref BattleData target, int conditionIndex, ref BattleData? attacker, int incomingDMG, List<DamageOverride> overrides, bool targetIsPlayer)
+        {
+            target.condition[conditionIndex][1]--;
+            if (target.condition[conditionIndex][1] < 1)
+            {
+                PlaySound("BubbleBurst", 0.8f, 1);
+                RemoveCondition((BattleCondition)target.condition[conditionIndex][0], target);
+            }
+
+            if (incomingDMG > 0)
+            {
+                int tpRecover = Mathf.CeilToInt(incomingDMG * 0.5f);
+                if (attacker.HasValue)
+                {
+                    if (attacker.Value.battleentity.CompareTag("Player"))
+                        battle.HealTP(tpRecover);
+                    else
+                        BattleControl_Ext.Instance.RecoverEnemyTp(tpRecover, attacker.Value.battleentity.battleid);
+                }
+                else if (overrides != null && overrides.Contains((DamageOverride)NewDamageOverride.DelayedDamage))
+                {
+                    if (BattleControl_Ext.Instance.inPlayerDelayedProjs > -1)
+                        battle.HealTP(tpRecover);
+                    else
+                        BattleControl_Ext.Instance.RecoverEnemyTp(tpRecover, battle.delprojs[battle.delprojs.Length - 1].calledby.battleentity.battleid);
+                }
+                else
+                {
+                    if (battle.chompyattack != null || BattleControl_Ext.Instance.inAiAttack || !targetIsPlayer)
+                        battle.HealTP(tpRecover);
+                    else if (battle.enemydata.Length > 0)
+                        BattleControl_Ext.Instance.RecoverEnemyTp(tpRecover, 0);
+                }
+            }
+        }
+        static void CheckSlugskinDamage(ref BattleData target, int conditionIndex, ref BattleData? attacker)
+        {
+            target.condition[conditionIndex][1]--;
+            if (target.condition[conditionIndex][1] <= 0)
+            {
+                RemoveCondition((BattleCondition)NewCondition.Slugskin, target);
+            }
+
+            if (attacker != null)
+            {
+                int recoilDamage = 2;
+                if (attacker.Value.battleentity.CompareTag("Player"))
+                    BattleControl_Ext.Instance.DoFakeDamage(ref instance.playerdata[attacker.Value.trueid], recoilDamage);
+                else
+                    BattleControl_Ext.Instance.DoFakeDamage(ref battle.enemydata[attacker.Value.battleentity.battleid], recoilDamage);
             }
         }
     }
@@ -784,38 +867,59 @@ namespace BFPlus.Patches
     [HarmonyPatch(typeof(BattleControl), "CalculateBaseDamage")]
     public class PatchBattleControlCalculateBaseDamage
     {
-        static void Prefix(BattleControl __instance, MainManager.BattleData? attacker, ref MainManager.BattleData target, bool block, ref int basevalue)
+        static void Prefix(BattleControl __instance, BattleData? attacker, ref BattleData target, ref int basevalue, bool block, AttackProperty? property, ref bool weaknesshit, DamageOverride[] overrides)
         {
-            BattleControl_Ext.Instance.realDamage = basevalue;
-
-            if (BattleControl_Ext.Instance.targetIsPlayer)
+            if (!__instance.doingaction &&
+                BattleControl_Ext.mashSuperblockThreshold > 0)
             {
-                if (attacker != null)
+                if (__instance.barfill >= 1f &&
+                    BattleControl_Ext.mashSuperblockTimer > BattleControl_Ext.mashSuperblockThreshold)
                 {
-                    BattleControl_Ext.Instance.realDamage -= attacker.Value.tired;
+                    __instance.superblockedthisframe = 3f;
                 }
+                BattleControl_Ext.mashSuperblockThreshold = BattleControl_Ext.mashSuperblockTimer = -1;
+            }
 
-                if(MainManager.HasCondition(MainManager.BattleCondition.Sticky, target)> -1 && (block || __instance.superblockedthisframe > 0f) && MainManager.BadgeIsEquipped((int)Medal.ThickSilk, target.trueid))
+            if (target.battleentity.CompareTag("Player"))
+            {
+                if (HasCondition(BattleCondition.Sticky, target) > -1 && (block || __instance.superblockedthisframe > 0 || battle.GetSuperBlock(target.battleentity.animid)))
                 {
-                    basevalue--;
+                    basevalue -= BadgeHowManyEquipped((int)Medal.ThickSilk, target.trueid);
                 }
+            }
 
-                if (Entity_Ext.GetEntity_Ext(target.battleentity).slugskinActive)
-                    basevalue--;
+            BattleControl_Ext.Instance.realDamage = basevalue;
+            if (property == null || property.Value != AttackProperty.Raw)
+            {
+                basevalue = DamagePipelineHandler.GetFinalDMG(basevalue, attacker, ref target, property, ref overrides);
+                weaknesshit = DamagePipelineHandler.targetWeaknessHit;
+                DamagePipelineHandler.targetWeaknessHit = false;
+
+                int flips = overrides.Count(o => o == (DamageOverride)NewDamageOverride.FlipNoPierce);
+                if (property.HasValue && property.Value == AttackProperty.Flip)
+                    flips++;
+
+                // add multiple flips to one attack to make wasp bombers miserable!!!
+                while (flips > 0)
+                {
+                    flips--;
+                    DamagePipelineHandler.FlipTarget(ref target);
+                }
             }
         }
 
-        static void Postfix(BattleControl __instance, MainManager.BattleData? attacker, ref MainManager.BattleData target, ref bool superguarded)
+
+        static void Postfix(BattleControl __instance, BattleData? attacker, ref BattleData target, ref bool superguarded, ref int __result)
         {
             if (BattleControl_Ext.Instance.inEndOfTurnDamage)
             {
                 target.cantmove = 1;
             }
 
-            if(BattleControl_Ext.Instance.targetIsPlayer)
+            if (target.battleentity.CompareTag("Player"))
             {
                 BattleControl_Ext.Instance.DoLoomLegsCheck(ref target, superguarded);
-                if (MainManager.HasCondition(MainManager.BattleCondition.Sticky, target) > -1)
+                if (HasCondition(BattleCondition.Sticky, target) > -1)
                 {
                     BattleControl_Ext.Instance.DoHoneyWebCheck(ref target, superguarded);
                 }
@@ -826,12 +930,13 @@ namespace BFPlus.Patches
     [HarmonyPatch(typeof(BattleControl), "TryCondition")]
     public class PatchBattleControlTryCondition
     {
-        static bool Prefix(BattleControl __instance, ref MainManager.BattleData data, MainManager.BattleCondition condition)
+        static bool Prefix(BattleControl __instance, ref BattleData data, BattleCondition condition)
         {
-            if(BattleControl_Ext.Instance.IsStatusImmune(data, condition))
+            if (BattleControl_Ext.Instance.IsStatusImmune(data, condition))
             {
                 return false;
             }
+
             return true;
         }
     }
@@ -866,7 +971,7 @@ namespace BFPlus.Patches
         }
     }
 
-    [HarmonyPatch(typeof(BattleControl), "AddNewEnemy", new Type[] {typeof(int), typeof(EntityControl)})]
+    [HarmonyPatch(typeof(BattleControl), "AddNewEnemy", new Type[] { typeof(int), typeof(EntityControl) })]
     public class PatchBattleControlAddNewEnemy
     {
         public static void CheckHoloEnemy(Transform enemy)
@@ -897,10 +1002,121 @@ namespace BFPlus.Patches
     {
         static void Postfix(BattleControl __instance, BattleControl.BattlePosition pos, int attackid, ref bool __result)
         {
-            if(pos == BattleControl.BattlePosition.Underground && attackid == (int)NewSkill.Steal)
+            if (pos == BattleControl.BattlePosition.Underground)
             {
-                __result = true;
+                if (attackid == (int)NewSkill.Steal)
+                    __result = true;
+
+                if (attackid == (int)Skills.BeeFly)
+                    __result = true;
+
+                if (attackid == (int)Skills.HurricaneBeemerang && MainManager_Ext.Instance.balanceChanges[(int)NewMenuText.HurricaneToss])
+                    __result = false;
+
+                if (__instance.currentaction == Pick.ItemList)
+                    __result = BattleControl_Ext.CanItemHitUnderground(__instance.selecteditem);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "TrueDef")]
+    public class PatchBattleControlTrueDef
+    {
+        static void Postfix(BattleControl __instance, MainManager.BattleData data, ref int __result)
+        {
+            __result = DamagePipelineHandler.GetFinalDEF(data, null, null, out _, out _);
+        }
+    }
+
+    /// <summary>
+    /// Jump ant revive on start of next turn
+    /// </summary>
+    [HarmonyPatch(typeof(BattleControl), "CheckEvent")]
+    public class PatchBattleControlCheckEvent
+    {
+        static void Prefix(BattleControl __instance)
+        {
+            if (!__instance.inevent && !__instance.action && __instance.enemydata.Length != 0)
+            {
+                if (__instance.enemy && __instance.reservedata.Count > 0)
+                {
+                    int? index = __instance.reservedata.Select((e, idx) => e.animid == (int)NewEnemies.JumpAnt ? (int?)idx : null).FirstOrDefault(i => i != null);
+
+                    if (index != null && __instance.reservedata[index.Value].turnssincedeath >= 1)
+                    {
+                        __instance.calleventnext = (int)NewEventDialogue.JumpAntRevive;
+                    }
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "SeedlingTackle")]
+    public class PatchBattleControlSeedlingTackle
+    {
+        static void Prefix(BattleControl __instance, ref int damage, int attackerid)
+        {
+            if (__instance.enemydata[attackerid].animid == (int)NewEnemies.RedSeedling || __instance.enemydata[attackerid].animid == (int)NewEnemies.BlueSeedling)
+                damage = 2;
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "CleanKill")]
+    public class PatchBattleControlCleanKill
+    {
+        static void Prefix(BattleControl __instance, ref MainManager.BattleData target, Vector3 startp)
+        {
+            BattleControl_Ext.Instance.cleanKilledEnemyPos.Add(startp);
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "CreateHelpBox", new Type[] { })]
+    public class PatchBattleControlCreateHelpBox
+    {
+        static void Postfix(BattleControl __instance)
+        {
+            if (__instance.helpbox != null)
+            {
+                __instance.helpbox.targetscale = Vector3.one * 0.8f;
+                __instance.helpbox.transform.localPosition = new Vector3(-4.2f, -4.45f, 10f);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "AddAI")]
+    public class PatchBattleControlAddAI
+    {
+        static bool Prefix(BattleControl __instance, int id, int basestate)
+        {
+            return __instance.aiparty == null;
+        }
+    }
+
+    /// <summary>
+    /// Skip pincer status, we have our own checks for needle medals in the hooks.
+    /// </summary>
+    [HarmonyPatch(typeof(BattleControl), "PincerStatus")]
+    public class PatchBattleControlPincerStatus
+    {
+        static bool Prefix(BattleControl __instance)
+        {
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(BattleControl), "CheckItemUse")]
+    public class PatchBattleControlCheckItemUse
+    {
+        static bool Prefix(BattleControl __instance, int id, ref bool __result)
+        {
+            if(__instance.currentaction == Pick.SelectPlayer && __instance.currentchoice == Actions.Item 
+                && id == (int)NewItem.Spiroll && (Entity_Ext.GetEntity_Ext(instance.playerdata[__instance.option].battleentity).cantSwap 
+                || Entity_Ext.GetEntity_Ext(instance.playerdata[__instance.currentturn].battleentity).cantSwap) && __instance.currentturn != __instance.option)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -1,15 +1,6 @@
-﻿using BFPlus.Extensions.EnemyAI;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
 using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions.Events.NewBossesEvents
 {
@@ -33,7 +24,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
 
             Transform tempJester = MainManager.map.mainmesh.Find("Jester");
             jester.transform.position = tempJester.position + Vector3.down;
-            tempJester.transform.position -= Vector3.down*30;
+            tempJester.transform.position -= Vector3.down * 30;
             jester.animstate = 100;
             MainManager.SetCamera(jester.transform.position + new Vector3(-5, 5f, -5), 0.01f);
 
@@ -89,14 +80,14 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             float a = 0;
             float b = 30;
             Vector3 startPos = handle.transform.position;
-            Vector3 endPos = handle.transform.position + new Vector3(-0.2f,-1f,-2f);
+            Vector3 endPos = handle.transform.position + new Vector3(-0.2f, -1f, -2f);
             Vector3 startRot = handle.transform.localEulerAngles;
             Vector3 endRot = new Vector3(300, 150, 0);
             MainManager.PlaySound("BridgeRope");
             do
             {
-                handle.position = Vector3.Lerp(startPos, endPos, a/b);
-                handle.localEulerAngles = Vector3.Lerp(startRot, endRot, a/b);
+                handle.position = Vector3.Lerp(startPos, endPos, a / b);
+                handle.localEulerAngles = Vector3.Lerp(startRot, endRot, a / b);
                 a += MainManager.TieFramerate(1f);
                 yield return null;
             } while (a < b);
@@ -104,7 +95,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             MainManager.PlaySound("ArtifactBounce");
             yield return EventControl.halfsec;
 
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 handle.gameObject.SetActive(!handle.gameObject.activeSelf);
                 yield return EventControl.quartersec;

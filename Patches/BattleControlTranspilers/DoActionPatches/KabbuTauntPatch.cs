@@ -1,13 +1,8 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
 namespace BFPlus.Patches.DoActionPatches
 {
     public class PatchKabbuTaunt : PatchBaseDoAction
@@ -17,12 +12,12 @@ namespace BFPlus.Patches.DoActionPatches
             priority = 56223;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("Taunt2"));
             var br = cursor.Body.Instructions[cursor.Index - 8];
 
-            cursor.GotoNext(MoveType.After,i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "SetDefaultCamera", new Type[] { })));
+            cursor.GotoNext(MoveType.After, i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "SetDefaultCamera", new Type[] { })));
             var label = cursor.DefineLabel();
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Extensions.EnemyAI.DarkTeamSnakemouth), "CantTauntDTS"));
@@ -33,7 +28,7 @@ namespace BFPlus.Patches.DoActionPatches
             cursor.Emit(OpCodes.Br, br.Operand);
 
             cursor.Emit(OpCodes.Nop).MarkLabel(label);
-            Utils.InsertStartStylishTimer(cursor,20f,30f,commandSuccess: false);
+            Utils.InsertStartStylishTimer(cursor, 20f, 30f, commandSuccess: false);
         }
     }
 
@@ -44,11 +39,11 @@ namespace BFPlus.Patches.DoActionPatches
             priority = 56579;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
                 MoveType.After,
-                i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "currentturn")), 
+                i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "currentturn")),
                 i => i.MatchStfld(AccessTools.Field(typeof(BattleControl), "forceattack"))
             );
 

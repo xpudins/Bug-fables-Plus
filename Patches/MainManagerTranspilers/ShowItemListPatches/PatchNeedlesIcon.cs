@@ -1,15 +1,9 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using MonoMod.Cil;
-using UnityEngine;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using static MainManager;
 
 namespace BFPlus.Patches.ShowItemListPatches
 {
@@ -20,52 +14,96 @@ namespace BFPlus.Patches.ShowItemListPatches
             priority = 72421;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor c, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(45));
+            c.GotoNext(x => x.MatchLdcI4(45));
+            c.GotoPrev(MoveType.After, x => x.MatchStloc(out _));
 
-            cursor.GotoNext(i => i.MatchLdstr(" |size,0.55,0.6|"));
-            cursor.Next.Operand = "|size,0.45,0.50|";
+            c.Emit(c.Next.OpCode, c.Next.Operand);
+            c.Emit(OpCodes.Ldloca, 30);
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchNeedlesIcon), "NewSkillIcons"));
 
-            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("|icon,193|"), i => i.MatchCall(out _), i => i.MatchStloc(out _));
+            c.GotoNext(MoveType.After, i => i.MatchLdcI4(45));
 
-            var labelIcon = cursor.DefineLabel();
-            var otherLabelIcon = cursor.DefineLabel();
-            var labelSkip = cursor.DefineLabel();
+            c.GotoNext(i => i.MatchLdstr(" |size,0.55,0.6|"));
+            c.Next.Operand = "|size,0.45,0.50|";
 
-            var badgeIsEquipRef = cursor.Body.Instructions[cursor.Index - 6];
-            var readText3Ref = cursor.Body.Instructions[cursor.Index];
-            var concatRef = cursor.Body.Instructions[cursor.Index - 2];
-            var writeText3Ref = cursor.Body.Instructions[cursor.Index - 1];
+            ILLabel labelSkip = c.DefineLabel();
 
-            cursor.Body.Instructions[cursor.Index - 5].Operand = otherLabelIcon;
-            cursor.Emit(OpCodes.Ldc_I4, (int)Medal.FrostNeedles);
-            cursor.Emit(badgeIsEquipRef.OpCode, badgeIsEquipRef.Operand);
-            cursor.Emit(OpCodes.Brfalse, labelIcon);
+            c.GotoNext(x => x.MatchBrfalse(out labelSkip));
+            c.GotoPrev(MoveType.After, x => x.MatchStloc(out _));
 
-            cursor.Emit(readText3Ref.OpCode, readText3Ref.Operand);
-            cursor.Emit(OpCodes.Ldstr, $"|icon,{(int)NewGui.FrostNeedles}|");
-            cursor.Emit(concatRef.OpCode, concatRef.Operand);
-            cursor.Emit(writeText3Ref.OpCode, writeText3Ref.Operand);
+            c.Emit(OpCodes.Br, labelSkip); // skips the electric needles icon for needle skills
 
-            cursor.Emit(OpCodes.Ldc_I4, (int)Medal.FireNeedles);
+            c.GotoNext(x => x.MatchLdstr("|icon,193|"));
+            c.GotoNext(MoveType.After, x => x.MatchStloc(out _));
 
-            cursor.Emit(badgeIsEquipRef.OpCode, badgeIsEquipRef.Operand);
-            cursor.Emit(OpCodes.Brfalse, labelSkip);
+            var labelIcon = c.DefineLabel();
+            var otherLabelIcon = c.DefineLabel();
+            labelSkip = c.DefineLabel();
 
-            cursor.Emit(readText3Ref.OpCode, readText3Ref.Operand);
-            cursor.Emit(OpCodes.Ldstr, $"|icon,{(int)NewGui.FireNeedles}|");
-            cursor.Emit(concatRef.OpCode, concatRef.Operand);
-            cursor.Emit(writeText3Ref.OpCode, writeText3Ref.Operand);
+            var badgeIsEquipRef = c.Body.Instructions[c.Index - 6];
+            var readText3Ref = c.Body.Instructions[c.Index];
+            var concatRef = c.Body.Instructions[c.Index - 2];
+            var writeText3Ref = c.Body.Instructions[c.Index - 1];
 
-            cursor.MarkLabel(labelSkip);
-            cursor.GotoPrev(i => i.MatchLdcI4((int)Medal.FireNeedles)).MarkLabel(labelIcon);
-            cursor.GotoPrev(i => i.MatchLdcI4((int)Medal.FrostNeedles)).MarkLabel(otherLabelIcon);
+            c.Body.Instructions[c.Index - 5].Operand = otherLabelIcon;
+            c.Emit(OpCodes.Ldc_I4, (int)Medal.FrostNeedles);
+            c.Emit(badgeIsEquipRef.OpCode, badgeIsEquipRef.Operand);
+            c.Emit(OpCodes.Brfalse, labelIcon);
+
+            c.Emit(readText3Ref.OpCode, readText3Ref.Operand);
+            c.Emit(OpCodes.Ldstr, $"|icon,{(int)NewGui.FrostNeedles}|");
+            c.Emit(concatRef.OpCode, concatRef.Operand);
+            c.Emit(writeText3Ref.OpCode, writeText3Ref.Operand);
+
+            c.Emit(OpCodes.Ldc_I4, (int)Medal.FireNeedles);
+
+            c.Emit(badgeIsEquipRef.OpCode, badgeIsEquipRef.Operand);
+            c.Emit(OpCodes.Brfalse, labelSkip);
+
+            c.Emit(readText3Ref.OpCode, readText3Ref.Operand);
+            c.Emit(OpCodes.Ldstr, $"|icon,{(int)NewGui.FireNeedles}|");
+            c.Emit(concatRef.OpCode, concatRef.Operand);
+            c.Emit(writeText3Ref.OpCode, writeText3Ref.Operand);
+
+            c.MarkLabel(labelSkip);
+            c.GotoPrev(i => i.MatchLdcI4((int)Medal.FireNeedles)).MarkLabel(labelIcon);
+            c.GotoPrev(i => i.MatchLdcI4((int)Medal.FrostNeedles)).MarkLabel(otherLabelIcon);
 
             //adbp icon
-            cursor.GotoNext(i => i.MatchLdcI4(28));
-            cursor.GotoPrev(i => i.MatchLdstr(" |size,0.55,0.6|"));
-            cursor.Next.Operand = "|size,0.35,0.40|";
+            c.GotoNext(i => i.MatchLdcI4(28));
+            c.GotoPrev(i => i.MatchLdstr(" |size,0.55,0.6|"));
+            c.Next.Operand = "|size,0.40,0.45|";
+        }
+
+        static void NewSkillIcons(int skill, ref string text)
+        {
+            if (skill == (int)NewSkill.NeedleSurge)
+            {
+                string addText = null;
+
+                if (BadgeIsEquipped((int)BadgeTypes.NumbNeedle))
+                    addText += "|icon,191|";
+
+                if (BadgeIsEquipped((int)BadgeTypes.PoisonNeedle))
+                    addText += "|icon,193|";
+
+                if (BadgeIsEquipped((int)Medal.FrostNeedles))
+                    addText += $"|icon,{(int)NewGui.FrostNeedles}|";
+
+                if (BadgeIsEquipped((int)Medal.FireNeedles))
+                    addText += $"|icon,{(int)NewGui.FireNeedles}|";
+
+                if (addText != null)
+                    text = $"|size,0.40,0.45|{addText}";
+            }
+
+            if ((skill == (int)MainManager.Skills.HeavyThrow || skill == (int)NewSkill.Steal) 
+                && BadgeIsEquipped((int)BadgeTypes.Beemerang2))
+            {
+                text += "|size,0.40,0.45||icon,194|";
+            }
         }
     }
 }

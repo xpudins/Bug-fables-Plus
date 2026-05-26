@@ -3,14 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static FlappyBee;
 
 namespace BFPlus.Patches
 {
@@ -20,10 +13,10 @@ namespace BFPlus.Patches
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(typeof(MainManager).GetField("playerdata")));
-            cursor.GotoNext(MoveType.After,i => i.MatchLdfld(typeof(MainManager).GetField("playerdata")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(typeof(MainManager).GetField("playerdata")));
             cursor.Emit(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager_Ext), "skillListType"));
             cursor.Remove();
         }
@@ -38,9 +31,9 @@ namespace BFPlus.Patches
         {
             priority = 127;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdloc1(), i=>i.MatchLdcI4(25));
+            cursor.GotoNext(i => i.MatchLdloc1(), i => i.MatchLdcI4(25));
             cursor.GotoNext(i => i.MatchLdcI4(25));
             cursor.Emit(OpCodes.Ldarg_1);
             cursor.Emit(OpCodes.Ldarg_0);
@@ -51,14 +44,17 @@ namespace BFPlus.Patches
 
         static int GetNewTPCost(int tpCost, int skillId, int playerId)
         {
-            if (skillId == (int)MainManager.Skills.Cleanse && MainManager.BadgeIsEquipped((int)Medal.RinseRegen))
+            if (skillId == (int)MainManager.Skills.Cleanse)
             {
-                tpCost += 1;
-            }
+                if (MainManager.BadgeIsEquipped((int)Medal.RinseRegen))
+                {
+                    tpCost += 1;
+                }
 
-            if (skillId == (int)MainManager.Skills.Cleanse && MainManager.BadgeIsEquipped((int)Medal.Liquidate))
-            {
-                tpCost += 4;
+                if (MainManager.BadgeIsEquipped((int)Medal.Liquidate))
+                {
+                    tpCost += 4;
+                }
             }
 
             if (skillId == (int)MainManager.Skills.PeebleToss)
@@ -87,6 +83,39 @@ namespace BFPlus.Patches
                 {
                     tpCost += Mathf.FloorToInt(BattleControl_Ext.Instance.rockyRampUpDmg / 2);
                 }
+            }
+            if (skillId == (int)MainManager.Skills.PebbleTossPlus)
+            {
+                if (MainManager.BadgeIsEquipped((int)Medal.Avalanche))
+                    tpCost += 1;
+            }
+
+            if (skillId == (int)MainManager.Skills.NeedleToss ||
+                skillId == (int)MainManager.Skills.NeedlePincer ||
+                skillId == (int)NewSkill.NeedleSurge)
+            {
+                if (MainManager.BadgeIsEquipped((int)MainManager.BadgeTypes.PoisonNeedle))
+                    tpCost += 1;
+
+                if (MainManager.BadgeIsEquipped((int)Medal.FrostNeedles))
+                    tpCost += 1;
+            }
+
+            if (MainManager.BadgeIsEquipped((int)Medal.HornRattle))
+            {
+                if (skillId == (int)MainManager.Skills.HeavyStrike ||
+                    skillId == (int)MainManager.Skills.HornDash ||
+                    skillId == (int)MainManager.Skills.PebbleTossPlus ||
+                    skillId == (int)MainManager.Skills.BeeFly)
+                {
+                    tpCost += 1;
+                }
+            }
+
+            if (skillId == (int)MainManager.Skills.HeavyThrow &&
+                MainManager.BadgeIsEquipped((int)MainManager.BadgeTypes.Beemerang2))
+            {
+                tpCost += 1;
             }
 
             if (skillId == (int)MainManager.Skills.HardCharge)

@@ -1,10 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Events.PitEvents
@@ -99,7 +93,7 @@ namespace BFPlus.Extensions.Events.PitEvents
 
             if (MainManager.map.chompy != null)
             {
-                MainManager.map.chompy.transform.parent =MainManager.map.transform;
+                MainManager.map.chompy.transform.parent = MainManager.map.transform;
             }
             yield return EventControl.sec;
             MainManager.StopSound(platformMove);

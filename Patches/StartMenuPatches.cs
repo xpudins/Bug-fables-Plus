@@ -1,17 +1,11 @@
-﻿using BFPlus.Extensions;
+﻿using BepInEx;
+using BFPlus.Extensions;
+using BFPlus.Extensions.Maps;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static MainManager;
-using System.Reflection;
-using System.Collections;
-using BFPlus.Extensions.Maps;
-using BepInEx;
 
 namespace BFPlus.Patches
 {
@@ -31,7 +25,7 @@ namespace BFPlus.Patches
     {
         static bool Prefix(StartMenu __instance)
         {
-            if (LoadNewBackground(__instance)) 
+            if (LoadNewBackground(__instance))
             {
                 return false;
             }
@@ -48,7 +42,7 @@ namespace BFPlus.Patches
             RenderSettings.skybox.SetColor("_Tint", new Color(0.5f, 0.5f, 0.5f));
             int lastSaved = GetLastSavedFile();
 
-            if(lastSaved == -1)
+            if (lastSaved == -1)
             {
                 return false;
             }
@@ -57,7 +51,7 @@ namespace BFPlus.Patches
             int mapId = StartMenu.savedata[lastSaved].Value.mapid;
 
             bool loadMap = false;
-            for(int i=0;i < StartMenu.extraareas.Length; i++)
+            for (int i = 0; i < StartMenu.extraareas.Length; i++)
             {
                 if (StartMenu.extraareas[i][0] == mapId)
                 {
@@ -75,7 +69,7 @@ namespace BFPlus.Patches
             int newAreaId = MainManager_Ext.GetNewAreaId(mapId);
             if (newAreaId != -1)
             {
-                int[] mapToLoad = new int[] 
+                int[] mapToLoad = new int[]
                 {
                     (int)MainManager.Maps.CaveOfTrials,
                     (int)MainManager.Maps.PowerPlant,
@@ -86,7 +80,7 @@ namespace BFPlus.Patches
                     (int)NewMaps.LeafbugVillage,
                     (int)NewMaps.GiantLairPlayroom1,
                 };
-                if (newAreaId < mapToLoad.Length)            
+                if (newAreaId < mapToLoad.Length)
                 {
                     loadMap = true;
                     mapId = mapToLoad[newAreaId];
@@ -96,7 +90,7 @@ namespace BFPlus.Patches
             }
 
             TextAsset asset = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(areaName);
-            if (asset != null) 
+            if (asset != null)
             {
                 int saveDataProgress = StartMenu.savedata[lastSaved].Value.progression;
                 AreaData areaData = LoadCSV(asset);
@@ -150,7 +144,7 @@ namespace BFPlus.Patches
             return areaData;
         }
 
-        static void DestroyAll(Type type,GameObject obj)
+        static void DestroyAll(Type type, GameObject obj)
         {
             Component[] objects = obj.transform.GetComponentsInChildren(type, true);
             foreach (Component component in objects)
@@ -163,7 +157,7 @@ namespace BFPlus.Patches
         {
             int latestFile = -1;
             DateTime latestTime = DateTime.MinValue;
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 string filePath = "save" + i + ".dat";
                 if (File.Exists(filePath))
@@ -178,7 +172,7 @@ namespace BFPlus.Patches
             }
             return latestFile;
         }
-        
+
         static GameObject SetupBackgroundMap(StartMenu __instance, AreaData areaData, int progress)
         {
             GameObject map;
@@ -216,11 +210,15 @@ namespace BFPlus.Patches
             List<EntityControl> entities = new List<EntityControl>();
             foreach (var e in areaData.entities)
             {
-                bool canExist = e.progress == -1 || progress >= e.progress;
+                bool canExist;
 
                 if (e.beforeProgress)
                 {
                     canExist = progress < e.progress;
+                }
+                else
+                {
+                    canExist = e.progress == -1 || progress >= e.progress;
                 }
 
                 if (canExist)
@@ -263,7 +261,8 @@ namespace BFPlus.Patches
 
                 antPalaces[palaceIndex].gameObject.SetActive(true);
                 antPalaces[palaceIndex].transform.position = Vector3.zero;
-            }else if (areaData.areaID == (int)MainManager.Areas.GiantLair)
+            }
+            else if (areaData.areaID == (int)MainManager.Areas.GiantLair)
             {
                 Transform eye = (UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Objects/Eye")) as GameObject).transform;
                 eye.parent = map.transform;
@@ -278,11 +277,11 @@ namespace BFPlus.Patches
 
                 eye.position = new Vector3(48.7f, 15.3f, 16);
                 eye.rotation = Quaternion.Euler(317, 149, 180);
-            } 
+            }
             else if (areaData.mapID == (int)MainManager.Maps.CaveOfTrials)
             {
                 map.transform.Find("Base").Find("Pillar").gameObject.SetActive(false);
-            } 
+            }
             else if (areaData.mapID == (int)MainManager.Maps.BugariaPier)
             {
                 if (progress >= 5)
@@ -290,11 +289,12 @@ namespace BFPlus.Patches
                     map.transform.Find("Base").Find("Boat").gameObject.SetActive(false);
                 }
             }
-            else if(areaData.mapID == (int)NewMaps.SandCastleDepthsMain)
+            else if (areaData.mapID == (int)NewMaps.SandCastleDepthsMain)
             {
                 Shader.SetGlobalFloat("GlobalIceRadius", 1000 / 2f);
                 Shader.SetGlobalVector("CentralIcePoint", Vector3.zero);
-            }else if(areaData.mapID == (int)MainManager.Maps.BugariaMainPlaza)
+            }
+            else if (areaData.mapID == (int)MainManager.Maps.BugariaMainPlaza)
             {
                 if (progress == 5)
                 {

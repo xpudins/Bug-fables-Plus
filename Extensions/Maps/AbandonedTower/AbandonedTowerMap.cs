@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.AbandonedTower
-{ 
+{
     public class AbandonedTowerMap : CustomMap
     {
         protected override void LoadCustomData()
@@ -16,7 +11,7 @@ namespace BFPlus.Extensions.Maps.AbandonedTower
             map.battleleafcolor = Color.gray;
             map.canfollowID = new int[0];
             map.fogend = 50;
-            map.fogcolor = new Color(0.5f,0.5f,0.5f,0.5f);
+            map.fogcolor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             AddCorrectMaterials(map.transform);
         }
 

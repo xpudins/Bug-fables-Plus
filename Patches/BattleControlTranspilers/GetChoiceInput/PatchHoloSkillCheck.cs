@@ -3,10 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BFPlus.Patches.BattleControlTranspilers.GetChoiceInput
 {
@@ -18,9 +14,9 @@ namespace BFPlus.Patches.BattleControlTranspilers.GetChoiceInput
             priority = 728;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchStfld(AccessTools.Field(typeof(BattleControl), "lastskill")));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(BattleControl), "lastskill")));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CheckHoloSkill"));
             Utils.RemoveUntilInst(cursor, i => i.MatchRet());
 

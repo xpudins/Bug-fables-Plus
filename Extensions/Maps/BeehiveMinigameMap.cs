@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static MainManager;
-using static UnityEngine.Experimental.UIElements.EventDispatcher;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps
 {
@@ -17,7 +10,7 @@ namespace BFPlus.Extensions.Maps
             SetBaseMapData(Color.gray, Vector3.zero, Vector3.zero, MainManager.Areas.Beehive, Resources.Load("Audio/Music/Bee") as AudioClip);
             map.camlimitneg = new Vector3(-9f, -4f, -24f);
             map.camlimitpos = new Vector3(11f, 999f, 999f);
-            map.skycolor = new Color(0.8f,0.64f,0.41f,1);
+            map.skycolor = new Color(0.8f, 0.64f, 0.41f, 1);
             map.skyboxmat = Resources.Load<Material>("materials/skybox/Black");
             map.canfollowID = new int[0];
             var baseObject = map.transform.Find("Base");

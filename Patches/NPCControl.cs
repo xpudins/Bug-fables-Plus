@@ -1,14 +1,8 @@
-﻿using HarmonyLib;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
 using UnityEngine;
-using BFPlus.Extensions;
-using System.Runtime.Remoting.Lifetime;
 
 namespace BFPlus.Patches
 {
@@ -30,13 +24,13 @@ namespace BFPlus.Patches
 
     [HarmonyPatch(typeof(NPCControl), "StartBattle", new Type[] { })]
     public class PatchNPCControlStartBattle
-    {      
+    {
         static bool Prefix(NPCControl __instance)
         {
             if (MainManager_Ext.inSeedlingMinigame)
                 return false;
 
-            if ((__instance.entity.animid == (int)NewAnimID.Worm || __instance.entity.animid == (int)NewAnimID.WormSwarm  )&& __instance.entity.digging)
+            if ((__instance.entity.animid == (int)NewAnimID.Worm || __instance.entity.animid == (int)NewAnimID.WormSwarm) && __instance.entity.digging)
             {
                 return false;
             }
@@ -49,7 +43,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(NPCControl __instance, ref bool __result)
         {
-            if((NewMaps)MainManager.map.mapid == NewMaps.Pit100BaseRoom || (NewMaps)MainManager.map.mapid == NewMaps.Pit100Reward || MainManager.map.mapid == MainManager.Maps.GoldenSMinigame)
+            if ((NewMaps)MainManager.map.mapid == NewMaps.Pit100BaseRoom || (NewMaps)MainManager.map.mapid == NewMaps.Pit100Reward || MainManager.map.mapid == MainManager.Maps.GoldenSMinigame)
             {
                 __result = false;
             }
@@ -73,7 +67,7 @@ namespace BFPlus.Patches
                 __instance.entity.model.localScale = Vector3.one;
             }
 
-            if ((int)MainManager.map.mapid == (int)NewMaps.SandCastleDepthsIcePuzzle && __instance.objecttype == NPCControl.ObjectTypes.PushRock && __instance.data.Length <=2)
+            if ((int)MainManager.map.mapid == (int)NewMaps.SandCastleDepthsIcePuzzle && __instance.objecttype == NPCControl.ObjectTypes.PushRock && __instance.data.Length <= 2)
             {
                 __instance.entity.model.GetComponent<MeshRenderer>().materials = new Material[] { Resources.Load("materials/Ice") as Material, MainManager.outlinemain };
             }
@@ -115,7 +109,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(NPCControl __instance, Collider other)
         {
-            if(MainManager.instance.flags[945] && __instance.entitytype == NPCControl.NPCType.NPC && other.CompareTag("Icecle"))
+            if (MainManager.instance.flags[945] && __instance.entitytype == NPCControl.NPCType.NPC && other.CompareTag("Icecle"))
             {
                 if (__instance.collisionammount == 0 && !__instance.entity.dead && !__instance.entity.digging && __instance.touchcooldown <= 0f)
                 {
@@ -146,6 +140,18 @@ namespace BFPlus.Patches
         static bool Prefix(NPCControl __instance)
         {
             return !MainManager.instance.flags[916];
+        }
+    }
+
+    [HarmonyPatch(typeof(NPCControl), "CutGrass")]
+    public class PatchNPCControlCutGrass
+    {
+        static void Postfix(NPCControl __instance)
+        {
+            if (MainManager_Ext.IsOutdoorMap(MainManager.map) && MainManager_Ext.Instance.GetWhirlySeedChance())
+            {
+                EntityControl.CreateItem(__instance.transform.position + Vector3.up * 0.5f, 0, (int)NewItem.WhirlySeed, MainManager.RandomItemBounce(4f, 12f), 600);
+            }
         }
     }
 }

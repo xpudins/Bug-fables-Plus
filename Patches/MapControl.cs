@@ -1,13 +1,10 @@
-﻿using HarmonyLib;
+﻿using BFPlus.Extensions;
+using BFPlus.Extensions.AnimNPCs;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
 using UnityEngine;
-using BFPlus.Extensions;
-using System.Collections;
 
 namespace BFPlus.Patches
 {
@@ -22,7 +19,7 @@ namespace BFPlus.Patches
                     __instance.gameObject.AddComponent<MapControl_Ext>();
                 MapControl_Ext.npcToAdd = new List<NewNpc>();
                 TextAsset mapChanges = MainManager_Ext.assetBundle.LoadAllAssets<TextAsset>().Where(asset => asset.name.Contains("mapData") && asset.name.Split('_')[1] == "mapData" && asset.name.Split('_')[0] == __instance.mapid.ToString()).FirstOrDefault();
-                if(mapChanges != null)
+                if (mapChanges != null)
                 {
                     int result = 0;
                     string[] data = mapChanges.ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -39,11 +36,11 @@ namespace BFPlus.Patches
                 {
                     string[] dialogues = mapDialogues.ToString().Split('\n');
                     var currentMapDialogues = __instance.dialogues.ToList();
-                    for(int i=0; i != dialogues.Length; i++)
+                    for (int i = 0; i != dialogues.Length; i++)
                     {
                         string[] line = dialogues[i].Split(new char[] { '[' }, StringSplitOptions.RemoveEmptyEntries);
                         int replaceLine = int.Parse(line[0]);
-                        if(replaceLine != -1)
+                        if (replaceLine != -1)
                         {
                             currentMapDialogues.RemoveAt(replaceLine);
                             currentMapDialogues.Insert(replaceLine, line[1]);
@@ -55,9 +52,9 @@ namespace BFPlus.Patches
                 }
 
 
-                if(MainManager_Ext.IsCustomMap())
+                if (MainManager_Ext.IsCustomMap())
                 {
-                    mapDialogues = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(((NewMaps)__instance.mapid).ToString() +"Dialogue");
+                    mapDialogues = MainManager_Ext.assetBundle.LoadAsset<TextAsset>(((NewMaps)__instance.mapid).ToString() + "Dialogue");
                     __instance.dialogues = mapDialogues.ToString().Split('\n');
                 }
             }
@@ -78,7 +75,7 @@ namespace BFPlus.Patches
 
                 if (!pitData.moverFloor)
                 {
-                    if(PitData.GetCurrentFloor() != 99)
+                    if (PitData.GetCurrentFloor() != 99)
                     {
                         var enemy = MainManager.map.entities.First(e => e.npcdata.entitytype == NPCControl.NPCType.Enemy);
                         enemy.npcdata.battleids = pitData.GetCurrentFloorEnemies();
@@ -90,10 +87,10 @@ namespace BFPlus.Patches
                     }
                     else
                     {
-                        EntityControl[] enemies = MainManager.map.entities.Where(e => e.npcdata.entitytype == NPCControl.NPCType.Enemy).ToArray();      
+                        EntityControl[] enemies = MainManager.map.entities.Where(e => e.npcdata.entitytype == NPCControl.NPCType.Enemy).ToArray();
                         pitData.GetEnemiesPos(enemies);
 
-                        for(int i=0;i<enemies.Length; i++)
+                        for (int i = 0; i < enemies.Length; i++)
                         {
                             enemies[i].npcdata.vectordata = pitData.GetRandomFloorEnemyItemDrop();
                             enemies[i].npcdata.teleportradius = 30f;
@@ -128,7 +125,7 @@ namespace BFPlus.Patches
         {
             var changeMethod = typeof(MapControl_Ext).GetMethod("Change" + __instance.mapid);
 
-            if(changeMethod != null)
+            if (changeMethod != null)
             {
                 MainManager_Ext.LoadMapsBundle();
                 changeMethod?.Invoke(null, new object[] { __instance });
@@ -173,20 +170,49 @@ namespace BFPlus.Patches
 
             if ((int)__instance.mapid == (int)NewMaps.AntPalaceTrainingRoom)
             {
-                __instance.entities[9].gameObject.AddComponent<TrainingNPC>();
-                __instance.entities[11].gameObject.AddComponent<TrainingNPC>();
-                __instance.entities[2].gameObject.AddComponent<TrainingNPC>();
+                __instance.entities[9].gameObject.AddComponent<GenTrainingAnim>();
+                __instance.entities[11].gameObject.AddComponent<CeliaTrainingAnim>();
+                __instance.entities[2].gameObject.AddComponent<StratosTrainingAnim>();
             }
 
-            if((int)__instance.mapid == (int)NewMaps.LeafbugVillage && MainManager.instance.flags[886])
+            if ((int)__instance.mapid == (int)NewMaps.LeafbugVillage && MainManager.instance.flags[886])
             {
-                BadmintonObj badminton =new GameObject("badmintonObj").AddComponent<BadmintonObj>();
-                badminton.transform.parent =  __instance.transform;
+                BadmintonObj badminton = new GameObject("badmintonObj").AddComponent<BadmintonObj>();
+                badminton.transform.parent = __instance.transform;
+            }
+
+            if ((int)__instance.mapid == (int)MainManager.Maps.BugariaOutskitsSnakemouthCorridor1 && MainManager.instance.flags[41] && !MainManager.instance.flags[966])
+            {
+                JumpAntAmbushObj ambush = new GameObject("jumpAntAmbush").AddComponent<JumpAntAmbushObj>();
+                ambush.transform.parent = __instance.transform;
             }
 
             if (MainManager.instance.flags[916])
             {
                 MapControl_Ext.CheckIntermissionEntities(__instance);
+            }
+
+            if (__instance.mapid == MainManager.Maps.BugariaTheater && MainManager.instance.flags[981])
+            {
+                Vector3 partnerPos = new Vector3(-14.69f, 0f, 0.62f);
+                int partnerId = UnityEngine.Random.Range(6, 14);
+                __instance.entities[partnerId].transform.position = partnerPos;
+                __instance.entities[partnerId].startpos = partnerPos;
+                __instance.entities[partnerId].lastpos = partnerPos;
+            }
+
+            //temporary, deactivate bush in the way for jump ant cutscene
+            if (__instance.mapid == MainManager.Maps.GoldenHillsDungeonUpperSide && MainManager.instance.flags[966] && MainManager.instance.flags[88] && !MainManager.instance.flags[967])
+            {
+                __instance.entities[27].gameObject.SetActive(false);
+                __instance.entities[23].gameObject.SetActive(false);
+
+                //jumpAnt
+                AnimNPC.CreateAnimNPC(typeof(JumpAntGoldenHillsAnim), __instance.entities[40], true, 0);
+
+                //pirahnaChomps
+                AnimNPC.CreateAnimNPC(typeof(PirahnaJumpAntAnim), __instance.entities[37], true, 10);
+                AnimNPC.CreateAnimNPC(typeof(PirahnaJumpAntAnim), __instance.entities[38], true, 20);
             }
         }
     }
@@ -209,6 +235,16 @@ namespace BFPlus.Patches
         static bool Prefix(MapControl __instance)
         {
             return !MainManager.instance.flags[916];
+        }
+    }
+
+    [HarmonyPatch(typeof(MapControl), "AreaSpecific")]
+    public class PatchMapControlAreaSpecific
+    {
+        static void Prefix(MapControl __instance)
+        {
+            if (__instance.areaid == MainManager.Areas.SandCastle && __instance.canfollowID != null)
+                MainManager.Insert((int)NewAnimID.JumpAnt, ref __instance.canfollowID);
         }
     }
 }

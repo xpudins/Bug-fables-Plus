@@ -1,13 +1,7 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
-using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.NPCControlTranspilers
 {
@@ -20,12 +14,12 @@ namespace BFPlus.Patches.NPCControlTranspilers
         {
             priority = 178;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(681));
             cursor.GotoNext(i => i.MatchLdcI4(681));
 
-            cursor.GotoNext(i => i.MatchLdsfld(out _), i=>i.MatchLdfld(out _));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext(i => i.MatchLdfld(out _));
             Utils.RemoveUntilInst(cursor, i => i.MatchStelemI4());

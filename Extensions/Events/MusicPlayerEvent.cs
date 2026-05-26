@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events
@@ -17,7 +14,7 @@ namespace BFPlus.Extensions.Events
                 yield return null;
             }
 
-            if(MainManager.instance.inmusicrange != -1)
+            if (MainManager.instance.inmusicrange != -1)
             {
                 instance.StartCoroutine(MainManager.SetText(MainManager.commondialogue[207], null, null));
                 while (MainManager.instance.message)

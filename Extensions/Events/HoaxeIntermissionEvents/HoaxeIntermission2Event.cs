@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 {
@@ -33,7 +27,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             if (MainManager.map.chompy != null)
             {
-                MainManager.map.chompy.transform.position = new Vector3(0,-999);
+                MainManager.map.chompy.transform.position = new Vector3(0, -999);
                 MainManager.map.chompy.LockRigid(true);
             }
 
@@ -49,9 +43,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             EntityControl[] deadlanders = new EntityControl[3];
 
-            for (int i = 0; i < deadlanders.Length; i++) 
+            for (int i = 0; i < deadlanders.Length; i++)
             {
-                deadlanders[i] = EntityControl.CreateNewEntity("deadlander"+i, (int)MainManager.AnimIDs.DeadLanderA - 1 + i, new Vector3(60+i*3, 0, 16f+i*2));
+                deadlanders[i] = EntityControl.CreateNewEntity("deadlander" + i, (int)MainManager.AnimIDs.DeadLanderA - 1 + i, new Vector3(60 + i * 3, 0, 16f + i * 2));
                 deadlanders[i].transform.parent = MainManager.map.transform;
             }
 
@@ -94,10 +88,10 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.LockRigid(true);
             hoaxe.animstate = (int)MainManager.Animations.Jump;
             hoaxe.PlaySound("Jump");
-            hoaxe.StartCoroutine(MainManager.ArcMovement(hoaxe.gameObject, hoaxe.transform.position + Vector3.forward*2, 5, 20));
+            hoaxe.StartCoroutine(MainManager.ArcMovement(hoaxe.gameObject, hoaxe.transform.position + Vector3.forward * 2, 5, 20));
 
             deadlanders[0].animstate = 102;
-            deadlanders[0].PlaySound("Bite",1f,1.2f);
+            deadlanders[0].PlaySound("Bite", 1f, 1.2f);
             yield return EventControl.halfsec;
 
             hoaxe.LockRigid(false);
@@ -130,13 +124,13 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             MainManager.PlaySound("DLGammaStep", 9, 1, 1, true);
             for (int i = 0; i < deadlanders.Length; i++)
             {
-                deadlanders[i].transform.position = new Vector3(40+i*2, 0, 8.5f + i*1);
+                deadlanders[i].transform.position = new Vector3(40 + i * 2, 0, 8.5f + i * 1);
                 deadlanders[i].MoveTowards(deadlandersPositions[i], 2f);
             }
 
             yield return EventControl.sec;
             yield return EventControl.halfsec;
-            MainManager.SetCamera(null, targetPos + new Vector3(4,0,-1), 0.05f);
+            MainManager.SetCamera(null, targetPos + new Vector3(4, 0, -1), 0.05f);
 
             yield return new WaitUntil(() => !hoaxe.forcemove);
             hoaxe.flip = true;
@@ -152,7 +146,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             MainManager.StopSound(9);
             yield return EventControl.halfsec;
 
-            for(int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 yield return EventControl.halfsec;
                 MainManager.PlaySound("DLGammaStep", 9, 1, 1, true);
@@ -223,7 +217,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             for (int i = 0; i < deadlanders.Length; i++)
             {
-                deadlanders[i].MoveTowards(new Vector3(30, 0,6), 2f);
+                deadlanders[i].MoveTowards(new Vector3(30, 0, 6), 2f);
             }
 
             MainManager.FadeMusic(0.1f);
@@ -231,7 +225,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             yield return EventControl.sec;
             yield return EventControl.sec;
 
-            EntityControl[] wasps= MainManager.GetEntities(new int[] {8,9,10,11});
+            EntityControl[] wasps = MainManager.GetEntities(new int[] { 8, 9, 10, 11 });
 
             foreach (var wasp in wasps)
                 wasp.alwaysactive = true;
@@ -255,7 +249,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             wasps[0].Emoticon(MainManager.Emoticons.Exclamation, 60);
             yield return EventControl.sec;
 
-            wasps[0].MoveTowards(new Vector3(4.4f, 0,10f), 1);
+            wasps[0].MoveTowards(new Vector3(4.4f, 0, 10f), 1);
             yield return new WaitUntil(() => !wasps[0].forcemove);
 
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[8], true, Vector3.zero, wasps[0].transform, wasps[0].npcdata));
@@ -275,9 +269,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             {
                 wasps[i].Unfix(true);
                 wasps[i].transform.position = new Vector3(-5 + i * 2, 0, -2 + i * 1);
-                wasps[i].MoveTowards(waspsPos[i-1], 1f);
+                wasps[i].MoveTowards(waspsPos[i - 1], 1f);
             }
-          
+
             yield return new WaitUntil(() => !wasps[1].forcemove && !wasps[2].forcemove && !wasps[3].forcemove);
 
             for (int i = 1; i < wasps.Length; i++)
@@ -357,7 +351,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             }
 
             MainManager.instance.flags[928] = true;
-            yield return EndIntermissionPostgame(instance,73,53);
+            yield return EndIntermissionPostgame(instance, 73, 53);
         }
     }
 }

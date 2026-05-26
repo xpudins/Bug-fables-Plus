@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -21,16 +16,16 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 0;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdstr("|boxstyle,-1|"), i => i.MatchStloc2());
-            cursor.Emit(OpCodes.Call,AccessTools.Method(typeof(PatchResetStuff), "ResetStuff"));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("|boxstyle,-1|"), i => i.MatchStloc2());
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchResetStuff), "ResetStuff"));
         }
 
         static void ResetStuff()
         {
             BattleControl_Ext.Instance.ResetStuff();
-            
+
             //This is because of pattons messing max hp around
             MainManager.ApplyBadges();
             MainManager.ApplyStatBonus();

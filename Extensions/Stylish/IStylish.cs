@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace BFPlus.Extensions.Stylish
 {
     public interface IStylish
     {
-        IEnumerator DoStylish(int actionid, int stylishID);
+        IEnumerator DoStylish(int actionid, int stylishID, float stylishGain);
     }
 
     public class StylishUtils
     {
-        public static bool CheckStylish(ref bool failedStylish,EntityControl entity, float time, float antiSpamFrames)
+        public static bool CheckStylish(ref bool failedStylish, EntityControl entity, float time, float antiSpamFrames)
         {
             if (time < antiSpamFrames)
             {
@@ -29,7 +25,7 @@ namespace BFPlus.Extensions.Stylish
             }
             else if (!failedStylish)
             {
-                if(MainManager.BadgeIsEquipped((int)Medal.TimingTutor))
+                if (MainManager.BadgeIsEquipped((int)Medal.TimingTutor))
                     entity.Emoticon(MainManager.Emoticons.Exclamation);
                 if (MainManager.GetKey(4, false))
                 {
@@ -41,11 +37,13 @@ namespace BFPlus.Extensions.Stylish
         }
 
 
-        public static void ShowStylish(float pitch, EntityControl entity, float stylishIncrease = 0.1f)
+        public static void ShowStylish(float pitch, EntityControl entity, float stylishIncrease = 0.1f, bool increaseBar = true, Vector3? offset = null)
         {
             MainManager.PlaySound("AtkSuccess", pitch, 1);
-            MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.ShowStylishMessage(entity));
-            MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.IncreaseStylishBar(stylishIncrease,entity));
+            MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.ShowStylishMessage(entity, offset));
+
+            if (increaseBar)
+                MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.IncreaseStylishBar(stylishIncrease, entity));
         }
     }
 }

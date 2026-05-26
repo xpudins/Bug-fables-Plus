@@ -1,14 +1,7 @@
-﻿using BFPlus.Extensions.Maps.AbandonedTower;
-using BFPlus.Extensions.Maps.DeepCave;
-using BFPlus.Extensions.Maps.NewPowerPlant;
-using BFPlus.Extensions.Maps.PitMaps;
-using BFPlus.Extensions.Maps.SandCastleDepths;
-using BFPlus.Extensions.Maps;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
 {
@@ -42,6 +35,12 @@ namespace BFPlus.Extensions.EnemyAI
             {NewEnemies.FirePopper, typeof(FirePopperAI) },
             {NewEnemies.Patton, typeof(PattonAI) },
             {NewEnemies.LonglegsSpider, typeof(LongLegsSpiderAI) },
+            {NewEnemies.JumpAnt, typeof(JumpAntAI) },
+            {NewEnemies.Frostfly, typeof(FrostflyAI) },
+            {NewEnemies.Caveling, typeof(CavelingAI) },
+            {NewEnemies.SplotchSpider, typeof(SplotchSpiderAI) },
+            {NewEnemies.Moeruki, typeof(MoerukiAI) },
+            {NewEnemies.MechaJaw, typeof(MechaJawAI) },
         };
 
         public static AI GetAI(NewEnemies enemyType)
@@ -55,7 +54,32 @@ namespace BFPlus.Extensions.EnemyAI
 
         public static bool HasCustomAI(NewEnemies enemyType)
         {
-            return EnemyTypeToAI.ContainsKey(enemyType);    
+            return EnemyTypeToAI.ContainsKey(enemyType);
+        }
+
+        public static IEnumerator ThrowBubble(Color color, Vector3 startPos, Vector3 targetPos, float frameTime, float height, Vector3 scale)
+        {
+            GameObject bubble = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Objects/WaterBubble"), startPos, Quaternion.identity) as GameObject;
+            bubble.transform.localScale = scale;
+            bubble.GetComponent<SpriteBounce>().startscale = true;
+            bubble.GetComponent<SpriteRenderer>().color = color;
+
+            Vector3 bubbleStartPos = bubble.transform.position;
+            MainManager.PlaySound("Blosh");
+            MainManager.PlaySound("Wub", 9, 0.8f, 1f, true);
+
+            float a = 0f;
+            while (a < frameTime)
+            {
+                bubble.transform.position = MainManager.BeizierCurve3(bubbleStartPos, targetPos, height, a / frameTime);
+                a += MainManager.TieFramerate(1f);
+                yield return null;
+            }
+            UnityEngine.Object.Destroy(bubble);
+            MainManager.StopSound(9);
+            MainManager.PlaySound("BubbleBurst");
+            MainManager.PlayParticle("WaterSplash", targetPos + Vector3.up)
+                .GetComponent<ParticleSystemRenderer>().material.color = color;
         }
     }
 }

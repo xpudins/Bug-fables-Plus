@@ -1,13 +1,7 @@
-﻿using BFPlus.Extensions.Events.DarkTeamSnakemouthEvents;
-using BFPlus.Patches.DoActionPatches;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace BFPlus.Extensions.Events.GourmetRaceEvents
 {
@@ -40,7 +34,7 @@ namespace BFPlus.Extensions.Events.GourmetRaceEvents
             yield return EventControl.halfsec;
 
             int count = 0;
-            for (int i = MainManager.instance.playerdata.Length-1; i >= 0; i--)
+            for (int i = MainManager.instance.playerdata.Length - 1; i >= 0; i--)
             {
                 MainManager.instance.playerdata[i].entity.transform.position = new Vector3(-1.4f + 1.5f * (float)count, 0f, 2.39f);
                 MainManager.instance.playerdata[i].entity.flip = false;
@@ -109,7 +103,7 @@ namespace BFPlus.Extensions.Events.GourmetRaceEvents
                 int points = contestants[i].Points;
                 EntityControl entity = contestantEntities.FirstOrDefault(e => e.animid == animId);
 
-                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[9+i] + points + " |call,16|", true, Vector3.zero, judge.transform, judge.npcdata));
+                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[9 + i] + points + " |call,16|", true, Vector3.zero, judge.transform, judge.npcdata));
                 while (MainManager.instance.message)
                 {
                     yield return null;
@@ -117,7 +111,7 @@ namespace BFPlus.Extensions.Events.GourmetRaceEvents
                 int dialogueLine = animIdToDialogueLine[animId];
 
                 //set camera on contestant
-                MainManager.SetCamera(entity.transform, entity.transform.position,0.1f, new Vector3(0,2.25f,-5f));
+                MainManager.SetCamera(entity.transform, entity.transform.position, 0.1f, new Vector3(0, 2.25f, -5f));
                 entity.animstate = (int)MainManager.Animations.ItemGet;
 
                 MainManager.PlaySound("CrowdClapping");
@@ -217,7 +211,7 @@ namespace BFPlus.Extensions.Events.GourmetRaceEvents
                 if (playerPosition == 2 && MainManager.instance.flagvar[1] >= 60)
                     dialoguePositionReward = 25;
 
-                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[dialoguePositionReward]+text, true, Vector3.zero, judge.transform, judge.npcdata));
+                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[dialoguePositionReward] + text, true, Vector3.zero, judge.transform, judge.npcdata));
                 while (MainManager.instance.message)
                 {
                     yield return null;

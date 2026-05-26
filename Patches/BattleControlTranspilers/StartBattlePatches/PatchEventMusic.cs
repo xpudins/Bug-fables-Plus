@@ -1,13 +1,10 @@
-﻿using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Extensions;
+using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Management.Instrumentation;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 {
@@ -18,7 +15,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             priority = 644;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "inlist")));
 
@@ -27,10 +24,10 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             cursor.GotoNext(i => i.MatchCallvirt(AccessTools.Method(typeof(BattleControl), "StartData")));
             cursor.GotoPrev(
                 i => i.MatchLdfld(out _),
-                i => i.MatchLdarg0(), 
+                i => i.MatchLdarg0(),
                 i => i.MatchLdfld(out _),
-                i=>i.MatchLdarg0(), 
-                i=>i.MatchLdfld(out _));
+                i => i.MatchLdarg0(),
+                i => i.MatchLdfld(out _));
 
             var musicRef = cursor.Next.Operand;
 
@@ -55,9 +52,10 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 
         static string CheckEventMusic(string music, int[] enemyids)
         {
+            BattleControl_Ext.inStartBattle = true;
             if (MainManager.instance.inevent)
             {
-                int[] events = new int[] { 
+                int[] events = new int[] {
                     14, //Jelly shroom relay Tutorial,
                     70, //Venus buds battle
                     91, //Cable car bodyguard quest
@@ -76,7 +74,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 
                 if (events.Contains(MainManager.lastevent))
                 {
-                    return "Battle6";
+                    return NewMusic.EventBattle.ToString();
                 }
 
                 switch (MainManager.lastevent)
@@ -84,21 +82,19 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
                     //Confidential Event
                     case 207:
                         if (enemyids.Contains((int)MainManager.Enemies.LeafbugArcher))
-                            return "Battle6";
+                            return NewMusic.EventBattle.ToString();
                         break;
 
                     //Coloseum Event
                     case 163:
                         if (enemyids.Contains((int)MainManager.Enemies.MimicSpider))
-                            return "Battle6";
+                            return NewMusic.EventBattle.ToString();
                         break;
                 }
-
-
             }
 
             if (MainManager.map.mapid == MainManager.Maps.GoldenSMinigame)
-                return "Battle6";
+                return NewMusic.EventBattle.ToString();
 
             return music;
         }

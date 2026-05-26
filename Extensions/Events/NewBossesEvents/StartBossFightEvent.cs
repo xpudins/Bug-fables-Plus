@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.NewBossesEvents
@@ -36,7 +34,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             if (chompy != null)
             {
                 chompy.forcejump = true;
-            }           
+            }
             while (!MainManager.PartyIsNotMoving() || (chompy != null && chompy.forcemove) || caller.entity.forcemoving != null)
             {
                 yield return null;
@@ -45,7 +43,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
 
         protected IEnumerator DoWinFightEvent(EventControl instance, NPCControl caller, EntityControl[] enemies, EntityControl[] party, int itemID, int flag, int itemType, Vector3 itemPos, bool resetCam = true)
         {
-            if(resetCam)
+            if (resetCam)
                 MainManager.ResetCamera(true);
 
             foreach (var enemy in enemies)
@@ -78,7 +76,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
                 p.animstate = 0;
             }
 
-            party[0].MoveTowards(item.transform.position,1,(int)MainManager.Animations.Walk, 0);
+            party[0].MoveTowards(item.transform.position, 1, (int)MainManager.Animations.Walk, 0);
             while (party[0].forcemove)
             {
                 yield return null;

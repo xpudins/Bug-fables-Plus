@@ -12,99 +12,12 @@ namespace BFPlus.Extensions.Stylish
     public class TeamStylish : IStylish
     {
         bool inSecondStylish;
-        IEnumerator DoFrostRelayStylish()
-        {
-            EntityControl[] entities = battle.GetEntities(new int[] { 0, 1, 2 });
 
-            EntityControl vi = entities[0];
-
-            EntityControl leif = entities[2];
-            StylishUtils.ShowStylish(1.2f, leif);
-
-            leif.LockRigid(true);
-            leif.overrridejump = true;
-            leif.overrideanim = true;
-            leif.overrideflip = false;
-
-            leif.FaceTowards(vi.transform.position);
-            leif.animstate = 111;
-            yield return EventControl.tenthsec;
-            MainManager.PlayParticle("mothicenormal", "OverworldIce", vi.transform.position);
-            vi.Freeze();
-            yield return EventControl.quartersec;
-
-            entities[1].animstate = (int)MainManager.Animations.Surprized;
-
-            float a = 0;
-            float b = 30;
-            Vector3 startPos = leif.transform.position;
-            Vector3 targetPos = vi.transform.position + Vector3.up * 2;
-            bool failedStylish = false;
-
-            leif.animstate = (int)MainManager.Animations.Jump;
-            MainManager.PlaySound("Jump");
-            do
-            {
-                leif.transform.position = MainManager.BeizierCurve3(startPos, targetPos, 5f, a / b);
-                a += MainManager.TieFramerate(1f);
-                yield return null;
-            } while (a < b);
-
-            a = 0;
-            b = 20;
-            do
-            {
-                if (!inSecondStylish && !failedStylish)
-                {
-                    if (StylishUtils.CheckStylish(ref failedStylish, leif, a, 5f))
-                    {
-                        inSecondStylish = true;
-                        MainManager.battle.StartCoroutine(DoLeifPose(leif));
-                        break;
-                    }
-                }
-                a += MainManager.TieFramerate(1f);
-                yield return null;
-            } while (a < b);
-            leif.Emoticon(MainManager.Emoticons.None);
-
-            yield return new WaitUntil(() => !inSecondStylish);
-
-            vi.BreakIce();
-            leif.spin = new Vector3(0, 20, 0);
-            leif.animstate = (int)MainManager.Animations.Fall;
-            void action(Vector3 startPosition, Vector3 endPosition, Transform obj, float starttime, float endTime)
-            {
-                obj.position = MainManager.BeizierCurve3(startPosition, endPosition, 5f, starttime / endTime);
-            }
-
-            Vector3[] partyPos = MainManager.battle.partypos;
-            int leifIndex = Array.FindIndex(MainManager.battle.partypointer, x => x == 2);
-
-            yield return LerpStuff(30f, leif.transform.position, partyPos[leifIndex], leif.transform, action);
-            leif.spin = Vector3.zero;
-            leif.LockRigid(false);
-            leif.overrridejump = false;
-            leif.overrideanim = false;
-            leif.animstate = (int)MainManager.Animations.Idle;
-            vi.animstate = (int)MainManager.Animations.Angry;
-        }
-
-        IEnumerator DoLeifPose(EntityControl leif)
-        {
-            StylishUtils.ShowStylish(1.2f, leif);
-            leif.spin = new Vector3(0, 20, 0);
-            leif.animstate = (int)MainManager.Animations.ItemGet;
-            yield return EventControl.thirdsec;
-            leif.spin = Vector3.zero;
-            inSecondStylish = false;
-        }
-
-        IEnumerator DoFlyDropStylish()
+        IEnumerator DoFlyDropStylish(float gain)
         {
             EntityControl[] entities = battle.GetEntities(new int[] { 0, 1 });
 
-            StylishUtils.ShowStylish(1.2f, entities[1]);
+            StylishUtils.ShowStylish(1.2f, entities[1], gain);
             Vector3[] basePosition = new Vector3[]
             {
                 entities[0].transform.position,
@@ -136,7 +49,7 @@ namespace BFPlus.Extensions.Stylish
                     if (StylishUtils.CheckStylish(ref failedStylish, entities[0], a, 10f))
                     {
                         inSecondStylish = true;
-                        MainManager.battle.StartCoroutine(DoViJump(entities[0], entities[1]));
+                        MainManager.battle.StartCoroutine(DoViJump(entities[0], entities[1], gain));
                     }
                 }
                 a += MainManager.TieFramerate(1f);
@@ -195,10 +108,9 @@ namespace BFPlus.Extensions.Stylish
                 entity.flip = true;
             }
         }
-
-        IEnumerator DoViJump(EntityControl vi, EntityControl kabbu)
+        IEnumerator DoViJump(EntityControl vi, EntityControl kabbu, float gain)
         {
-            StylishUtils.ShowStylish(1.2f, vi);
+            StylishUtils.ShowStylish(1.2f, vi, gain);
             float a = 0;
             float b = 20;
 
@@ -233,13 +145,101 @@ namespace BFPlus.Extensions.Stylish
             vi.flip = true;
             inSecondStylish = false;
         }
-        IEnumerator DoFrozenDrillStylish()
+
+        IEnumerator DoFrostRelayStylish(float gain)
+        {
+            EntityControl[] entities = battle.GetEntities(new int[] { 0, 1, 2 });
+
+            EntityControl vi = entities[0];
+            EntityControl leif = entities[2];
+
+            StylishUtils.ShowStylish(1.2f, leif, gain);
+
+            leif.LockRigid(true);
+            leif.overrridejump = true;
+            leif.overrideanim = true;
+            leif.overrideflip = false;
+
+            leif.FaceTowards(vi.transform.position);
+            leif.animstate = 111;
+            yield return EventControl.tenthsec;
+            MainManager.PlayParticle("mothicenormal", "OverworldIce", vi.transform.position);
+            vi.Freeze();
+            yield return EventControl.quartersec;
+
+            entities[1].animstate = (int)MainManager.Animations.Surprized;
+
+            float a = 0;
+            float b = 30;
+            Vector3 startPos = leif.transform.position;
+            Vector3 targetPos = vi.transform.position + Vector3.up * 2;
+            bool failedStylish = false;
+
+            leif.animstate = (int)MainManager.Animations.Jump;
+            MainManager.PlaySound("Jump");
+            do
+            {
+                leif.transform.position = MainManager.BeizierCurve3(startPos, targetPos, 5f, a / b);
+                a += MainManager.TieFramerate(1f);
+                yield return null;
+            } while (a < b);
+
+            a = 0;
+            b = 20;
+            do
+            {
+                if (!inSecondStylish && !failedStylish)
+                {
+                    if (StylishUtils.CheckStylish(ref failedStylish, leif, a, 5f))
+                    {
+                        inSecondStylish = true;
+                        MainManager.battle.StartCoroutine(DoLeifPose(leif, gain));
+                        break;
+                    }
+                }
+                a += MainManager.TieFramerate(1f);
+                yield return null;
+            } while (a < b);
+            leif.Emoticon(MainManager.Emoticons.None);
+
+            yield return new WaitUntil(() => !inSecondStylish);
+
+            vi.BreakIce();
+            leif.spin = new Vector3(0, 20, 0);
+            leif.animstate = (int)MainManager.Animations.Fall;
+            void action(Vector3 startPosition, Vector3 endPosition, Transform obj, float starttime, float endTime)
+            {
+                obj.position = MainManager.BeizierCurve3(startPosition, endPosition, 5f, starttime / endTime);
+            }
+
+            Vector3[] partyPos = MainManager.battle.partypos;
+            int leifIndex = Array.FindIndex(MainManager.battle.partypointer, x => x == 2);
+
+            yield return LerpStuff(30f, leif.transform.position, partyPos[leifIndex], leif.transform, action);
+            leif.spin = Vector3.zero;
+            leif.LockRigid(false);
+            leif.overrridejump = false;
+            leif.overrideanim = false;
+            leif.animstate = (int)MainManager.Animations.Idle;
+            vi.animstate = (int)MainManager.Animations.Angry;
+        }
+        IEnumerator DoLeifPose(EntityControl leif, float gain)
+        {
+            StylishUtils.ShowStylish(1.2f, leif, gain);
+            leif.spin = new Vector3(0, 20, 0);
+            leif.animstate = (int)MainManager.Animations.ItemGet;
+            yield return EventControl.thirdsec;
+            leif.spin = Vector3.zero;
+            inSecondStylish = false;
+        }
+
+        IEnumerator DoFrozenDrillStylish(float gain)
         {
             EntityControl[] entities = battle.GetEntities(new int[] { 1, 2 });
 
             EntityControl kabbu = entities[0];
             EntityControl leif = entities[1];
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
 
             bool originalFlip = leif.flip;
 
@@ -284,7 +284,7 @@ namespace BFPlus.Extensions.Stylish
 
             if (hitBlock)
             {
-                yield return DoKabbuDrillStylish(kabbu, leif, icecube);
+                yield return DoKabbuDrillStylish(kabbu, leif, icecube, gain);
             }
             else
             {
@@ -298,10 +298,9 @@ namespace BFPlus.Extensions.Stylish
 
             leif.flip = originalFlip;
         }
-
-        IEnumerator DoKabbuDrillStylish(EntityControl kabbu, EntityControl leif, GameObject icecube)
+        IEnumerator DoKabbuDrillStylish(EntityControl kabbu, EntityControl leif, GameObject icecube, float gain)
         {
-            StylishUtils.ShowStylish(1.2f, kabbu);
+            StylishUtils.ShowStylish(1.2f, kabbu, gain);
             kabbu.animstate = 100;
             kabbu.PlaySound("Damage0", 1f, 0.5f);
             MainManager.HitPart(kabbu.transform.position + Vector3.up / 2f);
@@ -340,19 +339,19 @@ namespace BFPlus.Extensions.Stylish
             leif.Emoticon(MainManager.Emoticons.None);
             kabbu.animstate = (int)MainManager.Animations.BattleIdle;
             if (gotStylish)
-                yield return DoFrozenDrillStylish();
+                yield return DoFrozenDrillStylish(gain);
         }
 
-        IEnumerator DoFrostBowlingStylish()
+        IEnumerator DoFrostBowlingStylish(float gain)
         {
             EntityControl[] entities = battle.GetEntities(new int[] { 0, 1, 2 });
-            StylishUtils.ShowStylish(1.2f, entities[0]);
+            StylishUtils.ShowStylish(1.2f, entities[0], gain);
 
             entities[0].animstate = 111;
             entities[1].animstate = 114;
             entities[2].animstate = 115;
 
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 entity.spin = new Vector3(0, 20, 0);
             }
@@ -365,58 +364,53 @@ namespace BFPlus.Extensions.Stylish
             yield return EventControl.quartersec;
         }
 
-        IEnumerator DoRoyalDecreeStylish()
+        IEnumerator DoRoyalDecreeStylish(float gain)
         {
-            StylishUtils.ShowStylish(1.2f, MainManager.instance.playerdata[0].battleentity);
-            foreach(var player in MainManager.instance.playerdata)
+            StylishUtils.ShowStylish(1.2f, instance.playerdata[0].battleentity, gain);
+            foreach (var player in instance.playerdata)
             {
-                player.battleentity.animstate = (int)MainManager.Animations.Happy;
+                if (!battle.IsStopped(player))
+                    player.battleentity.animstate = (int)Animations.Happy;
             }
             yield return EventControl.quartersec;
         }
 
-        IEnumerator DoRainDanceStylish()
+        IEnumerator DoRainDanceStylish(float gain)
         {
-            StylishUtils.ShowStylish(1.2f, MainManager.instance.playerdata[MainManager.battle.currentturn].battleentity);
-            MainManager.instance.playerdata[MainManager.battle.currentturn].battleentity.animstate = (int)MainManager.Animations.Happy;
-            MainManager.instance.playerdata[battle.target].battleentity.animstate = (int)MainManager.Animations.Happy;
+            StylishUtils.ShowStylish(1.2f, instance.playerdata[battle.currentturn].battleentity, gain);
+            instance.playerdata[battle.currentturn].battleentity.animstate = (int)Animations.Happy;
+            instance.playerdata[battle.target].battleentity.animstate = (int)Animations.Happy;
 
             yield return EventControl.quartersec;
         }
 
-        public IEnumerator DoStylish(int actionid, int stylishID)
+        public IEnumerator DoStylish(int actionid, int stylishID, float stylishGain)
         {
             switch (actionid)
             {
-                //Fly drop
-                case 5:
-
-                    yield return DoFlyDropStylish();
+                case (int)Skills.BeeFly:
+                    yield return DoFlyDropStylish(stylishGain);
                     break;
 
-                //frost relay
-                case 26:
-                    yield return DoFrostRelayStylish();
+                case (int)Skills.IceBeemerang:
+                    yield return DoFrostRelayStylish(stylishGain);
                     break;
 
-                //Frozen Drill
-                case 27:
-                    yield return DoFrozenDrillStylish();
+                case (int)Skills.IceDrill:
+                    yield return DoFrozenDrillStylish(stylishGain);
                     break;
 
-                case 31:
-                    yield return DoFrostBowlingStylish();
+                case (int)Skills.IceSphere:
+                    yield return DoFrostBowlingStylish(stylishGain);
                     break;
 
-                //Royal Decree
-                case 46:
-                    yield return DoRoyalDecreeStylish();
+                case (int)Skills.RoyalDecree:
+                    yield return DoRoyalDecreeStylish(stylishGain);
                     break;
 
                 case (int)NewSkill.RainDance:
-                    yield return DoRainDanceStylish();
+                    yield return DoRainDanceStylish(stylishGain);
                     break;
-
             }
         }
     }

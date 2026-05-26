@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using static MainManager;
 
 namespace BFPlus.Extensions
 {
     public class EnemyItemData
     {
-        public static MainManager.Items[][] enemyData =
+        public static Items[][] enemyData =
         {
             // Zombiant
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.Mushroom, MainManager.Items.AphidEgg },
+            new Items[] {(Items)NewItem.WhirlaRang, Items.HoneyDrop, Items.Mushroom, Items.AphidEgg },
 
             // Jellyshroom
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.Mushroom, MainManager.Items.DangerShroom },
+            new Items[] {(Items)NewItem.WhirlaRang, Items.HoneyDrop, Items.Mushroom, Items.DangerShroom },
 
             // Spider
             null,
@@ -23,25 +19,25 @@ namespace BFPlus.Extensions
             null,
 
             // Cactiling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.BerryJuice, MainManager.Items.ShockShroom, MainManager.Items.JellyBean },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.BerryJuice, Items.ShockShroom, Items.JellyBean },
 
             // Psicorp
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.RoastBerry, MainManager.Items.BerryJuice, MainManager.Items.ShockShroom },
+            new Items[] {Items.CrunchyLeaf, Items.RoastBerry, Items.BerryJuice, Items.ShockShroom },
 
             // Thief
-            new MainManager.Items[] { (MainManager.Items)NewItem.TauntBerry, MainManager.Items.HustleSeed, (MainManager.Items)NewItem.SeedlingWhistle, (MainManager.Items)NewItem.StickyBomb,(MainManager.Items)NewItem.WebWad, (MainManager.Items)NewItem.StickySoup, (MainManager.Items)NewItem.Arachnomuffins, (MainManager.Items)NewItem.Cottoncap, (MainManager.Items)NewItem.BanditDelights },
+            new Items[] { (Items)NewItem.WhirlaRang, (Items)NewItem.AgaricDots, (Items)NewItem.SpiderEyes, (Items)NewItem.TauntBerry, Items.HustleSeed, (Items)NewItem.SeedlingWhistle, (Items)NewItem.StickyBomb,(Items)NewItem.WebWad, (Items)NewItem.StickySoup, (Items)NewItem.Arachnomuffins, (Items)NewItem.Cottoncap, (Items)NewItem.BanditDelights },
 
             // Bandit
-            new MainManager.Items[] {MainManager.Items.GlazedShroom, MainManager.Items.HustleSeed, (MainManager.Items)NewItem.SeedlingWhistle, (MainManager.Items)NewItem.StickyBomb,(MainManager.Items)NewItem.WebWad, (MainManager.Items)NewItem.StickySoup, (MainManager.Items)NewItem.Arachnomuffins, (MainManager.Items)NewItem.Cottoncap, (MainManager.Items)NewItem.BanditDelights  },
+            new Items[] { (Items)NewItem.WhirlaRang, (Items)NewItem.AgaricDots, (Items)NewItem.SpiderEyes, Items.GlazedShroom, Items.HustleSeed, (Items)NewItem.SeedlingWhistle, (Items)NewItem.StickyBomb,(Items)NewItem.WebWad, (Items)NewItem.StickySoup, (Items)NewItem.Arachnomuffins, (Items)NewItem.Cottoncap, (Items)NewItem.BanditDelights  },
 
             // Inichas
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.VitalitySeed, MainManager.Items.Mushroom, MainManager.Items.DangerShroom },
+            new Items[] {Items.CrunchyLeaf, Items.VitalitySeed, Items.Mushroom, Items.DangerShroom },
 
             // Seedling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed },
 
             // Flying Seedling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed },
 
             // Maki
             null,
@@ -53,25 +49,25 @@ namespace BFPlus.Extensions
             null,
 
             // Numbnail
-            new MainManager.Items[] {MainManager.Items.NumbDart, MainManager.Items.GenerousSeed, MainManager.Items.AphidEgg, (MainManager.Items)NewItem.GoldenLeaf },
+            new Items[] {Items.NumbDart, Items.GenerousSeed, Items.AphidEgg, (Items)NewItem.GoldenLeaf, (Items)NewItem.SlugPop, (Items)NewItem.SluggyDew },
 
             // Mothiva
             null,
 
             // Acornling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed },
 
             // Weevil
-            new MainManager.Items[] {MainManager.Items.MagicDrops, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, (MainManager.Items)NewItem.GoldenLeaf },
+            new Items[] {Items.MagicDrops, Items.VitalitySeed, Items.GenerousSeed, (Items)NewItem.GoldenLeaf },
 
             // Mr. Tester
             null,
 
             // Venus' Bud
-            new MainManager.Items[] {MainManager.Items.MagicDrops, MainManager.Items.RoastBerry, MainManager.Items.HardSeed, MainManager.Items.ClearWater, (MainManager.Items)NewItem.GoldenLeaf},
+            new Items[] {Items.MagicDrops, Items.RoastBerry, Items.HardSeed, Items.ClearWater, (Items)NewItem.GoldenLeaf},
 
             // Chomper
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.PoisonDart, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed, (MainManager.Items)NewItem.GoldenLeaf },
+            new Items[] {Items.CrunchyLeaf, Items.PoisonDart, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed, (Items)NewItem.GoldenLeaf },
 
             // Acolyte Aria
             null,
@@ -86,31 +82,31 @@ namespace BFPlus.Extensions
             null,
 
             // Wasp Trooper
-            new MainManager.Items[] {MainManager.Items.ProteinShake, MainManager.Items.GlazedShroom, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.NumbDart, MainManager.Items.SpicyCandy, (MainManager.Items)NewItem.SeedlingWhistle },
+            new Items[] {Items.ProteinShake, Items.GlazedShroom, Items.VitalitySeed, Items.GenerousSeed, Items.NumbDart, Items.SpicyCandy, (Items)NewItem.SeedlingWhistle },
 
             // Wasp Bomber
-            new MainManager.Items[] {MainManager.Items.BurlyBomb, MainManager.Items.PoisonBomb, MainManager.Items.FrostBomb, MainManager.Items.NumbBomb, MainManager.Items.SleepBomb, MainManager.Items.ClearBomb },
+            new Items[] { (Items)NewItem.WhirlyBomb, Items.BurlyBomb, Items.PoisonBomb, Items.FrostBomb, Items.NumbBomb, Items.SleepBomb, Items.ClearBomb },
 
             // Wasp Driller
-            new MainManager.Items[] {MainManager.Items.SquashSoda, MainManager.Items.SpicyBomb, MainManager.Items.CookedLeaf, MainManager.Items.BurlyTea, MainManager.Items.SpicyTea, MainManager.Items.MiteBurg, MainManager.Items.BurlyChips, (MainManager.Items)NewItem.SeedlingWhistle},
+            new Items[] {Items.SquashSoda, Items.SpicyBomb, Items.CookedLeaf, Items.BurlyTea, Items.SpicyTea, Items.MiteBurg, Items.BurlyChips, (Items)NewItem.SeedlingWhistle},
 
             // Wasp Scout
-            new MainManager.Items[] {MainManager.Items.NumbBomb, MainManager.Items.NumbDart, MainManager.Items.PoisonDart, MainManager.Items.PoisonBomb, MainManager.Items.FrenchFries, (MainManager.Items)NewItem.SeedlingWhistle },
+            new Items[] {Items.NumbBomb, Items.NumbDart, Items.PoisonDart, Items.PoisonBomb, Items.FrenchFries, (Items)NewItem.SeedlingWhistle },
 
             // Midge
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.NumbDart, MainManager.Items.JellyBean },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.VitalitySeed, Items.NumbDart, Items.JellyBean },
 
             // Underling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed, MainManager.Items.PoisonSpud },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed, Items.PoisonSpud },
 
             // Monsieur Scarlet
             null,
 
             // Golden Seedling
-            new MainManager.Items[] {MainManager.Items.TangyBerry, MainManager.Items.TangyJam, MainManager.Items.TangyPie, MainManager.Items.TangyJuice, MainManager.Items.TangyCarpaccio, (MainManager.Items)NewItem.SeedlingWhistle },
+            new Items[] {Items.TangyBerry, Items.TangyJam, Items.TangyPie, Items.TangyJuice, Items.TangyCarpaccio, (Items)NewItem.SeedlingWhistle },
 
             // Arrow Worm
-            new MainManager.Items[] {MainManager.Items.PoisonSpud, MainManager.Items.Squash, MainManager.Items.ShockShroom, MainManager.Items.DryBread},
+            new Items[] {Items.PoisonSpud, Items.Squash, Items.ShockShroom, Items.DryBread},
 
             // Carmina
             null,
@@ -122,13 +118,13 @@ namespace BFPlus.Extensions
             null,
 
             // Plumpling
-            new MainManager.Items[] {MainManager.Items.PlumplingPie, MainManager.Items.SquashSoda, (MainManager.Items)NewItem.SeedlingWhistle},
+            new Items[] {Items.PlumplingPie, Items.SquashSoda, (Items)NewItem.SeedlingWhistle},
 
             // Flowerling
-            new MainManager.Items[] { (MainManager.Items)NewItem.PointSwap, MainManager.Items.RoastBerry, MainManager.Items.MushroomCandy, MainManager.Items.ClearBomb},
+            new Items[] { (Items)NewItem.PointSwap, Items.RoastBerry, Items.MushroomCandy, Items.ClearBomb},
 
             // Burglar
-            new MainManager.Items[] {MainManager.Items.GlazedShroom, MainManager.Items.HustleSeed, (MainManager.Items)NewItem.SeedlingWhistle, (MainManager.Items)NewItem.StickyBomb,(MainManager.Items)NewItem.WebWad, (MainManager.Items)NewItem.StickySoup, (MainManager.Items)NewItem.Arachnomuffins, (MainManager.Items)NewItem.Cottoncap, (MainManager.Items)NewItem.BanditDelights  },
+            new Items[] { (Items)NewItem.WhirlaRang, (Items)NewItem.AgaricDots, (Items)NewItem.SpiderEyes, Items.GlazedShroom, Items.HustleSeed, (Items)NewItem.SeedlingWhistle, (Items)NewItem.StickyBomb,(Items)NewItem.WebWad, (Items)NewItem.StickySoup, (Items)NewItem.Arachnomuffins, (Items)NewItem.Cottoncap, (Items)NewItem.BanditDelights  },
 
             // Astotheles
             null,
@@ -140,13 +136,13 @@ namespace BFPlus.Extensions
             null,
 
             // Bee-Boop
-            new MainManager.Items[] { (MainManager.Items)NewItem.BeeBattery, MainManager.Items.GlazedHoney, MainManager.Items.ShockShroom, MainManager.Items.ShockCandy, MainManager.Items.NumbDart, MainManager.Items.RoastBerry },
+            new Items[] { (Items)NewItem.BeeBattery, Items.GlazedHoney, Items.ShockShroom, Items.ShockCandy, Items.NumbDart, Items.RoastBerry },
 
             // Security Turret
-            new MainManager.Items[] {(MainManager.Items)NewItem.BeeBattery,MainManager.Items.GlazedHoney, MainManager.Items.ShockShroom, MainManager.Items.ShockCandy, MainManager.Items.NumbBomb, MainManager.Items.RoastBerry },
+            new Items[] {(Items)NewItem.BeeBattery,Items.GlazedHoney, Items.ShockShroom, Items.ShockCandy, Items.NumbBomb, Items.RoastBerry },
 
             // Denmuki
-            new MainManager.Items[] { (MainManager.Items)NewItem.BeeBattery, MainManager.Items.AphidEgg, MainManager.Items.CrunchyLeaf, MainManager.Items.ShockCandy, MainManager.Items.ProteinShake, MainManager.Items.RoastBerry },
+            new Items[] { (Items)NewItem.BeeBattery, Items.AphidEgg, Items.CrunchyLeaf, Items.ShockCandy, Items.ProteinShake, Items.RoastBerry },
 
             // Heavy Drone B-33
             null,
@@ -155,7 +151,7 @@ namespace BFPlus.Extensions
             null,
 
             // Abomihoney
-            new MainManager.Items[] {MainManager.Items.GlazedHoney, MainManager.Items.HoneyDrop, MainManager.Items.Abomihoney, MainManager.Items.Abombhoney},
+            new Items[] {Items.GlazedHoney, Items.HoneyDrop, Items.Abomihoney, Items.Abombhoney},
 
             // Dune Scorpion
             null,
@@ -167,10 +163,10 @@ namespace BFPlus.Extensions
             null,
 
             // Zombee
-            new MainManager.Items[] { (MainManager.Items)NewItem.PointSwap, MainManager.Items.Mistake,MainManager.Items.MushroomStick, MainManager.Items.Mushroom, MainManager.Items.MushroomCandy, MainManager.Items.SpicyCandy },
+            new Items[] { (Items)NewItem.PointSwap, Items.Mistake,Items.MushroomStick, Items.Mushroom, Items.MushroomCandy, Items.SpicyCandy },
 
             // Zombeetle
-            new MainManager.Items[] { (MainManager.Items)NewItem.TauntBerry, (MainManager.Items)NewItem.PointSwap, MainManager.Items.Mistake,MainManager.Items.MushroomStick, MainManager.Items.Mushroom, MainManager.Items.MushroomCandy, MainManager.Items.BurlyCandy },
+            new Items[] { (Items)NewItem.TauntBerry, (Items)NewItem.PointSwap, Items.Mistake,Items.MushroomStick, Items.Mushroom, Items.MushroomCandy, Items.BurlyCandy },
 
             // The Watcher
             null,
@@ -179,13 +175,13 @@ namespace BFPlus.Extensions
             null,
 
             // Bloatshroom
-            new MainManager.Items[] {MainManager.Items.MushroomStick, MainManager.Items.Mushroom, MainManager.Items.MushroomCandy, MainManager.Items.CookedShroom, MainManager.Items.GlazedShroom, MainManager.Items.FrostBomb },
+            new Items[] {Items.MushroomStick, Items.Mushroom, Items.MushroomCandy, Items.CookedShroom, Items.GlazedShroom, Items.FrostBomb },
 
             // Krawler
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.Ice },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.Ice },
 
             // Haunted Cloth
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.Ice },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.Ice },
 
             // Sand Wall
             null,
@@ -194,43 +190,43 @@ namespace BFPlus.Extensions
             null,
 
             // Warden
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.Ice},
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.Ice},
 
             // Wasp King
             null,
 
             // Jumping Spider
-            new MainManager.Items[] {MainManager.Items.LonglegSummoner, (MainManager.Items)NewItem.Arachnomuffins, (MainManager.Items)NewItem.StickyBomb, (MainManager.Items)NewItem.WebWad, (MainManager.Items)NewItem.Cottoncap},
+            new Items[] { (Items)NewItem.WhirlaRang, Items.LonglegSummoner, (Items)NewItem.Arachnomuffins, (Items)NewItem.StickyBomb, (Items)NewItem.WebWad, (Items)NewItem.Cottoncap},
 
             // Mimic Spider
-            new MainManager.Items[] {MainManager.Items.LonglegSummoner, MainManager.Items.Squash, MainManager.Items.SquashSoda},
+            new Items[] {Items.LonglegSummoner, Items.Squash, Items.SquashSoda},
 
             // Leafbug Ninja
-            new MainManager.Items[] {(MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.LeafbugSkewer, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.InkTrap,(MainManager.Items)NewItem.SplotchScramble, },
+            new Items[] {(Items)NewItem.InkBomb, (Items)NewItem.LeafbugSkewer, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.InkTrap,(Items)NewItem.SplotchScramble, (Items)NewItem.PaintedGourd, (Items)NewItem.InkySundae},
 
             // Leafbug Archer
-            new MainManager.Items[] {(MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.LeafbugSkewer, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.InkTrap,(MainManager.Items)NewItem.SplotchScramble },
+            new Items[] {(Items)NewItem.InkBomb, (Items)NewItem.LeafbugSkewer, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.InkTrap,(Items)NewItem.SplotchScramble, (Items)NewItem.PaintedGourd, (Items)NewItem.InkySundae },
 
             // Leafbug Clubber
-            new MainManager.Items[] {(MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.LeafbugSkewer, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.InkTrap,(MainManager.Items)NewItem.SplotchScramble },
+            new Items[] {(Items)NewItem.InkBomb, (Items)NewItem.LeafbugSkewer, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.InkTrap,(Items)NewItem.SplotchScramble, (Items)NewItem.PaintedGourd, (Items)NewItem.InkySundae },
 
             // Madesphy
-            new MainManager.Items[] { MainManager.Items.HustleSeed, MainManager.Items.HoneyDrop, MainManager.Items.CrunchyLeaf, MainManager.Items.VitalitySeed },
+            new Items[] { Items.HustleSeed, Items.HoneyDrop, Items.CrunchyLeaf, Items.VitalitySeed },
 
             // The Beast
             null,
 
             // Chomper Brute
-            new MainManager.Items[] {MainManager.Items.NutCake, MainManager.Items.DryBread, MainManager.Items.BurlyChips, MainManager.Items.SpicyCandy, MainManager.Items.CoffeeCandy },
+            new Items[] {Items.NutCake, Items.DryBread, Items.BurlyChips, Items.SpicyCandy, Items.CoffeeCandy },
 
             // Mantidfly
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HustleSeed, MainManager.Items.NumbDart, MainManager.Items.VitalitySeed },
+            new Items[] {Items.CrunchyLeaf, Items.HustleSeed, Items.NumbDart, Items.VitalitySeed },
 
             // General Ultimax
             null,
 
             // Wild Chomper
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.PoisonDart, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] {Items.CrunchyLeaf, Items.PoisonDart, Items.VitalitySeed, Items.GenerousSeed, Items.HardSeed },
 
             // Cross
             null,
@@ -245,25 +241,25 @@ namespace BFPlus.Extensions
             null,
 
             // Mothfly
-            new MainManager.Items[] { MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, (MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.SplotchScramble, },
+            new Items[] { Items.CrunchyLeaf, Items.HoneyDrop, (Items)NewItem.InkBomb, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.SplotchScramble, },
 
             // Mothfly Cluster
-            new MainManager.Items[] { MainManager.Items.CookedLeaf, MainManager.Items.GlazedHoney, (MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.SplotchScramble, },
+            new Items[] { Items.CookedLeaf, Items.GlazedHoney, (Items)NewItem.InkBomb, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.SplotchScramble, },
 
             // Ironnail
-            new MainManager.Items[] {MainManager.Items.ProteinShake, MainManager.Items.GenerousSeed, MainManager.Items.AphidEgg },
+            new Items[] { (Items)NewItem.SlugPop, (Items)NewItem.SluggyDew, Items.ProteinShake, Items.GenerousSeed, Items.AphidEgg },
 
             // Belostoss
-            new MainManager.Items[] {MainManager.Items.ProteinShake, MainManager.Items.GenerousSeed, MainManager.Items.CookedLeaf },
+            new Items[] {Items.ProteinShake, Items.GenerousSeed, Items.CookedLeaf },
 
             // Ruffian
-            new MainManager.Items[] {MainManager.Items.SquashSoda, MainManager.Items.DryBread, MainManager.Items.CrunchyLeaf, (MainManager.Items)NewItem.SeedlingWhistle },
+            new Items[] {Items.SquashSoda, Items.DryBread, Items.CrunchyLeaf, (Items)NewItem.SeedlingWhistle },
 
             // Water Strider
-            new MainManager.Items[] {MainManager.Items.LonglegSummoner},
+            new Items[] {Items.LonglegSummoner},
 
             // Diving Spider
-            new MainManager.Items[] {MainManager.Items.LonglegSummoner, MainManager.Items.MagicDrops, (MainManager.Items)NewItem.Arachnomuffins, (MainManager.Items)NewItem.StickyBomb, (MainManager.Items)NewItem.WebWad, (MainManager.Items)NewItem.Cottoncap},
+            new Items[] {Items.LonglegSummoner, Items.MagicDrops, (Items)NewItem.Arachnomuffins, (Items)NewItem.StickyBomb, (Items)NewItem.WebWad, (Items)NewItem.Cottoncap},
 
             // Cenn
             null,
@@ -326,19 +322,19 @@ namespace BFPlus.Extensions
             null,
 
             // FireKrawler
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.FlameRock,MainManager.Items.Guarana },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.FlameRock,Items.Guarana },
 
             // FireWarden
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.FlameRock, MainManager.Items.Guarana },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.FlameRock, Items.Guarana },
 
             // FireCape
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed,  MainManager.Items.FlameRock,MainManager.Items.Guarana },
+            new Items[] {Items.BerryJuice, Items.HustleSeed,  Items.FlameRock,Items.Guarana },
 
             // IceKrawler
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.Ice },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.Ice },
 
             // IceWarden
-            new MainManager.Items[] {MainManager.Items.BerryJuice, MainManager.Items.HustleSeed, MainManager.Items.Ice },
+            new Items[] {Items.BerryJuice, Items.HustleSeed, Items.Ice },
 
             // |glitchy,1|TANGYBUG|glitchy|
             null,
@@ -366,40 +362,40 @@ namespace BFPlus.Extensions
             null,
 
             // Caveling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] {(Items)NewItem.WhirlaRang, Items.HoneyDrop, Items.VitalitySeed,(Items)NewItem.TauntBerry, Items.BerryJuice },
 
             // Flying Caveling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.HardSeed },
+            new Items[] { (Items)NewItem.WhirlaRang, Items.HoneyDrop, Items.VitalitySeed, Items.GenerousSeed },
 
             // Frostfly
-            new MainManager.Items[] {MainManager.Items.ShavedIce, MainManager.Items.HoneyDrop, MainManager.Items.VitalitySeed, MainManager.Items.Ice, MainManager.Items.JellyBean },
+            new Items[] {Items.ShavedIce, Items.Ice, Items.HoneyIceCream, Items.SquashPie, Items.CookedJellyBean },
 
             // Pirahna Chomp
-            new MainManager.Items[] {MainManager.Items.PoisonCake, MainManager.Items.PoisonDart, MainManager.Items.VitalitySeed, MainManager.Items.GenerousSeed, MainManager.Items.DangerShroom, (MainManager.Items)NewItem.GoldenLeaf },
+            new Items[] {Items.PoisonCake, Items.PoisonDart, Items.VitalitySeed, Items.GenerousSeed, Items.DangerShroom, (Items)NewItem.GoldenLeaf },
 
             // Moeruki
-            new MainManager.Items[] {MainManager.Items.AphidEgg, MainManager.Items.CrunchyLeaf, MainManager.Items.BurlyCandy, MainManager.Items.ProteinShake, MainManager.Items.RoastBerry, MainManager.Items.FlameRock },
+            new Items[] {Items.Omelet, Items.LeafSalad, Items.BurlyCandy, Items.ProteinShake, Items.RoastBerry, Items.FlameRock, (Items)NewItem.ViciousRose },
 
-            // Abomiberry
-            new MainManager.Items[] { (MainManager.Items)NewItem.TauntBerry, MainManager.Items.GlazedHoney, MainManager.Items.HoneyDrop, MainManager.Items.Abomihoney, MainManager.Items.Abombhoney},
+            // Mechajaw
+            new Items[] { (Items)NewItem.TauntBerry, Items.BurlyTea, (Items)NewItem.AgaricDots, (Items)NewItem.JoltMush, Items.SquashSoda},
 
             // Splotch Spider
-            new MainManager.Items[] { MainManager.Items.LonglegSummoner, (MainManager.Items)NewItem.InkBomb, (MainManager.Items)NewItem.InkblotGravy,(MainManager.Items)NewItem.MurkyPizza,(MainManager.Items)NewItem.InkTrap,(MainManager.Items)NewItem.SplotchScramble, },
+            new Items[] { Items.LonglegSummoner, (Items)NewItem.InkBomb, (Items)NewItem.InkblotGravy,(Items)NewItem.MurkyPizza,(Items)NewItem.InkTrap,(Items)NewItem.SplotchScramble, (Items)NewItem.InkySundae, (Items)NewItem.PaintedGourd, (Items)NewItem.InkyBrew, (Items)NewItem.BubbleHoney },
 
             // Worm
-            new MainManager.Items[] {MainManager.Items.Squash, MainManager.Items.AphidEgg, MainManager.Items.AphidMilk, (MainManager.Items)NewItem.TauntBerry},
+            new Items[] {Items.Squash, Items.AphidEgg, Items.AphidMilk, (Items)NewItem.TauntBerry},
 
             // Worm Swarm
-            new MainManager.Items[] {MainManager.Items.Squash, MainManager.Items.AphidEgg, MainManager.Items.AphidMilk, (MainManager.Items)NewItem.TauntBerry},
+            new Items[] {Items.Squash, Items.AphidEgg, Items.AphidMilk, (Items)NewItem.TauntBerry},
 
             // Spineling
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.BerryJuice, MainManager.Items.PoisonDart, MainManager.Items.JellyBean, (MainManager.Items)NewItem.SeedlingWhistle },
+            new Items[] {Items.CrunchyLeaf, Items.HoneyDrop, Items.BerryJuice, Items.PoisonDart, Items.JellyBean, (Items)NewItem.SeedlingWhistle },
 
             // Dewling
-            new MainManager.Items[] {MainManager.Items.RoastBerry, MainManager.Items.MushroomCandy, MainManager.Items.ClearBomb, (MainManager.Items)NewItem.SeedlingWhistle},
+            new Items[] {Items.RoastBerry, Items.MushroomCandy, Items.ClearBomb, (Items)NewItem.SeedlingWhistle},
 
             // Fire Ant
-            new MainManager.Items[] {MainManager.Items.Omelet, MainManager.Items.CookedShroom, MainManager.Items.CookedLeaf, MainManager.Items.CookedJellyBean },
+            new Items[] {Items.Omelet, Items.CookedShroom, Items.CookedLeaf, Items.CookedJellyBean },
 
             // Belosslow
             null,
@@ -408,7 +404,7 @@ namespace BFPlus.Extensions
             null,
 
             // Voltshroom
-            new MainManager.Items[] {MainManager.Items.ShockShroom, MainManager.Items.ShockCandy, MainManager.Items.Mushroom },
+            new Items[] {Items.ShockShroom, Items.ShockCandy, Items.Mushroom },
 
             // Dull Scorp
             null,
@@ -429,10 +425,10 @@ namespace BFPlus.Extensions
             null,
 
             //Mothmite
-            new MainManager.Items[] {MainManager.Items.CrunchyLeaf, MainManager.Items.HoneyDrop, MainManager.Items.Mushroom, MainManager.Items.DangerShroom },
+            new Items[] { (Items)NewItem.SlugPop, (Items)NewItem.SluggyDew },
 
             //Mars Bud
-            new MainManager.Items[] {MainManager.Items.SpicyBomb, MainManager.Items.BurlyBomb, MainManager.Items.CherryPie, MainManager.Items.Guarana, MainManager.Items.BerryShake},
+            new Items[] {Items.SpicyBomb, Items.BurlyBomb, Items.CherryPie, Items.Guarana, Items.BerryShake},
             
             //Termite Knight
             null,
@@ -443,14 +439,22 @@ namespace BFPlus.Extensions
             null,
 
             //Fire Popper
-            new MainManager.Items[] { MainManager.Items.BurlyCandy, MainManager.Items.ProteinShake, MainManager.Items.RoastBerry, MainManager.Items.FlameRock, (MainManager.Items)NewItem.TauntBerry },
+            new Items[] { Items.BurlyCandy, Items.ProteinShake, Items.RoastBerry, Items.FlameRock, (Items)NewItem.TauntBerry },
             
             //Patton
             null,
 
             //LongLegs
-            new MainManager.Items[] { MainManager.Items.LonglegSummoner,(MainManager.Items)NewItem.WebWad }
+            new Items[] { Items.LonglegSummoner,(Items)NewItem.WebWad }
 ,
+            //jump ant
+            null,
+
+            //red seedling
+            null,
+
+            //blue seedling
+            null,
         };
     }
 

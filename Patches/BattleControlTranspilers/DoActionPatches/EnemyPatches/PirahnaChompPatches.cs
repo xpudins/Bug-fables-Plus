@@ -1,13 +1,7 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
 
 namespace BFPlus.Patches.DoActionPatches.EnemyPatches
 {
@@ -25,7 +19,7 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             return (int)MainManager.Enemies.FlyTrap;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(566));
             cursor.GotoNext(i => i.MatchLdcI4(20));
@@ -41,7 +35,7 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             priority = 83211;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(559));
 

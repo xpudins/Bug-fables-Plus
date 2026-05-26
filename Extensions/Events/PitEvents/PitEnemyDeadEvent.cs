@@ -1,10 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.PitEvents
@@ -13,7 +7,7 @@ namespace BFPlus.Extensions.Events.PitEvents
     {
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
-            if(caller != null && caller.gameObject.activeSelf)
+            if (caller != null && caller.gameObject.activeSelf)
             {
                 while (caller.entity.deathcoroutine != null)
                 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.SocialPlatforms.GameCenter;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.AbandonedTower
 {
@@ -24,7 +18,7 @@ namespace BFPlus.Extensions.Maps.AbandonedTower
 
             var baseObject = map.transform.Find("Base");
 
-            foreach(Transform wind in map.transform.Find("Winds"))
+            foreach (Transform wind in map.transform.Find("Winds"))
             {
                 Wind windComp = wind.gameObject.AddComponent<Wind>();
                 windComp.bobammount = 2;
@@ -42,7 +36,7 @@ namespace BFPlus.Extensions.Maps.AbandonedTower
             hazard.flagfloats = new int[0];
 
             StaticModelAnim sma = water.gameObject.AddComponent<StaticModelAnim>();
-            sma.speed = new Vector2(0.0003f,0);
+            sma.speed = new Vector2(0.0003f, 0);
             sma.current = new Vector2(0.2239262f, 0);
             sma.bobspeed = new Vector3(0, 2, 0);
             sma.bobfreq = new Vector3(0, 0.1f, 0);

@@ -1,11 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using UnityEngine;
 using static BFPlus.Extensions.BattleControl_Ext;
 using static UnityEngine.ParticleSystem;
@@ -156,7 +150,7 @@ namespace BFPlus.Extensions.EnemyAI
             int hits = big ? 1 : 3;
 
             SpriteRenderer[] seeds = new SpriteRenderer[hits];
-            int damage = big ? SEED_DAMAGE *2 : SEED_DAMAGE;
+            int damage = big ? SEED_DAMAGE * 2 : SEED_DAMAGE;
 
             BattleControl.AttackProperty[] properties =
             {
@@ -187,11 +181,11 @@ namespace BFPlus.Extensions.EnemyAI
                 seeds[i].transform.localScale = big ? Vector3.one * 1.5f : Vector3.one;
 
                 BattleControl.AttackProperty property = properties[UnityEngine.Random.Range(0, properties.Length)];
-                battle.StartCoroutine(battle.Projectile(damage, property, battle.enemydata[actionid], playerTargetID, seeds[i].transform, 25f, 0, "keepcolor", null, "WoodHit", "", new Vector3(0,0,20),false));
+                battle.StartCoroutine(battle.Projectile(damage, property, battle.enemydata[actionid], playerTargetID, seeds[i].transform, 25f, 0, "keepcolor", null, "WoodHit", "", new Vector3(0, 0, 20), false));
                 MainManager.PlaySound("PingShot");
                 yield return EventControl.quartersec;
             }
-            yield return new WaitUntil(()=> MainManager.ArrayIsEmpty(seeds));
+            yield return new WaitUntil(() => MainManager.ArrayIsEmpty(seeds));
 
         }
 
@@ -237,7 +231,7 @@ namespace BFPlus.Extensions.EnemyAI
             MainManager.PlaySound("Bite2", -1, 0.9f, 1f);
             int playerTargetID = battle.playertargetID;
             battle.DoDamage(actionid, playerTargetID, UNDERGROUND_STRIKE_DAMAGE, BattleControl.AttackProperty.Poison, battle.commandsuccess);
-            
+
             yield return EventControl.halfsec;
 
             MainManager.PlaySound("Digging", 9, 1.1f, 0.75f, true);
@@ -353,7 +347,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             foreach (var seed in seeds)
             {
-                if(seed != null)
+                if (seed != null)
                 {
                     UnityEngine.Object.Destroy(seed.gameObject);
                 }
@@ -374,7 +368,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             void LateUpdate()
             {
-                if(entity.animstate == 102)
+                if (entity.animstate == 102)
                 {
                     bone.position = target;
                 }

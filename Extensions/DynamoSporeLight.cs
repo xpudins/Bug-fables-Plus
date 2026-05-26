@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
-using BFPlus.Extensions;
+﻿using BFPlus.Extensions;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class DynamoSporeLight : MonoBehaviour
 {
@@ -25,18 +25,21 @@ public class DynamoSporeLight : MonoBehaviour
         Blinking,
         Decharging
     }
-
+    private static readonly int ColorId = Shader.PropertyToID("_Color");
     public LightState state = LightState.Off;
+    public LightState lastState = LightState.Off;
     public Mode mode = Mode.Charging;
     public bool overrideLight = false;
-    //public int charge = 0;
-    Sprite[] lights;
     float chargeCooldown = 0;
     public float chargeFrame = 30f;
+    Sprite lastSprite;
     SpriteRenderer lightSprite;
     EntityControl entity;
-    //GameObject[] elecParticles = new GameObject[2];
     int oldAnimState = 0;
+    Vector3 baseLightPosition = new Vector3(0, 0, -0.0001f);
+    static Dictionary<LightState, Dictionary<string, Sprite>> lightSprites = new Dictionary<LightState, Dictionary<string, Sprite>>();
+    MaterialPropertyBlock mpb;
+    Color lastLightColor;
 
     void Start()
     {
@@ -44,16 +47,38 @@ public class DynamoSporeLight : MonoBehaviour
         lightSprite = new GameObject("LightLevel").AddComponent<SpriteRenderer>();
         lightSprite.transform.parent = entity.spritetransform;
         //lightSprite.sortingOrder = entity.sprite.sortingOrder + 1;
-        lights = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("DynamoSporeLight");
-        lightSprite.sprite = lights[0];
+        
+        if(lightSprites.Count == 0)
+        {
+            Sprite[] lights = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("DynamoSporeLight");
+
+            LightState[] states = Enum.GetValues(typeof(LightState)).Cast<LightState>().ToArray();
+            foreach (LightState state in states)
+            {
+                Dictionary<string, Sprite> tempDict = new Dictionary<string, Sprite>();
+
+                Sprite[] sprites = lights.Where(a => a.name.Contains(state.ToString())).ToArray();
+                string stateString = state.ToString();
+                foreach (var s in sprites)
+                {
+                    s.name = s.name.Replace("dynamoLight" + stateString, "zombees");
+                    tempDict.Add(s.name, s);
+                }
+
+                lightSprites.Add(state, tempDict);
+            }
+        }
+
+        lightSprite.sprite = lightSprites[LightState.Off]["zombees_39"];
         lightSprite.sortingOrder = -1;
+        mpb = new MaterialPropertyBlock();
+        lightSprite.transform.localPosition = baseLightPosition;
+        lightSprite.transform.localScale = Vector3.one;
     }
 
     void LateUpdate()
     {
-        lightSprite.transform.localPosition = new Vector3(0,0,-0.0001f);
-        lightSprite.transform.localScale = Vector3.one;
-        lightSprite.material.color = Color.white;
+        Color targetColor = Color.white;
 
         if (entity.icecube != null)
         {
@@ -72,43 +97,18 @@ public class DynamoSporeLight : MonoBehaviour
                 int charge = MainManager.battle.enemydata[entity.battleid].charge;
                 if (charge == 3 && entity.sprite != null && entity.sprite.sprite != null)
                 {
-                    lightSprite.material.color = MainManager.RainbowColor(1, 5.9f * 1, 0.5f, 1f, 1f);
-
-                    /*if (elecParticles.All(e => e == null))
-                    {
-                        for(int i=0; i< elecParticles.Length; i++)
-                        {
-                            elecParticles[i] = MainManager.PlayParticle("Elec", entity.spritetransform.position, -1f);
-                            elecParticles[i].transform.parent = entity.spritetransform;
-                            elecParticles[i].transform.localPosition = new Vector3(-0.8f + i * 1.5f, 0.5f, -0.02f);
-                            elecParticles[i].transform.localScale = Vector3.one * 0.1f;
-                            elecParticles[i].transform.GetChild(0).localScale = Vector3.one * 0.15f;
-                        }
-                    }*/
+                    targetColor = MainManager.RainbowColor(1, 5.9f * 1, 0.5f, 1f, 1f);
 
                     if (!overrideLight && (entity.animstate == (int)MainManager.Animations.Idle || entity.animstate == (int)MainManager.Animations.Sleep))
                     {
                         mode = Mode.Stay;
                         state = LightState.Full;
                     }
-                    else
-                    {
-                        /*foreach (var elec in elecParticles)
-                        {
-                            if (elec != null)
-                                Destroy(elec);
-                        }*/
-                    }
                 }
             }
             else
             {
-                /*foreach (var elec in elecParticles)
-                {
-                    if (elec != null)
-                        Destroy(elec);
-                }*/
-                lightSprite.material.color = Color.white;
+                targetColor = Color.white;
             }
 
             if (mode == Mode.Charging)
@@ -156,14 +156,18 @@ public class DynamoSporeLight : MonoBehaviour
             chargeCooldown -= 1f;
         }
 
-        if (entity.sprite != null && entity.sprite.sprite != null)
+        if (entity.sprite != null && entity.sprite.sprite != null && lastSprite != entity.sprite.sprite)
         {
-            var spriteId = entity.sprite.sprite.name.Split('_')[1];
-            var lightId = lightSprite.sprite.name.Split('_')[1];
-            if (spriteId != lightId || !lightSprite.sprite.name.Contains(state.ToString()))
-            {
-                lightSprite.sprite = lights.Where(a => a.name.Split('_')[1] == spriteId && a.name.Contains(state.ToString())).FirstOrDefault();
-            }
+            lastSprite = entity.sprite.sprite;
+            lightSprite.sprite = lightSprites[state][lastSprite.name];
+        }
+
+        if(targetColor != lastLightColor)
+        {
+            lastLightColor = targetColor;
+            mpb.Clear();
+            mpb.SetColor(ColorId, targetColor);
+            lightSprite.SetPropertyBlock(mpb);
         }
     }
 
@@ -217,7 +221,7 @@ public class DynamoSporeLight : MonoBehaviour
         chargeFrame = frame;
         mode = Mode.ChargeUp;
         state = LightState.Off;
-        yield return new WaitUntil(() =>state == LightState.Full);
+        yield return new WaitUntil(() => state == LightState.Full);
         mode = Mode.Stay;
     }
 

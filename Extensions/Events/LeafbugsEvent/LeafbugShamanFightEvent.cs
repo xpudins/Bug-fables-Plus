@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions.Events
 {
@@ -39,8 +33,8 @@ namespace BFPlus.Extensions.Events
 
             yield return EventControl.tenthsec;
             MainManager.instance.StartCoroutine(BattleControl.StartBattle(
-                new int[] { (int)MainManager.Enemies.LeafbugNinja, (int)NewEnemies.LeafbugShaman, (int)MainManager.Enemies.LeafbugArcher }, 
-                -1, -1, NewMusic.PlusBosses.ToString(), null, false)
+                new int[] { (int)MainManager.Enemies.LeafbugNinja, (int)NewEnemies.LeafbugShaman, (int)MainManager.Enemies.LeafbugArcher },
+                -1, -1, NewMusic.NewMiniboss.ToString(), null, false)
             );
 
             yield return EventControl.sec;
@@ -61,7 +55,7 @@ namespace BFPlus.Extensions.Events
             {
                 party[i].transform.position = posArray[i];
                 party[i].animstate = (int)MainManager.Animations.Idle;
-                party[i].FaceTowards(Vector3.zero,true);
+                party[i].FaceTowards(Vector3.zero, true);
             }
 
             var chompy = MainManager.map.chompy;
@@ -109,7 +103,7 @@ namespace BFPlus.Extensions.Events
 
             MainManager.FadeIn();
             yield return EventControl.sec;
-            
+
             MainManager.instance.flags[886] = true;
             MainManager.AddPrizeMedal((int)NewPrizeFlag.Shaman);
             MainManager.LoadMap();

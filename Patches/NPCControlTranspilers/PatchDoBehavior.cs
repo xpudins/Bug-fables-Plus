@@ -1,13 +1,7 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.NPCControlTranspilers
 {
@@ -18,7 +12,7 @@ namespace BFPlus.Patches.NPCControlTranspilers
         {
             priority = 690;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(PlayerControl), "tattling")));
 

@@ -3,12 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.PlayerControlTranspilers
@@ -19,9 +14,9 @@ namespace BFPlus.Patches.PlayerControlTranspilers
         {
             priority = 671;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdsfld(out _),i=>i.MatchLdfld(out _),i => i.MatchLdcI4(699));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(699));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext(i => i.MatchLdfld(out _));
             Utils.RemoveUntilInst(cursor, i => i.MatchLdcI4(5));
@@ -34,15 +29,15 @@ namespace BFPlus.Patches.PlayerControlTranspilers
         {
             priority = 426;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
-                i => i.MatchCall(AccessTools.Method(typeof(PlayerControl),"GetAngle")), 
+                i => i.MatchCall(AccessTools.Method(typeof(PlayerControl), "GetAngle")),
                 i => i.MatchStfld(out _));
 
             ILLabel label = cursor.DefineLabel();
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchHoaxeAbility), "IsHoaxeCrown"));
-            cursor.Emit(OpCodes.Brfalse,label);
+            cursor.Emit(OpCodes.Brfalse, label);
 
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchHoaxeAbility), "DoHoaxeActionTap"));

@@ -1,13 +1,7 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
-using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.MainManagerTranspilers
 {
@@ -20,15 +14,15 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(i => i.MatchLdcI4(156), i=>i.MatchBeq(out _), i=>i.MatchLdarg1(), i=>i.MatchLdcI4(156), i=>i.MatchBneUn(out label));
+            cursor.GotoNext(i => i.MatchLdcI4(156), i => i.MatchBeq(out _), i => i.MatchLdarg1(), i => i.MatchLdcI4(156), i => i.MatchBneUn(out label));
             cursor.Goto(0);
             cursor.GotoNext(i => i.MatchBle(out _));
             cursor.Next.Operand = label;
 
-            cursor.GotoNext(MoveType.After,i => i.MatchBgt(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchBgt(out _));
             cursor.Prev.OpCode = OpCodes.Ble;
             cursor.Prev.Operand = label;
 

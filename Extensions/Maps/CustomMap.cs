@@ -1,20 +1,13 @@
-﻿using BFPlus.Patches;
+﻿using BFPlus.Extensions.Maps.AbandonedTower;
+using BFPlus.Extensions.Maps.DeepCave;
+using BFPlus.Extensions.Maps.GiantLairPlayroom;
+using BFPlus.Extensions.Maps.NewPowerPlant;
+using BFPlus.Extensions.Maps.PitMaps;
+using BFPlus.Extensions.Maps.SandCastleDepths;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MainManager;
 using UnityEngine;
 using static UnityEngine.Object;
-using Steamworks;
-using BFPlus.Extensions.Maps.PitMaps;
-using BFPlus.Extensions.Maps.NewPowerPlant;
-using BFPlus.Extensions.Maps.SandCastleDepths;
-using BFPlus.Extensions.Maps.DeepCave;
-using BFPlus.Extensions.Maps.AbandonedTower;
-using BFPlus.Extensions.Maps.GiantLairPlayroom;
-using MonoMod.RuntimeDetour;
 
 namespace BFPlus.Extensions.Maps
 {
@@ -78,7 +71,7 @@ namespace BFPlus.Extensions.Maps
                     }
                     else
                     {
-                        if(mr.material != null && mr.material.name.Contains("3DMain"))
+                        if (mr.material != null && mr.material.name.Contains("3DMain"))
                         {
                             mr.materials = new Material[] { MainManager.Main3D, MainManager.outlinemain };
                         }
@@ -93,7 +86,7 @@ namespace BFPlus.Extensions.Maps
             }
         }
 
-        protected ScrewPlatform AddScrewPlatform(GameObject gameObject, Vector3 target, int[] linkEntities, Vector3 shakeWhenMoving, string soundActive, ScrewPlatform.Type type, bool or, bool nonscrewswitch, float timerActive=60f)
+        protected ScrewPlatform AddScrewPlatform(GameObject gameObject, Vector3 target, int[] linkEntities, Vector3 shakeWhenMoving, string soundActive, ScrewPlatform.Type type, bool or, bool nonscrewswitch, float timerActive = 60f)
         {
             ScrewPlatform screwPlat = gameObject.AddComponent<ScrewPlatform>();
             screwPlat.target = target;
@@ -166,6 +159,7 @@ namespace BFPlus.Extensions.Maps
             { NewMaps.GiantLairPlayroom2, typeof(GiantLairPlayroom2Map) },
             { NewMaps.GiantLairPlayroom3, typeof(GiantLairPlayroom3Map) },
             { NewMaps.GiantLairPlayroomBoss, typeof(GiantLairPlayroomBossMap) },
+            { NewMaps.AntPalaceStorage, typeof(AntPalaceStorageMap) },
 
         };
 

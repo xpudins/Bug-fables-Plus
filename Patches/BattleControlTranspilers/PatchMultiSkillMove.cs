@@ -4,24 +4,20 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches
 {
     /// <summary>
     /// Adds checks for usecharge and if you suffer from tired
     /// </summary>
-    public class PatchCanUseCharge: PatchBaseBattleControlMultiSkillMove
+    public class PatchCanUseCharge : PatchBaseBattleControlMultiSkillMove
     {
         public PatchCanUseCharge()
         {
             priority = 50;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchStfld(AccessTools.Field(typeof(MainManager.BattleData), "charge")));
             cursor.GotoPrev(i => i.MatchLdsfld(out _));
@@ -30,7 +26,7 @@ namespace BFPlus.Patches
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CanUseCharge", new Type[] { typeof(int) }));
             cursor.Emit(OpCodes.Brfalse, label);
             cursor.GotoNext();
-            cursor.GotoNext(i=>i.MatchLdsfld(out _));
+            cursor.GotoNext(i => i.MatchLdsfld(out _));
 
             cursor.GotoNext(i => i.MatchLdflda(AccessTools.Field(typeof(MainManager.BattleData), "tired")));
             cursor.GotoPrev(i => i.MatchLdsfld(out _));

@@ -1,25 +1,17 @@
-﻿using BFPlus.Extensions.Maps.NewPowerPlant;
-using BFPlus.Extensions.Maps.PitMaps;
-using BFPlus.Extensions.Maps.SandCastleDepths;
-using BFPlus.Extensions.Maps;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
-using HarmonyLib;
-using BFPlus.Extensions.Events.DarkTeamSnakemouthEvents;
-using static BFPlus.Extensions.PitData;
-using UnityEngine;
-using BFPlus.Extensions.Events.PitEvents;
-using BFPlus.Extensions.Events.SeedlingMinigameEvents;
-using BFPlus.Extensions.Events.NewDungeonsEvents;
-using BFPlus.Extensions.Events.NewBossesEvents;
-using System.IO.Ports;
+﻿using BFPlus.Extensions.Events.DarkTeamSnakemouthEvents;
 using BFPlus.Extensions.Events.GourmetRaceEvents;
 using BFPlus.Extensions.Events.HoaxeIntermissionEvents;
+using BFPlus.Extensions.Events.JumpAntEvents;
+using BFPlus.Extensions.Events.NewBossesEvents;
+using BFPlus.Extensions.Events.NewDungeonsEvents;
 using BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents;
+using BFPlus.Extensions.Events.PitEvents;
+using BFPlus.Extensions.Events.SeedlingMinigameEvents;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace BFPlus.Extensions.Events
 {
@@ -30,11 +22,37 @@ namespace BFPlus.Extensions.Events
         {
             yield return DoEvent(caller, instance);
 
-            if (endEvent) 
+            if (endEvent)
             {
                 EventControl.EndEvent();
             }
             yield break;
+        }
+
+        public static IEnumerator WaitJump(EntityControl entity, int jumpAmount = 1, float jumpHeight = 0, bool noSound = false)
+        {
+            for (int i = 0; i < jumpAmount; i++)
+            {
+                entity.animstate = (int)MainManager.Animations.Jump;
+                if (!noSound)
+                    MainManager.PlaySound("Jump");
+                if (jumpHeight == 0)
+                    entity.Jump();
+                else
+                    entity.Jump(jumpHeight);
+                yield return EventControl.tenthsec;
+                yield return new WaitUntil(() => entity.onground);
+            }
+        }
+
+        public static IEnumerator WaitMove(EntityControl entity, Vector3 target, float multiplier = 1,
+            int moveState = 1, int stopState = 0, bool ignore_y = false, Vector3? lookAfter = null)
+        {
+            entity.MoveTowards(target, multiplier, moveState, stopState, ignore_y);
+            yield return new WaitUntil(() => !entity.forcemove);
+            yield return null;
+            if (lookAfter.HasValue)
+                entity.FaceTowards(lookAfter.Value);
         }
 
         protected IEnumerator SetupPlayerHoaxe(Vector3 position, int animid)
@@ -106,7 +124,7 @@ namespace BFPlus.Extensions.Events
                 }
             }
             yield return new WaitForSeconds(0.75f);
-            if(!marsBudCutscene && ((int)MainManager.map.mapid == (int)NewMaps.Pit100Reward || (int)MainManager.map.mapid == (int)NewMaps.PitBossRoom) || currentFloor == 1)
+            if (!marsBudCutscene && ((int)MainManager.map.mapid == (int)NewMaps.Pit100Reward || (int)MainManager.map.mapid == (int)NewMaps.PitBossRoom) || currentFloor == 1)
                 MainManager.ChangeMusic();
 
             Vector3[] posArray = new Vector3[]
@@ -227,7 +245,7 @@ namespace BFPlus.Extensions.Events
                 }
             }
 
-            if(marsBudCutscene)
+            if (marsBudCutscene)
             {
                 yield return DoMarsBudEvent(party);
 
@@ -237,7 +255,7 @@ namespace BFPlus.Extensions.Events
 
         IEnumerator DoMarsBudEvent(EntityControl[] party)
         {
-            foreach(var p in party)
+            foreach (var p in party)
             {
                 p.FaceTowards(party[1].transform.position);
             }
@@ -261,7 +279,7 @@ namespace BFPlus.Extensions.Events
             Vector3 camPos = bud.transform.position + Vector3.left;
             MainManager.SetCamera(camPos, 0.045f);
             MainManager.DeathSmoke(bud.transform.position);
-            foreach(var p in party)
+            foreach (var p in party)
             {
                 p.animstate = (int)MainManager.Animations.Surprized;
                 p.Emoticon(2, 50);
@@ -296,7 +314,7 @@ namespace BFPlus.Extensions.Events
             }
 
             yield return EventControl.sec;
-            MainManager.instance.StartCoroutine(BattleControl.StartBattle(new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MarsBud }, -1, -1, "Battle6", null, false));
+            MainManager.instance.StartCoroutine(BattleControl.StartBattle(new int[] { (int)NewEnemies.MarsBud, (int)NewEnemies.MarsBud }, -1, -1, NewMusic.EventBattle.ToString(), null, false));
             yield return null;
             while (MainManager.battle != null)
             {
@@ -351,12 +369,12 @@ namespace BFPlus.Extensions.Events
         }
 
 
-        protected IEnumerator EndIntermissionPostgame(EventControl instance, int eventToLoad, int loadMap =-1)
+        protected IEnumerator EndIntermissionPostgame(EventControl instance, int eventToLoad, int loadMap = -1)
         {
             MainManager.instance.flags[916] = false;
 
             //not intermission 7
-            if(eventToLoad != 204)
+            if (eventToLoad != 204)
             {
                 MainManager.DestroyPlayers(false, false);
                 MainManager.ChangeParty(new int[3] { 0, 1, 2 }, true, true);
@@ -369,19 +387,7 @@ namespace BFPlus.Extensions.Events
                 MainManager.LoadMap((int)MainManager.Maps.BugariaMainPlaza);
                 yield return EventControl.tenthsec;
 
-                //Just keep getting the same random bug where the inside house is not rendered and its all blacked out. 
-                //dont really want to lose more time on it so for the time being ill just respawn the player in front of the house.
-                //instance.ChangeInside(1, MainManager.GetEntity(4).npcdata);
-
                 yield return EventControl.halfsec;
-                //inside house pos
-                /*instance.SetPartyPos(new Vector3[]
-                {
-                    new Vector3(-16.76f, 0.0197f, 7.57f),
-                    new Vector3(-14f, 0.0197f, 7.57f),
-                    new Vector3(-12.5f, 0.0197f, 7.57f),
-                    new Vector3(-12f, 0.0197f, 7.57f)
-                });*/
 
                 instance.SetPartyPos(new Vector3[]
                 {
@@ -401,12 +407,55 @@ namespace BFPlus.Extensions.Events
             else
             {
                 yield return null;
-                if(loadMap != -1)
+                if (loadMap != -1)
                     MainManager.LoadMap(loadMap);
                 yield return EventControl.sec;
                 endEvent = false;
                 instance.StartEvent(eventToLoad, null);
             }
+        }
+
+        protected IEnumerator GiveJumpAntReward(EntityControl jumpAnt, EventControl instance, int berryAmount, int cbFlag)
+        {
+            MainManager.GetPartyEntities(true)[0].animstate = (int)MainManager.Animations.Happy;
+            MainManager.PlaySound("ItemHold");
+            jumpAnt.animstate = (int)MainManager.Animations.ItemGet;
+            var berries = MainManager.NewSpriteObject(new Vector3(0, 3, -0.1f), jumpAnt.transform, MainManager.itemsprites[0, (int)MainManager.Items.MoneyBig]);
+            yield return EventControl.sec;
+
+            UnityEngine.Object.Destroy(berries.gameObject);
+
+            instance.GiveItem(-1, berryAmount);
+            while (MainManager.instance.message)
+            {
+                yield return null;
+            }
+
+            instance.GiveItem(3, cbFlag);
+            while (MainManager.instance.message)
+            {
+                yield return null;
+            }
+
+            jumpAnt.animstate = 0;
+        }
+
+        protected IEnumerator JumpAntPDash(EntityControl jumpAnt, EntityControl[] party, Vector3 targetPos, float speed = 3)
+        {
+            jumpAnt.animstate = (int)MainManager.Animations.Jump;
+            jumpAnt.PlaySound("Jump");
+            jumpAnt.Jump();
+            yield return EventControl.tenthsec;
+            yield return new WaitUntil(() => jumpAnt.onground);
+
+            foreach (var p in party)
+                Physics.IgnoreCollision(jumpAnt.ccol, p.ccol);
+
+            jumpAnt.animstate = 125;
+            MainManager.PlaySound("BeetleDash", 1.2f, 1);
+            jumpAnt.MoveTowards(targetPos, speed, 125, 0);
+            yield return new WaitUntil(() => !jumpAnt.forcemove);
+            jumpAnt.gameObject.SetActive(false);
         }
     }
 
@@ -467,6 +516,19 @@ namespace BFPlus.Extensions.Events
             { NewEvents.HoaxeIntermission6MainHall, typeof(HoaxeIntermission6MainHallEvent) },
             { NewEvents.HoaxeIntermission6End, typeof(HoaxeIntermission6EndEvent) },
             { NewEvents.HoaxeIntermission7, typeof(HoaxeIntermission7Event) },
+            { NewEvents.JumpAntFight, typeof(JumpAntFightEvent) },
+            { NewEvents.JumpAntIntermission1, typeof(JumpAntIntermission1) },
+            { NewEvents.JumpAntIntermission2, typeof(JumpAntIntermission2) },
+            { NewEvents.JumpAntIntermission3Before, typeof(JumpAntIntermission3Talk) },
+            { NewEvents.JumpAntIntermission3End, typeof(JumpAntIntermission3End) },
+            { NewEvents.JumpAntIntermission4, typeof(JumpAntIntermission4) },
+            { NewEvents.JumpAntIntermission4End, typeof(JumpAntIntermission4End) },
+            { NewEvents.JumpAntIntermission5, typeof(JumpAntIntermission5Event) },
+            { NewEvents.JumpAntIntermission6, typeof(JumpAntIntermission6) },
+            { NewEvents.JumpAntIntermission7, typeof(JumpAntIntermission7) },
+            { NewEvents.JumpAntCardBattle, typeof(JumpAntCardBattle) },
+            { NewEvents.FoodThieves, typeof(FoodThievesEvent) },
+            { NewEvents.SpinoutCar, typeof(SpinoutCarEvent) },
         };
 
         public static NewEvent GetEventClass(NewEvents eventType)
