@@ -123,11 +123,14 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             ILLabel skipToLabel = c.MarkLabel();
             c.GotoPrev(MoveType.After, x => x.MatchPop());
 
+            ILLabel label = c.DefineLabel();
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchUnderstrike), nameof(NewUnderstrike)));
+            c.Emit(OpCodes.Brfalse, label);
             c.Emit(OpCodes.Ldc_I4_0);
             c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchUnderstrike), "UnderstrikeDoDamage"));
             c.Emit(OpCodes.Br, skipToLabel);
+            c.MarkLabel(label);
 
-            //c.GotoNext(i => i.MatchLdcI4(190));
             c.GotoNext(MoveType.After,
                        x => x.MatchLdcR4(0.85f),
                        x => x.MatchCall(out _));
@@ -136,17 +139,18 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             skipToLabel = c.MarkLabel();
             c.Goto(returnHere);
 
+            label = c.DefineLabel();
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchUnderstrike), nameof(NewUnderstrike)));
+            c.Emit(OpCodes.Brfalse, label);
             c.Emit(OpCodes.Ldc_I4_1);
             c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchUnderstrike), "UnderstrikeDoDamage"));
             c.Emit(OpCodes.Br, skipToLabel);
+            c.MarkLabel(label);
         }
 
         static int?[] targetDamages;
-        static DamageOverride[] UnderstrikeOverrides(bool rebalance, int hit, int dmg)
+        static DamageOverride[] UnderstrikeOverrides(int hit, int dmg)
         {
-            if (!rebalance)
-                return null;
-
             List<DamageOverride> overrides = new List<DamageOverride>()
             {
                 (DamageOverride)NewDamageOverride.Pierce1
@@ -168,8 +172,6 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             if (targetDamages == null)
                 targetDamages = new int?[battle.enemydata.Length];
 
-            bool rebalance = MainManager_Ext.Instance.GetBalanceChangeState((int)NewMenuText.Understrike);
-
             int userID = battle.currentturn;
             Vector3 userPos = instance.playerdata[userID].battleentity.transform.position;
 
@@ -184,20 +186,17 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
 
                 if (targetDamages[i] == null)
                 {
-                    overrides = UnderstrikeOverrides(rebalance, hit, baseDamage);
+                    overrides = UnderstrikeOverrides(hit, baseDamage);
                     targetDamages[i] = battle.DoDamage(instance.playerdata[userID], ref battle.enemydata[i], baseDamage, AttackProperty.Atleast1, overrides, false);
                 }
                 else
                 {
-                    AttackProperty property = rebalance ? AttackProperty.NoExceptions : AttackProperty.Atleast1;
+                    AttackProperty property = AttackProperty.NoExceptions;
                     if (targetDamages[i].Value > 1)
                     {
-                        if (rebalance)
-                            targetDamages[i] = Mathf.FloorToInt(targetDamages[i].Value / 2f);
-                        else//vanilla
-                            targetDamages[i] = Mathf.Clamp(Mathf.RoundToInt(instance.playerdata[userID].atk / 1.5f), 1, 99);
+                        targetDamages[i] = Mathf.FloorToInt(targetDamages[i].Value / 2f);
                     }
-                    overrides = UnderstrikeOverrides(rebalance, hit, targetDamages[i].Value);
+                    overrides = UnderstrikeOverrides(hit, targetDamages[i].Value);
                     battle.DoDamage(instance.playerdata[userID], ref battle.enemydata[i], targetDamages[i].Value, property, overrides, false);
                 }
             }
@@ -205,6 +204,8 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches.SkillPatches
             if (hit == 1)
                 targetDamages = null;
         }
+
+        static bool NewUnderstrike() => MainManager_Ext.Instance.GetBalanceChangeState((int)NewMenuText.Understrike);
     }
 
     // <summary>
