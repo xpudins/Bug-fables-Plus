@@ -61,11 +61,11 @@ namespace BFPlus.Extensions.BattleStuff.StatusStuff
                 {
                     extEnt.dizzyRecoil +=
                         battle.DoDamage(null,
-                            ref instance.playerdata[attacker.Value.trueid],
+                            ref instance.playerdata[battle.currentturn],
                             recoilDamage,
                             AttackProperty.NoExceptions, overrides, false
                         );
-                    if (instance.playerdata[attacker.Value.trueid].hp <= 0)
+                    if (instance.playerdata[battle.currentturn].hp <= 0)
                     {
                         dizzyKO = true;
                         extEnt.diedFromDizzy = false;
