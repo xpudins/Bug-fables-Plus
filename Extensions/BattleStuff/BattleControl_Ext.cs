@@ -2437,7 +2437,7 @@ namespace BFPlus.Extensions
 
                 case Items.Abombhoney:
                     yield return ThrowItem(entity, battle, itemID, BattleControl.AttackArea.All, true, true);
-                    yield return DoAbomb(new Vector3(0f, 0f, -0.5f), battle);
+                    yield return DoAbomb(new Vector3(0f, 0f, -0.5f), entity);
                     break;
 
                 case Items.ClearBomb:
@@ -2598,7 +2598,7 @@ namespace BFPlus.Extensions
             Destroy(itemSprite.gameObject);
         }
 
-        IEnumerator DoAbomb(Vector3 position, BattleControl battle)
+        IEnumerator DoAbomb(Vector3 position, EntityControl user)
         {
             MainManager.PlaySound("Splat1");
             MainManager.PlaySound("Fuse");
@@ -2698,8 +2698,17 @@ namespace BFPlus.Extensions
             {
                 Destroy(splatters[i].gameObject);
             }
-            if(battle.enemy)
+
+            int tpRecover = Mathf.Clamp(Mathf.FloorToInt((float)MainManager.instance.maxtp * 0.4f), 6, 12);
+            if (battle.enemy)
+            {
                 FixEnemyDiedOnItemUse();
+                RecoverEnemyTp(tpRecover, user.battleid);
+            }
+            else
+            {
+                RecoverPlayerTP(tpRecover, user.transform.position + Vector3.up);
+            }
         }
 
         void CheckEnemyItems()
@@ -3560,7 +3569,7 @@ namespace BFPlus.Extensions
                     break;
 
                 case (int)Items.Abombhoney:
-                    yield return DoAbomb(new Vector3(0f, 0f, -0.5f), battle);
+                    yield return DoAbomb(new Vector3(0f, 0f, -0.5f), entity);
                     break;
 
                 case (int)Items.ClearBomb:

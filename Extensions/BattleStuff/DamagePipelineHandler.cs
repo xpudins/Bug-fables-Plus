@@ -167,13 +167,8 @@ namespace BFPlus.Extensions.BattleStuff
                 atk += Instance.CheckOddWarrior(battle, attacker);
                 atk += Instance.CheckKineticEnergy(attacker);
 
-                if (property.HasValue &&
-                    property.Value != AttackProperty.Pierce &&
-                    property.Value != AttackProperty.Atleast1pierce)
-                {
-                    if (battle.currentchoice == Actions.Attack)
-                        defPierce += BadgeHowManyEquipped((int)BadgeTypes.AntlionJaws, attacker.trueid);
-                }
+                if (battle.currentchoice == Actions.Attack)
+                    defPierce += BadgeHowManyEquipped((int)BadgeTypes.AntlionJaws, attacker.trueid);
 
                 useCharge = CanUseCharge(attacker.battleentity.battleid);
             }
