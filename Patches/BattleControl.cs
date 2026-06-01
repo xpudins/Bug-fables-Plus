@@ -903,7 +903,8 @@ namespace BFPlus.Patches
                 while (flips > 0)
                 {
                     flips--;
-                    DamagePipelineHandler.FlipTarget(ref target);
+                    if(DamagePipelineHandler.FlipTarget(ref target));
+                        weaknesshit = true;
                 }
             }
         }
