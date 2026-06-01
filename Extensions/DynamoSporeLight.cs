@@ -38,7 +38,6 @@ public class DynamoSporeLight : MonoBehaviour
     int oldAnimState = 0;
     Vector3 baseLightPosition = new Vector3(0, 0, -0.0001f);
     static Dictionary<LightState, Dictionary<string, Sprite>> lightSprites = new Dictionary<LightState, Dictionary<string, Sprite>>();
-    MaterialPropertyBlock mpb;
     Color lastLightColor;
 
     void Start()
@@ -71,7 +70,6 @@ public class DynamoSporeLight : MonoBehaviour
 
         lightSprite.sprite = lightSprites[LightState.Off]["zombees_39"];
         lightSprite.sortingOrder = -1;
-        mpb = new MaterialPropertyBlock();
         lightSprite.transform.localPosition = baseLightPosition;
         lightSprite.transform.localScale = Vector3.one;
     }
@@ -94,8 +92,7 @@ public class DynamoSporeLight : MonoBehaviour
 
             if (HasMaxCharge())
             {
-                int charge = MainManager.battle.enemydata[entity.battleid].charge;
-                if (charge == 3 && entity.sprite != null && entity.sprite.sprite != null)
+                if (entity.sprite != null && entity.sprite.sprite != null)
                 {
                     targetColor = MainManager.RainbowColor(1, 5.9f * 1, 0.5f, 1f, 1f);
 
@@ -156,7 +153,7 @@ public class DynamoSporeLight : MonoBehaviour
             chargeCooldown -= 1f;
         }
 
-        if (entity.sprite != null && entity.sprite.sprite != null && lastSprite != entity.sprite.sprite)
+        if (entity.sprite != null && entity.sprite.sprite != null && (lastSprite != entity.sprite.sprite || lastState != state))
         {
             lastSprite = entity.sprite.sprite;
             lightSprite.sprite = lightSprites[state][lastSprite.name];
@@ -165,10 +162,11 @@ public class DynamoSporeLight : MonoBehaviour
         if(targetColor != lastLightColor)
         {
             lastLightColor = targetColor;
-            mpb.Clear();
-            mpb.SetColor(ColorId, targetColor);
-            lightSprite.SetPropertyBlock(mpb);
+            lightSprite.color = targetColor;
         }
+
+        if (lastState != state)
+            lastState = state;
     }
 
     void GetChargeFrame()
