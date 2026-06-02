@@ -535,17 +535,14 @@ namespace BFPlus.Patches
             IEnumerable methods = typeof(BattleControl).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(method => method.Name == "DoDamage").Cast<MethodBase>();
             return typeof(BattleControl).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(method => method.Name == "DoDamage" && method.GetParameters().Length == 6).FirstOrDefault();
         }
-        static bool hadPlating = false;
-        static int beforeDoDamageHp = -1;
         static bool superBlocked = false;
 
-        static bool attackerIsInked = false;
         static bool Prefix(BattleControl __instance, MethodBase __originalMethod, BattleData? attacker, ref BattleData target, ref int damageammount, BattleControl.AttackProperty? property, ref BattleControl.DamageOverride[] overrides, bool block)
         {
             bool isDotDamage = BattleControl_Ext.Instance.IsDotDamage(overrides);
             bool targetIsPlayer = target.battleentity.CompareTag("Player");
 
-            if (targetIsPlayer)
+            if (targetIsPlayer && !isDotDamage)
             {
                 superBlocked = (__instance.GetSuperBlock(target.battleentity.animid) || __instance.superblockedthisframe > 0f) && !__instance.IsStopped(target);
             }
@@ -576,9 +573,7 @@ namespace BFPlus.Patches
 
             BattleControl_Ext.Instance.realDamage = 0;
 
-            beforeDoDamageHp = target.hp;
-
-            hadPlating = target.plating;
+            entityExt.beforeDoDamageHp = target.hp;
 
             if (__instance.chompyattack == null && MainManager.BadgeIsEquipped((int)Medal.Blightfury) && !BattleControl_Ext.Instance.inAiAttack && !isDotDamage)
             {
@@ -618,7 +613,7 @@ namespace BFPlus.Patches
                 BattleControl_Ext.Instance.attackedThisTurn.Add(BattleControl_Ext.Instance.entityAttacking.battleid);
             }
 
-            attackerIsInked = attacker != null && !isDotDamage && MainManager.HasCondition(MainManager.BattleCondition.Inked, attacker.Value) > -1;
+            bool attackerIsInked = attacker != null && !isDotDamage && MainManager.HasCondition(MainManager.BattleCondition.Inked, attacker.Value) > -1;
             //Smearcharge check
             if (targetIsPlayer && attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Smearcharge, target.trueid))
             {
@@ -644,13 +639,12 @@ namespace BFPlus.Patches
                 if(target.battleentity.icecube == null)
                     target.battleentity.Freeze();
             }
-
-            if (MainManager.BadgeIsEquipped((int)Medal.Perkfectionist) && !__instance.enemy && beforeDoDamageHp - __result == 0 && __result != 0 && beforeDoDamageHp != 0)
+            var entityExt = Entity_Ext.GetEntity_Ext(target.battleentity);
+            if (!targetIsPlayer && BadgeIsEquipped((int)Medal.Perkfectionist) && entityExt.beforeDoDamageHp - __result == 0 && __result != 0 && entityExt.beforeDoDamageHp != 0 && target.hp == 0)
             {
                 BattleControl_Ext.Instance.perfectKill = true;
                 BattleControl_Ext.Instance.perfectKillAmount++;
             }
-            var entityExt = Entity_Ext.GetEntity_Ext(target.battleentity);
 
             if (targetIsPlayer && attacker != null && !isDotDamage && target.trueid == 2)
             {
@@ -707,7 +701,7 @@ namespace BFPlus.Patches
 
                 if (!targetIsPlayer)
                 {
-                    BattleControl_Ext.Instance.CheckStrikeBlasters(__instance, target, beforeDoDamageHp, entityExt);
+                    BattleControl_Ext.Instance.CheckStrikeBlasters(__instance, target, entityExt.beforeDoDamageHp, entityExt);
                 }
 
                 if (!__instance.enemy && !targetIsPlayer && __result > BattleControl_Ext.Instance.trustFallDamage)
@@ -722,6 +716,7 @@ namespace BFPlus.Patches
                     BattleControl_Ext.Instance.DoWebsheetCheck(attacker, ref target, targetIsPlayer);
                 }
 
+                bool attackerIsInked = attacker != null && !isDotDamage && MainManager.HasCondition(MainManager.BattleCondition.Inked, attacker.Value) > -1;
                 if (attackerIsInked && MainManager.BadgeIsEquipped((int)Medal.Inkblot))
                 {
                     var attackerExt = Entity_Ext.GetEntity_Ext(attacker.Value.battleentity);

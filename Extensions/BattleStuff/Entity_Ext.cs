@@ -50,6 +50,7 @@ namespace BFPlus.Extensions
         public bool inkBubbleEnabled = false;
         public int piercedStatusRes;
         public int corkscrewRelays;
+        public int beforeDoDamageHp;
 
         public bool hasDizzyAnim = false;
         DialogueAnim vitiationShield = null;

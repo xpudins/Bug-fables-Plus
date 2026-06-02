@@ -3089,6 +3089,7 @@ namespace BFPlus.Extensions
 
         IEnumerator DoLecture(EntityControl entity)
         {
+            battle.dontusecharge = true;
             yield return EventControl.tenthsec;
             AudioClip bleep = Resources.Load<AudioClip>("Audio/Sounds/Dialogue/Dialogue" + entity.dialoguebleepid);
             entity.talking = true;
