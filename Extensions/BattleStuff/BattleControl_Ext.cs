@@ -6014,7 +6014,7 @@ namespace BFPlus.Extensions
             stylishBar.transform.localScale = new Vector3(0, 1, 1);
             stylishBar.color = Color.yellow;
             GetStylishReward();
-
+            battle.UpdateConditionIcons();
             yield return EventControl.halfsec;
         }
 
