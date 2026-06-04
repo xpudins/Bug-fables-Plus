@@ -39,11 +39,14 @@ namespace BFPlus.Extensions.Stylish
 
         public static void ShowStylish(float pitch, EntityControl entity, float stylishIncrease = 0.1f, bool increaseBar = true, Vector3? offset = null)
         {
-            MainManager.PlaySound("AtkSuccess", pitch, 1);
-            MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.ShowStylishMessage(entity, offset));
+            if(stylishIncrease > 0 && !float.IsNaN(stylishIncrease) && !float.IsInfinity(stylishIncrease))
+            {
+                MainManager.PlaySound("AtkSuccess", pitch, 1);
+                MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.ShowStylishMessage(entity, offset));
 
-            if (increaseBar)
-                MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.IncreaseStylishBar(stylishIncrease, entity));
+                if (increaseBar)
+                    MainManager.battle.StartCoroutine(BattleControl_Ext.Instance.IncreaseStylishBar(stylishIncrease, entity));
+            }
         }
     }
 }

@@ -57,7 +57,5 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
                 crane.localEulerAngles = new Vector3(crane.localEulerAngles.x, 385, crane.localEulerAngles.z);
             }
         }
-
-
     }
 }

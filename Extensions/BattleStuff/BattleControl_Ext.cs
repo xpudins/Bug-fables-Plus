@@ -2891,7 +2891,7 @@ namespace BFPlus.Extensions
                                 if (StylishUtils.CheckStylish(ref failedStylish, entity, startTime, 15f))
                                 {
                                     succeedStylish = true;
-                                    battle.StartCoroutine(KabbuStylish.DoPebbleTossStylish(entity, stylishHits, gain: 0.04f / (float)stylishHits));
+                                    battle.StartCoroutine(KabbuStylish.DoPebbleTossStylish(entity, stylishHits, gain: 0.02f));
                                     stylishHits++;
                                 }
                             }
