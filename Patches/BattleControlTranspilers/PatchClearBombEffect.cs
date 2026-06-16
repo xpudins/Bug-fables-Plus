@@ -27,7 +27,7 @@ namespace BFPlus.Patches.BattleControlTranspilers
             int heal = 5;
             if (!battle.enemy)
             {
-                heal += BadgeHowManyEquipped((int)BadgeTypes.HealPlus) + (2 * BadgeHowManyEquipped((int)BadgeTypes.BombPlus));
+                heal += BadgeHowManyEquipped((int)BadgeTypes.HealPlus, instance.playerdata[battle.currentturn].trueid) + (2 * BadgeHowManyEquipped((int)BadgeTypes.BombPlus, instance.playerdata[battle.currentturn].trueid));
                 for (int i = 0; i != instance.playerdata.Length; i++)
                 {
                     if (instance.playerdata[i].hp > 0)
