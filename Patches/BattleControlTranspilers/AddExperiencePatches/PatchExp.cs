@@ -1,14 +1,7 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
 {
@@ -19,10 +12,10 @@ namespace BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches
             priority = 13462;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(i=>i.MatchBge(out label),i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(656));
+            cursor.GotoNext(i => i.MatchBge(out label), i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(656));
             cursor.GotoNext();
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext();

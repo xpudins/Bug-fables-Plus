@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.GiantLairPlayroom
 {
@@ -62,7 +57,5 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
                 crane.localEulerAngles = new Vector3(crane.localEulerAngles.x, 385, crane.localEulerAngles.z);
             }
         }
-
-
     }
 }

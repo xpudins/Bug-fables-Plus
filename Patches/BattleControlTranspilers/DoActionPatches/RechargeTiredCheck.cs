@@ -1,12 +1,8 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
 
 namespace BFPlus.Patches.DoActionPatches
 {
@@ -17,7 +13,7 @@ namespace BFPlus.Patches.DoActionPatches
             priority = 150415;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdflda(typeof(MainManager.BattleData).GetField("tired")));
 
@@ -28,7 +24,7 @@ namespace BFPlus.Patches.DoActionPatches
 
             cursor.GotoNext(i => i.MatchLdflda(typeof(MainManager.BattleData).GetField("tired")));
             cursor.GotoNext(i => i.MatchLdflda(typeof(MainManager.BattleData).GetField("tired")));
-            cursor.GotoPrev(MoveType.After,i => i.MatchBrtrue(out label));
+            cursor.GotoPrev(MoveType.After, i => i.MatchBrtrue(out label));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CheckRecharge", new Type[] { }));
             cursor.Emit(OpCodes.Brfalse, label);
         }

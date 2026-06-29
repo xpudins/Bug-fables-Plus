@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
@@ -23,10 +19,10 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             priority = 74294;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(MoveType.After,i => i.MatchLdarg0(), i => i.MatchLdcI4(33), i => i.MatchBeq(out label));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdarg0(), i => i.MatchLdcI4(33), i => i.MatchBeq(out label));
 
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldc_I4, (int)NewListType.BadgeShops);
@@ -47,7 +43,7 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             cursor.GotoNext(i => i.MatchLdstr("itemsprite"));
             var textRef = cursor.Prev.Operand;
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(1), i => i.MatchLdsfld(out _), i => i.MatchLdloc(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(1), i => i.MatchLdsfld(out _), i => i.MatchLdloc(out _));
             var indexRef = cursor.Prev.Operand;
 
             cursor.GotoNext(i => i.MatchLdcI4(190));
@@ -55,7 +51,7 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             cursor.GotoNext(i => i.MatchLdloc(out _));
             var barRef = cursor.Next.Operand;
 
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcR4(0.6f), i=>i.MatchLdcR4(1f), i=>i.MatchNewobj(out _), i=>i.MatchCallvirt(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcR4(0.6f), i => i.MatchLdcR4(1f), i => i.MatchNewobj(out _), i => i.MatchCallvirt(out _));
 
             cursor.Emit(OpCodes.Ldloc, indexRef);
             cursor.Emit(OpCodes.Ldloca, textRef);
@@ -93,7 +89,7 @@ namespace BFPlus.Patches.MainManagerTranspilers.ShowItemListPatches
             priority = 75173;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
             cursor.GotoNext(MoveType.After, i => i.MatchLdarg0(), i => i.MatchLdcI4(33), i => i.MatchBeq(out label));

@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -23,12 +18,12 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 48876;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdsfld(out _),i =>i.MatchLdfld(out _),i => i.MatchLdcI4(411));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(411));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext(i => i.MatchLdfld(out _));
-            Utils.RemoveUntilInst(cursor,i => i.MatchStloc2());
+            Utils.RemoveUntilInst(cursor, i => i.MatchStloc2());
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchVenusPitDialogues), "GetVenusPitDialogue"));
         }
@@ -63,9 +58,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 48946;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdloc2(),i => i.MatchCall(out _));
+            cursor.GotoNext(i => i.MatchLdloc2(), i => i.MatchCall(out _));
             cursor.GotoNext(i => i.MatchCall(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchVenusNewMapDialogue), "GetVenusDialogue"));
         }

@@ -3,12 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
 {
@@ -22,7 +17,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
             priority = 6911;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdloc1(), i => i.MatchLdcI4(24));
             cursor.GotoNext(
@@ -45,7 +40,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
         static IEnumerator DoVeguDeath()
         {
             int veguId = MainManager.battle.EnemyInField((int)MainManager.Enemies.VenusBoss);
-            for (int i = 0; i < MainManager.battle.enemydata.Length; i++) 
+            for (int i = 0; i < MainManager.battle.enemydata.Length; i++)
             {
                 if (veguId != i && MainManager.battle.enemydata[i].battleentity.deathcoroutine == null)
                 {

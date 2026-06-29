@@ -1,14 +1,7 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
-using System.Reflection;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
-using Mono.Cecil;
+using MonoMod.Cil;
 
 namespace BFPlus.Patches.DoActionPatches
 {
@@ -19,13 +12,13 @@ namespace BFPlus.Patches.DoActionPatches
             priority = 44427;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, 
-                i => i.MatchLdfld(typeof(BattleControl).GetField("checkingdead")), 
+            cursor.GotoNext(MoveType.After,
+                i => i.MatchLdfld(typeof(BattleControl).GetField("checkingdead")),
                 i => i.MatchBrtrue(out _));
             cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext),"CheckNewSkills"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CheckNewSkills"));
             Utils.InsertYieldReturn(cursor);
         }
 

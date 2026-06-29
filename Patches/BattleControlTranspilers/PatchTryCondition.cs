@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -19,21 +15,31 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 0;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor c, ILContext context)
         {
-            cursor.Goto(0);
+            c.Goto(0);
 
             var updateAnimRef = AccessTools.Method(typeof(BattleControl), "UpdateAnim", new Type[] { });
-            while (cursor.TryGotoNext(i => i.MatchLdarg0(), i=>i.MatchCall(updateAnimRef)))
+            while (c.TryGotoNext(i => i.MatchLdarg0(), i => i.MatchCall(updateAnimRef)))
             {
-                for(int i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
-                    cursor.Next.OpCode = OpCodes.Nop;
-                    cursor.GotoNext();
+                    c.Next.OpCode = OpCodes.Nop;
+                    c.GotoNext();
                 }
             }
-            cursor.Goto(0);
+            c.Goto(0);
+            c.GotoNext(MoveType.After, x => x.MatchStloc(0));
+
+            c.Emit(OpCodes.Ldloca, 0);
+            c.Emit(OpCodes.Ldarg_1);
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchTryCondition), "GetResistancePierce"));
         }
 
+        public static void GetResistancePierce(ref float resPierce, ref MainManager.BattleData target)
+        {
+            Entity_Ext extEnt = Entity_Ext.GetEntity_Ext(target.battleentity);
+            resPierce += extEnt?.piercedStatusRes ?? 0;
+        }
     }
 }

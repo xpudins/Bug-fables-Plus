@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
@@ -43,10 +38,10 @@ namespace BFPlus.Extensions.EnemyAI
             }
         }
 
-        IEnumerator DoStomp(EntityControl entity, int actionid) 
+        IEnumerator DoStomp(EntityControl entity, int actionid)
         {
             battle.GetSingleTarget();
-            entity.MoveTowards(battle.playertargetentity.transform.position + Vector3.right*2,1.5f);
+            entity.MoveTowards(battle.playertargetentity.transform.position + Vector3.right * 2, 1.5f);
 
             yield return new WaitUntil(() => !entity.forcemove);
             MainManager.PlaySound("longLegsGrow");
@@ -66,12 +61,12 @@ namespace BFPlus.Extensions.EnemyAI
         IEnumerator DoWebSpit(EntityControl entity, int actionid)
         {
             battle.nonphyscal = true;
-            MainManager.PlaySound("Chew", -1, 1.5f,1, true);
+            MainManager.PlaySound("Chew", -1, 1.5f, 1, true);
             entity.animstate = 102;
             yield return EventControl.sec;
             MainManager.StopSound("Chew");
 
-            for (int i = 0; i < WEB_SPIT_AMOUNT; i++) 
+            for (int i = 0; i < WEB_SPIT_AMOUNT; i++)
             {
                 if (MainManager.GetAlivePlayerAmmount() == 0)
                     break;
@@ -87,7 +82,7 @@ namespace BFPlus.Extensions.EnemyAI
 
                 battle.StartCoroutine(battle.Projectile(
                     WEB_SPIT_DAMAGE, BattleControl.AttackProperty.Sticky, battle.enemydata[actionid], battle.playertargetID,
-                    webWad.transform, speed,10, "keepcolor", null, null, null, new Vector3(0,0,20), false));
+                    webWad.transform, speed, 10, "keepcolor", null, null, null, new Vector3(0, 0, 20), false));
                 yield return EventControl.quartersec;
                 yield return new WaitUntil(() => webWad == null);
 

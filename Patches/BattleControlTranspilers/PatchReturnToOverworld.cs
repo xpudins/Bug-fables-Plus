@@ -3,13 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -20,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 157515;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
             cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdcI4(0), i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "minipause")));
@@ -30,9 +24,9 @@ namespace BFPlus.Patches.BattleControlTranspilers
             cursor.Goto(cursorIndex);
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchEndOfBattleChecks), "CheckPitEnemyDead"));
-            cursor.Emit(OpCodes.Brtrue,label);
+            cursor.Emit(OpCodes.Brtrue, label);
 
-            cursor.GotoNext(MoveType.After,i=>i.MatchLdstr("CheckAchievement"), i=>i.MatchLdcR4(0.5f), i=>i.MatchCallvirt(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("CheckAchievement"), i => i.MatchLdcR4(0.5f), i => i.MatchCallvirt(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchEndOfBattleChecks), "CheckEndOfBattleStuff"));
         }
 
@@ -83,6 +77,21 @@ namespace BFPlus.Patches.BattleControlTranspilers
             }
 
             return false;
+        }
+    }
+
+    public class PatchUnloadMemoryOnTransition : PatchBaseBattleControlReturnToOverworld
+    {
+        public PatchUnloadMemoryOnTransition()
+        {
+            priority = 156866;
+        }
+
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
+        {
+            cursor.GotoNext(MoveType.After,i => i.MatchLdcR4(30f), i => i.MatchStfld(out _));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Resources), nameof(Resources.UnloadUnusedAssets), new System.Type[] {}));
+            cursor.Emit(OpCodes.Pop);
         }
     }
 }

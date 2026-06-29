@@ -3,15 +3,10 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.PauseMenuTranspilers
-{ 
+{
 
     public class PatchMedalList : PatchBasePauseMenuUpdateText
     {
@@ -19,7 +14,7 @@ namespace BFPlus.Patches.PauseMenuTranspilers
         {
             priority = 530;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             //check medal label text
             cursor.GotoNext(i => i.MatchLdcI4(61));
@@ -28,7 +23,7 @@ namespace BFPlus.Patches.PauseMenuTranspilers
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchMedalList), "CheckMedalLabelText"));
 
             //change showitemlist to list 38
-            cursor.GotoNext(i => i.MatchLdcI4(3),i=>i.MatchCall(out _), i => i.MatchLdcI4(0), i => i.MatchLdcI4(0), i => i.MatchCall(out _));
+            cursor.GotoNext(i => i.MatchLdcI4(3), i => i.MatchCall(out _), i => i.MatchLdcI4(0), i => i.MatchLdcI4(0), i => i.MatchCall(out _));
             cursor.Next.OpCode = OpCodes.Ldc_I4;
             cursor.Next.Operand = (int)NewListType.MedalCategories;
 
@@ -41,16 +36,16 @@ namespace BFPlus.Patches.PauseMenuTranspilers
             //if we are on page 0 and list medal categories, render stuff differently
             ILLabel label = cursor.DefineLabel();
             cursor.GotoNext(i => i.MatchLdcI4(32));
-            cursor.GotoNext(i => i.MatchLdsfld(out _), i=>i.MatchLdfld(out _));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchMedalList), "CheckMedalList"));
-            cursor.Emit(OpCodes.Brfalse,label);
+            cursor.Emit(OpCodes.Brfalse, label);
             cursor.Emit(OpCodes.Ret);
             cursor.MarkLabel(label);
         }
 
         static bool CheckMedalList()
         {
-            if(MainManager.pausemenu.page == 0 && MainManager.listtype == (int)NewListType.MedalCategories && PauseMenu_Ext.Instance.chooseMedalCategory == -1 && MainManager.instance.option < MainManager.listvar.Length)
+            if (MainManager.pausemenu.page == 0 && MainManager.listtype == (int)NewListType.MedalCategories && PauseMenu_Ext.Instance.chooseMedalCategory == -1 && MainManager.instance.option < MainManager.listvar.Length)
             {
                 MainManager.instance.itemlist.parent = MainManager.pausemenu.boxes[0].transform;
                 MainManager.instance.itemlist.localScale = Vector3.one;
@@ -102,13 +97,13 @@ namespace BFPlus.Patches.PauseMenuTranspilers
                 PauseMenu_Ext.Instance.DestroyMedalCategoryIcon();
             }
 
-            if(page == 0 && PauseMenu_Ext.Instance.chooseMedalCategory != -1 && MainManager.instance.option < MainManager.listvar.Length)
+            if (page == 0 && PauseMenu_Ext.Instance.chooseMedalCategory != -1 && MainManager.instance.option < MainManager.listvar.Length)
             {
                 PauseMenu_Ext.MedalCategory category = PauseMenu_Ext.Instance.medalCategories[PauseMenu_Ext.Instance.chooseMedalCategory];
                 return category.name;
             }
 
-            if(page == 3)
+            if (page == 3)
             {
                 if (PauseMenu_Ext.Instance.presetId == -1)
                     return MainManager.menutext[292];
@@ -119,7 +114,7 @@ namespace BFPlus.Patches.PauseMenuTranspilers
                     return preset.name;
 
                 return "Empty Preset";
-                
+
             }
             return MainManager.menutext[page == 0 ? 27 : page == 1 ? 260 : 61];
         }
@@ -131,10 +126,10 @@ namespace BFPlus.Patches.PauseMenuTranspilers
         {
             priority = 658;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = cursor.DefineLabel();
-            cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(PauseMenu), "page")), i => i.MatchLdcI4(2), i=>i.MatchBneUn(out _));
+            cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(PauseMenu), "page")), i => i.MatchLdcI4(2), i => i.MatchBneUn(out _));
             cursor.GotoNext(i => i.MatchBneUn(out _));
             cursor.Emit(OpCodes.Beq, label);
             cursor.Remove();
@@ -156,11 +151,11 @@ namespace BFPlus.Patches.PauseMenuTranspilers
             }
             int menuText = 291;
 
-            if(PauseMenu_Ext.Instance.presetId != -1)
+            if (PauseMenu_Ext.Instance.presetId != -1)
             {
                 menuText = 299 + MainManager.listvar[MainManager.instance.option];
 
-                if(MainManager.listvar[MainManager.instance.option] >= 5)
+                if (MainManager.listvar[MainManager.instance.option] >= 5)
                 {
                     menuText = 305;
                 }

@@ -1,10 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using BFPlus.Extensions;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 
 namespace BFPlus.Patches
 {
@@ -13,25 +8,25 @@ namespace BFPlus.Patches
     {
         static void Prefix(PlayerControl __instance)
         {
-			if (MainManager.GetKey(7, false) && __instance.canpause)
-			{
-				if (MainManager.instance.hudcooldown <= 0f)
-				{
-					MainManager.PlaySound("HudDown", 13, 1f, 0.15f);
-					MainManager.instance.hudcooldown = 300f;
-					MainManager.instance.showmoney = 300f;
-				}
-				else
-				{
-					MainManager.PlaySound("HudUp", 13, 1f, 0.15f);
-					MainManager.instance.hudcooldown = 1f;
-					if (MainManager.instance.money == MainManager.instance.moneyt)
-					{
-						MainManager.instance.showmoney = 1f;
-					}
-				}
-			}
-		}
+            if (MainManager.GetKey(7, false) && __instance.canpause)
+            {
+                if (MainManager.instance.hudcooldown <= 0f)
+                {
+                    MainManager.PlaySound("HudDown", 13, 1f, 0.15f);
+                    MainManager.instance.hudcooldown = 300f;
+                    MainManager.instance.showmoney = 300f;
+                }
+                else
+                {
+                    MainManager.PlaySound("HudUp", 13, 1f, 0.15f);
+                    MainManager.instance.hudcooldown = 1f;
+                    if (MainManager.instance.money == MainManager.instance.moneyt)
+                    {
+                        MainManager.instance.showmoney = 1f;
+                    }
+                }
+            }
+        }
     }
 
     [HarmonyPatch(typeof(PlayerControl), "DoActionHold")]
@@ -39,9 +34,9 @@ namespace BFPlus.Patches
     {
         static bool Prefix(PlayerControl __instance)
         {
-			if (MainManager_Ext.inSeedlingMinigame)
-				return false;
-			return true;
+            if (MainManager_Ext.inSeedlingMinigame)
+                return false;
+            return true;
         }
     }
 

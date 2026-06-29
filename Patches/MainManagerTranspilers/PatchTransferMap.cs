@@ -5,10 +5,6 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.MainManagerTranspilers
@@ -20,9 +16,9 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 34413;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "DetectIgnoreSphere", new Type[] {typeof(bool)})));
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "DetectIgnoreSphere", new Type[] { typeof(bool) })));
 
             ILLabel label = cursor.DefineLabel();
 

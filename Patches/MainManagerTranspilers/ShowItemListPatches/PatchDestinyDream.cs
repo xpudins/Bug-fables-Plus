@@ -1,16 +1,9 @@
 ﻿using BFPlus.Extensions;
+using BFPlus.Extensions.BattleStuff.StatusStuff;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using UnityEngine.SocialPlatforms;
 
 namespace BFPlus.Patches.ShowItemListPatches
 {
@@ -20,12 +13,12 @@ namespace BFPlus.Patches.ShowItemListPatches
         {
             priority = 72223;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
 
             cursor.GotoNext(MoveType.Before, i => i.MatchLdloc(out _), i => i.MatchLdcI4(0), i => i.MatchClt(), i => i.MatchBr(out _));
             var label = cursor.Prev.Operand;
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "DestinyDreamCheck"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Sleep), "CheckDestinyDream"));
             cursor.Emit(OpCodes.Brtrue, label);
         }
     }
@@ -36,7 +29,7 @@ namespace BFPlus.Patches.ShowItemListPatches
         {
             priority = 72347;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             int originalIndex = cursor.Index;
 
@@ -49,7 +42,7 @@ namespace BFPlus.Patches.ShowItemListPatches
 
             cursor.GotoNext(MoveType.After, i => i.MatchCall(out _), i => i.MatchCallvirt(out _), i => i.MatchPop());
             cursor.Emit(localValueSpriteRendererDestiny.OpCode, localValueSpriteRendererDestiny.Operand);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "CreateDestinySkillSprite"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Sleep), "CreateDestinySkillSprite"));
 
             var stLoc = cursor.Body.Instructions[cursor.Index + 1];
             cursor.Emit(stLoc.OpCode, stLoc.Operand);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 namespace BFPlus.Extensions
 {
     public class LightningManager : MonoBehaviour
@@ -57,7 +53,7 @@ namespace BFPlus.Extensions
         private Light directionalLight;
         public static float timeOfDay;
         public float timeModifier = 0.01f;
-        
+
         void Start()
         {
             ambientColor.SetKeys(colorKeyAmbient, alphaKeys);
@@ -88,9 +84,9 @@ namespace BFPlus.Extensions
         {
             RenderSettings.ambientLight = ambientColor.Evaluate(timePercent);
             RenderSettings.fogColor = fogColor.Evaluate(timePercent);
-            RenderSettings.skybox.SetColor("_Tint", skyBoxColor.Evaluate(timePercent));
-            
-            
+            //RenderSettings.skybox.SetColor("_Tint", skyBoxColor.Evaluate(timePercent));
+
+
             if (directionalLight != null)
             {
                 directionalLight.color = directionalColor.Evaluate(timePercent);

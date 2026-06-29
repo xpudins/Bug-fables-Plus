@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 {
@@ -37,7 +32,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             if (MainManager.map.chompy != null)
             {
                 MainManager.map.chompy.following = null;
-                MainManager.map.chompy.transform.position = new Vector3(0,-30);
+                MainManager.map.chompy.transform.position = new Vector3(0, -30);
             }
 
             for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
@@ -55,19 +50,19 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             babyHoaxe.animid = (int)NewAnimID.BabyHoaxe;
             babyHoaxe.emoticonoffset = new Vector3(0, 1, -0.1f);
 
-            EntityControl hoaxMom = EntityControl.CreateNewEntity("hoaxeMom", (int)NewAnimID.HoaxeMom,new Vector3(1.67f, 0, 5.20f));
+            EntityControl hoaxMom = EntityControl.CreateNewEntity("hoaxeMom", (int)NewAnimID.HoaxeMom, new Vector3(1.67f, 0, 5.20f));
             hoaxMom.animstate = 100;
             hoaxMom.transform.parent = MainManager.map.transform;
 
-            MainManager.SetCamera(hoaxMom.transform,null, 1f);
+            MainManager.SetCamera(hoaxMom.transform, null, 1f);
             MainManager.FadeOut(0.01f);
             hoaxMom.MoveTowards(new Vector3(11.5f, -0.4f, 5f), 0.5f, 100, 105);
 
             yield return null;
-            yield return new WaitUntil(() =>!hoaxMom.forcemove);
+            yield return new WaitUntil(() => !hoaxMom.forcemove);
 
             hoaxMom.animstate = 105;
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 hoaxMom.flip = !hoaxMom.flip;
                 yield return EventControl.sec;
@@ -136,7 +131,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             yield return EventControl.sec;
             yield return EventControl.sec;
 
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 babyHoaxe.animstate = i % 2 == 0 ? 102 : 101;
                 yield return EventControl.quartersec;
@@ -146,7 +141,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             yield return EventControl.sec;
 
             babyHoaxe.animstate = 0;
-            GameObject blanket = UnityEngine.Object.Instantiate(MainManager_Ext.assetBundle.LoadAsset<GameObject>("HoaxeBlanket"),MainManager.map.transform);
+            GameObject blanket = UnityEngine.Object.Instantiate(MainManager_Ext.assetBundle.LoadAsset<GameObject>("HoaxeBlanket"), MainManager.map.transform);
             blanket.GetComponent<SpriteRenderer>().material = MainManager.spritemat;
             blanket.transform.position = babyHoaxe.transform.position + new Vector3(0, 0, 0.1f);
             yield return EventControl.halfsec;
@@ -154,10 +149,10 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             babyHoaxe.LockRigid(true);
 
-            MainManager.SetCamera(babyHoaxe.transform, null, 0.02f, new Vector3(0,1f,-4f));
+            MainManager.SetCamera(babyHoaxe.transform, null, 0.02f, new Vector3(0, 1f, -4f));
             babyHoaxe.animstate = 1;
             yield return BattleControl_Ext.LerpPosition(60, babyHoaxe.transform.position, new Vector3(14.3f, -0.4f, 5.1f), babyHoaxe.transform);
-            
+
             babyHoaxe.animstate = 0;
             for (int i = 0; i < 4; i++)
             {
@@ -190,12 +185,12 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
     {
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
-            while(MainManager.instance.message)
+            while (MainManager.instance.message)
                 yield return null;
 
             EntityControl babyHoaxe = MainManager.instance.playerdata[0].entity;
 
-            MainManager.SetCamera(babyHoaxe.transform, null, 0.02f, new Vector3(0, 1f, -4f), new Vector3(10,15,0));
+            MainManager.SetCamera(babyHoaxe.transform, null, 0.02f, new Vector3(0, 1f, -4f), new Vector3(10, 15, 0));
 
             GameObject mysteryBerry = MainManager.map.transform.Find("mysterryBerryHoaxe").gameObject;
 
@@ -205,7 +200,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             babyHoaxe.flip = false;
 
             babyHoaxe.animstate = 100;
-            MainManager.PlaySound("Eat",-1, 1.2f, 1, true);
+            MainManager.PlaySound("Eat", -1, 1.2f, 1, true);
 
             yield return new WaitForSeconds(3);
             MainManager.StopSound("Eat");

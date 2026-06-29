@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.DeepCave
 {
@@ -13,7 +8,7 @@ namespace BFPlus.Extensions.Maps.DeepCave
         {
             base.LoadCustomData();
             map.camlimitneg = new Vector3(-20, 0, -4);
-            map.camlimitpos = new Vector3(20, 999,999);
+            map.camlimitpos = new Vector3(20, 999, 999);
             map.camangle = new Vector3(15, 0, 0);
             var baseObject = map.transform.Find("Base");
 
@@ -26,12 +21,12 @@ namespace BFPlus.Extensions.Maps.DeepCave
             Transform puzzlePlats = baseObject.Find("puzzleBase");
 
             AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (4)").gameObject, new Vector3(0, 10, 0), new int[] { 1 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
-            AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (5)").gameObject, new Vector3(0, 10, 0), new int[] { 3,4 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
-            AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (1)").gameObject, new Vector3(0, -10, 0), new int[] { 1,5 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
+            AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (5)").gameObject, new Vector3(0, 10, 0), new int[] { 3, 4 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
+            AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (1)").gameObject, new Vector3(0, -10, 0), new int[] { 1, 5 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
             AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (2)").gameObject, new Vector3(0, 10, 0), new int[] { 3 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
             AddScrewPlatform(puzzlePlats.Find("WoodenPlatform (7)").gameObject, new Vector3(0, -10, 0), new int[] { 6 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, true);
-            
-            ScrewPlatform screwPlat = AddScrewPlatform(map.transform.Find("RopePlatform").gameObject, new Vector3(0, 0, -7), new int[] { 10 }, Vector3.zero, "", ScrewPlatform.Type.Platform, false, false,180f);
+
+            ScrewPlatform screwPlat = AddScrewPlatform(map.transform.Find("RopePlatform").gameObject, new Vector3(0, 0, -7), new int[] { 10 }, Vector3.zero, "", ScrewPlatform.Type.Platform, false, false, 180f);
             screwPlat.smoothmovement = true;
         }
     }

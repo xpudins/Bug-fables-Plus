@@ -1,27 +1,10 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using static BFPlus.Extensions.PitData;
-using BFPlus.Extensions.EnemyAI;
 using static MainManager;
 
 namespace BFPlus.Extensions
 {
-    public enum NewEvents
-    {
-        DarkSnekFight=400,MusicPlayerUse=401,PitStart=402,PitNextFloor=403,PitEnemyDead=404,LeavePit=405,DarkSnekZaryant =406, DarkSnekSearch=407,
-        TangyFight=408,PitFinalBoss=409,StartSeedlingGame=410, EndSeedlingGame=411, PowerPlantExtraSwitchDoor=412,PowerPlantBoss=413,SandCastleDepthsIcePuzzle=414,
-        SandCastleDepthsBoss=415,LeavePitBossRoomEvent=416,LeviCeliaFight=417,DeepCave1VineDoor=418,DeepCaveBoss=419,MoverEvent=420,
-        StartGourmetMinigame=421, EndGourmetMinigame = 422, CheckMedal=423, HBLeifEvent=424,LeafbugVillageLift=425,ApproachLeafbugShaman=426,
-        LeafbugCooking=427, ConflictingVisions=428, AbandonedTower3WindSwitch, IronTowerBoss, HoaxeIntermission1, HoaxeIntermission1End,
-        PlayroomTrain, ToyTruckPlayroom, PlayroomRaceStart, PlayroomRaceEnd, PlayroomBoss, HoaxeIntermission2, HoaxeIntermission3,
-        HoaxeIntermission3End,HerFavoriteSweet,CollectMagicPouch, HoaxeIntermission4, HoaxeIntermission4End, HoaxeIntermission5,
-        HoaxeIntermission5Talk, HoaxeIntermission5End, HoaxeIntermission5EatDish, HoaxeIntermission6, HoaxeIntermission6MainHall,
-        HoaxeIntermission6End, HoaxeIntermission7
-    }
     class EventControl_Ext
     {
         public static IEnumerator WaitForPitEnemyDeath(NPCControl caller)
@@ -50,7 +33,7 @@ namespace BFPlus.Extensions
         {
             if (!MainManager.instance.flags[774])
             {
-                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[119] + "|break||giveitem,2," + (int)Medal.DestinyDream+",120|", true, Vector3.zero, EventControl.call.transform, EventControl.call));
+                MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[119] + "|break||giveitem,2," + (int)Medal.DestinyDream + ",120|", true, Vector3.zero, EventControl.call.transform, EventControl.call));
                 MainManager.instance.flags[774] = true;
             }
             else
@@ -64,7 +47,7 @@ namespace BFPlus.Extensions
             Audience[] audience = MainManager.map.transform.GetChild(1).GetComponentsInChildren<Audience>();
             EntityControl[] party = MainManager.GetPartyEntities(true);
             EntityControl[] entities = MainManager.GetEntities(new int[] { 0, 1, 2, 3, 4 });
-            EntityControl[] enemies = MainManager.GetEntities(new int[] { 13,14 });
+            EntityControl[] enemies = MainManager.GetEntities(new int[] { 13, 14 });
 
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[52], true, Vector3.zero, party[2].transform, null));
             while (MainManager.instance.message)
@@ -131,7 +114,7 @@ namespace BFPlus.Extensions
                 MainManager.PlayParticle("impactsmoke", termiteKnight.transform.position);
                 MainManager.ShakeScreen(0.1f, 0.75f);
 
-                for(int i = 0; i < party.Length; i++)
+                for (int i = 0; i < party.Length; i++)
                 {
                     party[i].animstate = (int)MainManager.Animations.Hurt;
                     party[i].Jump();
@@ -161,7 +144,7 @@ namespace BFPlus.Extensions
                 termiteKnight.flip = false;
                 termiteKnight.animstate = (int)MainManager.Animations.Idle;
 
-                MainManager.instance.StartCoroutine(MainManager.SetText("|define,14,knight|"+MainManager.map.dialogues[66], true, Vector3.zero, party[2].transform, null));
+                MainManager.instance.StartCoroutine(MainManager.SetText("|define,14,knight|" + MainManager.map.dialogues[66], true, Vector3.zero, party[2].transform, null));
                 while (MainManager.instance.message)
                 {
                     yield return null;
@@ -218,7 +201,7 @@ namespace BFPlus.Extensions
 
                 List<Coroutine> coroutines = new List<Coroutine>();
 
-                for(int i = 0; i < party.Length; i++)
+                for (int i = 0; i < party.Length; i++)
                 {
                     coroutines.Add(MainManager.events.StartCoroutine(FlipAround(party[i])));
                     party[i].animstate = (int)MainManager.Animations.ItemGet;
@@ -245,7 +228,7 @@ namespace BFPlus.Extensions
                 }
                 MainManager.StopSound("CrowdChatter");
 
-                for(int i=0;i<coroutines.Count;i++)
+                for (int i = 0; i < coroutines.Count; i++)
                     MainManager.events.StopCoroutine(coroutines[i]);
 
                 yield return new WaitForSeconds(0.75f);
@@ -269,12 +252,12 @@ namespace BFPlus.Extensions
                 MainManager.SetCamera(null, new Vector3?(new Vector3(-16f, 0f, 5f)), 1f);
                 yield return null;
                 termiteKnight.transform.position = new Vector3(-14.25f, 0f, 3f);
-                
+
                 yield return EventControl.halfsec;
                 MainManager.FadeOut();
                 yield return EventControl.sec;
 
-                MainManager.instance.StartCoroutine(MainManager.SetText("|define,14,knight|"+MainManager.map.dialogues[37], true, Vector3.zero, termiteKnight.transform, null));
+                MainManager.instance.StartCoroutine(MainManager.SetText("|define,14,knight|" + MainManager.map.dialogues[37], true, Vector3.zero, termiteKnight.transform, null));
                 while (MainManager.instance.message)
                 {
                     yield return null;
@@ -413,7 +396,7 @@ namespace BFPlus.Extensions
             }
             else
             {
-                int[] requiredItems = new int[] { (int)MainManager.Items.LonglegSummoner, (int)NewItem.WebWad, (int)MainManager.Items.Abomihoney };
+                int[] requiredItems = new int[] { (int)MainManager.Items.LonglegSummoner, (int)NewItem.WebWad, (int)NewItem.BeeBattery };
                 bool gotAll = true;
                 for (int i = 0; i < requiredItems.Length; i++)
                 {
@@ -423,7 +406,7 @@ namespace BFPlus.Extensions
                     }
                 }
 
-                if (gotAll || MainManager.instance.flags[936]) 
+                if (gotAll || MainManager.instance.flags[936])
                 {
                     Vector3 targetPos = new Vector3(5.21f, 0, 6.37f);
                     Vector3 basePos = patton.transform.position;
@@ -442,7 +425,7 @@ namespace BFPlus.Extensions
                         }
                         MainManager.instance.flags[936] = true;
 
-                        patton.MoveTowards(targetPos,2f);
+                        patton.MoveTowards(targetPos, 2f);
                         yield return new WaitUntil(() => !patton.forcemove);
 
                         for (int i = 0; i < requiredItems.Length; i++)
@@ -451,7 +434,7 @@ namespace BFPlus.Extensions
                         }
                         CreatePattonsIngredients();
                         MainManager.PlaySound("WaterSplash2");
-                        MainManager.PlaySound("Click2",1.2f,1);
+                        MainManager.PlaySound("Click2", 1.2f, 1);
 
                         patton.MoveTowards(basePos, 2f);
                         yield return new WaitUntil(() => !patton.forcemove);
@@ -474,7 +457,7 @@ namespace BFPlus.Extensions
                     }
 
 
-                    if(MainManager.instance.option == 0 && MainManager.instance.money >= 30)
+                    if (MainManager.instance.option == 0 && MainManager.instance.money >= 30)
                     {
                         MainManager.FadeMusic(0.1f);
                         MainManager.instance.money -= 30;
@@ -484,7 +467,7 @@ namespace BFPlus.Extensions
                             yield return null;
                         }
 
-                        patton.MoveTowards(targetPos,2);
+                        patton.MoveTowards(targetPos, 2);
                         yield return new WaitUntil(() => !patton.forcemove);
 
                         int[] berriesId = { (int)MainManager.Items.MoneyBig, (int)MainManager.Items.MoneyMedium, (int)MainManager.Items.MoneySmall };
@@ -515,12 +498,12 @@ namespace BFPlus.Extensions
 
                         Transform tube = MainManager.map.transform.Find("PattonsHouse").Find("Tube (2)").GetChild(0);
                         MainManager.instance.StartCoroutine(MainManager.ShakeObject(tube.parent, new Vector3(0.2f, 0.2f), 120, true));
-                        GameObject smokePart =MainManager.PlayParticle("ContinuousSmokeCloud", tube.transform.position,-1);
+                        GameObject smokePart = MainManager.PlayParticle("ContinuousSmokeCloud", tube.transform.position, -1);
                         smokePart.transform.localScale = Vector3.one * 3;
 
                         yield return EventControl.halfsec;
 
-                        GameObject smokeSphere = MainManager.PlayParticle("OpaqueSmokeSphere", tube.transform.position + new Vector3(1,2,-1), -1);
+                        GameObject smokeSphere = MainManager.PlayParticle("OpaqueSmokeSphere", tube.transform.position + new Vector3(1, 2, -1), -1);
                         smokeSphere.transform.localScale = Vector3.one * 0.5f;
 
                         foreach (var p in party)
@@ -549,10 +532,10 @@ namespace BFPlus.Extensions
                         GameObject tubeMesh = Resources.Load<GameObject>("prefabs/maps/UpperSnekMiddleRoom");
                         tube.gameObject.GetComponent<MeshFilter>().mesh = tubeMesh.transform.GetChild(0).Find("Tube (4)").GetChild(0).GetComponent<MeshFilter>().mesh;
                         EntityControl[] enemies = new EntityControl[2];
-                        for(int i=0;i<enemies.Length; i++)
+                        for (int i = 0; i < enemies.Length; i++)
                         {
-                            int animId = i == 0 ?(int)MainManager.AnimIDs.Abomihoney : (int)MainManager.AnimIDs.LongLegs;
-                            enemies[i] = EntityControl.CreateNewEntity(i==0 ? NewEnemies.Abomiberry.ToString() : "spider", animId - 1, tube.transform.position);
+                            int animId = i == 0 ? (int)NewAnimID.MechaJaw : (int)MainManager.AnimIDs.LongLegs-1;
+                            enemies[i] = EntityControl.CreateNewEntity("enemy"+1, animId, tube.transform.position);
                             enemies[i].transform.parent = MainManager.map.transform;
 
                             yield return null;
@@ -564,7 +547,7 @@ namespace BFPlus.Extensions
                             }
 
                             enemies[i].gameObject.layer = 9;
-                            enemies[i].StartCoroutine(MainManager.ArcMovement(enemies[i].gameObject, enemies[i].transform.position, patton.transform.position - new Vector3(2 + 2.5f *(1-i),0, i== 0 ? 1 : 0.5f),new Vector3(0,20,0),5,30,false)); 
+                            enemies[i].StartCoroutine(MainManager.ArcMovement(enemies[i].gameObject, enemies[i].transform.position, patton.transform.position - new Vector3(2 + 2.5f * (1 - i), 0, i == 0 ? 1 : 0.5f), new Vector3(0, 20, 0), 5, 30, false));
                         }
 
                         UnityEngine.Object.Destroy(smokePart);
@@ -595,9 +578,9 @@ namespace BFPlus.Extensions
                         MainManager.FadeMusic(1);
                         yield return EventControl.quartersec;
 
-                        instance.StartCoroutine(BattleControl.StartBattle(new int[] { 
-                            (int)NewEnemies.Abomiberry,(int)NewEnemies.LonglegsSpider,(int)NewEnemies.Patton }, 
-                            -1, -1, NewMusic.PlusBosses.ToString(), null, false));
+                        instance.StartCoroutine(BattleControl.StartBattle(new int[] {
+                            (int)NewEnemies.MechaJaw,(int)NewEnemies.LonglegsSpider,(int)NewEnemies.Patton },
+                            -1, -1, NewMusic.NewMiniboss.ToString(), null, false));
                         yield return EventControl.sec;
                         while (MainManager.battle != null)
                         {
@@ -617,12 +600,12 @@ namespace BFPlus.Extensions
                         patton.animstate = (int)MainManager.Animations.KO;
                         patton.spritetransform.localEulerAngles = new Vector3(0, 0, -90);
                         patton.LockRigid(true);
-                        basePos = patton.spritetransform.position; 
+                        basePos = patton.spritetransform.position;
                         patton.spritetransform.localPosition += new Vector3(-1, 0.5f);
 
                         yield return EventControl.halfsec;
 
-                        foreach(var enemy in enemies)
+                        foreach (var enemy in enemies)
                         {
                             enemy.animstate = (int)MainManager.Animations.Hurt;
                             enemy.destroytype = NPCControl.DeathType.SpinSmoke;
@@ -691,7 +674,7 @@ namespace BFPlus.Extensions
 
         public static void CreatePattonsIngredients()
         {
-            int[] requiredItems = new int[] { (int)MainManager.Items.LonglegSummoner, (int)NewItem.WebWad, (int)MainManager.Items.Abomihoney };
+            int[] requiredItems = new int[] { (int)MainManager.Items.LonglegSummoner, (int)NewItem.WebWad, (int)NewItem.BeeBattery };
 
             Vector3 itemPos = new Vector3(2.23f, 3f, 6.5f);
             SpriteRenderer[] items = new SpriteRenderer[requiredItems.Length];
@@ -703,12 +686,12 @@ namespace BFPlus.Extensions
             }
         }
 
-        public static IEnumerator FlipAround(EntityControl entity)
+        public static IEnumerator FlipAround(EntityControl entity, float time = 1)
         {
             do
             {
                 entity.flip = !entity.flip;
-                yield return EventControl.sec;
+                yield return new WaitForSeconds(time);
             } while (true);
         }
 

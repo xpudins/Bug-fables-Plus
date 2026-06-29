@@ -1,12 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static BFPlus.Extensions.PitData;
 
 namespace BFPlus.Extensions.Events.PitEvents
 {
@@ -44,7 +38,7 @@ namespace BFPlus.Extensions.Events.PitEvents
             if (MainManager.map.tempfollowers != null)
             {
                 lieutenant = MainManager.map.tempfollowers.FirstOrDefault(f => f.animid == (int)MainManager.AnimIDs.AntCapitain - 1);
-                if(lieutenant != null)
+                if (lieutenant != null)
                     lieutenant.transform.position = new Vector3(1.5f, 1.5f, 10f);
             }
 
@@ -89,7 +83,7 @@ namespace BFPlus.Extensions.Events.PitEvents
                 yield return null;
             } while (a <= b);
             yield return LoadPitRoom(instance);
-        }  
+        }
     }
 
 }

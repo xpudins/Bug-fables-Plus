@@ -1,11 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static BFPlus.Extensions.BattleControl_Ext;
 using static UnityEngine.ParticleSystem;
@@ -83,7 +77,6 @@ namespace BFPlus.Extensions.EnemyAI
             if (battle.enemydata[actionid].hitaction)
             {
                 yield return battle.EnemyAngryCharge(battle.enemydata[actionid].battleentity, 5);
-                battle.enemydata[actionid].def = battle.enemydata[actionid].basedef + battle.enemydata[actionid].charge;
                 yield break;
             }
 
@@ -101,7 +94,7 @@ namespace BFPlus.Extensions.EnemyAI
             if (battle.enemydata.Length < 3)
             {
                 int odds = battle.enemydata.Length == 1 ? 70 : 40;
-                if(UnityEngine.Random.Range(0,100) < odds + battle.enemydata[actionid].data[0]*10)
+                if (UnityEngine.Random.Range(0, 100) < odds + battle.enemydata[actionid].data[0] * 10)
                 {
                     battle.enemydata[actionid].data[0] = 0;
                     yield return CallBackup(entity, actionid);
@@ -115,12 +108,12 @@ namespace BFPlus.Extensions.EnemyAI
 
             List<Attacks> attacks = new List<Attacks>() { Attacks.TailSwipe, Attacks.InkBomb, Attacks.StaffSpin, Attacks.StaffSpin, Attacks.TailSwipe, Attacks.SleepPowder };
 
-            if(MainManager.HasCondition(MainManager.BattleCondition.Inked, battle.enemydata[actionid])> -1)
+            if (MainManager.HasCondition(MainManager.BattleCondition.Inked, battle.enemydata[actionid]) > -1)
             {
                 attacks.AddRange(new Attacks[] { Attacks.RainDance, Attacks.RainDance });
             }
 
-            if(hpPercent<=0.9f)
+            if (hpPercent <= 0.9f)
                 attacks.Add(Attacks.RainDance);
 
             switch (attacks[UnityEngine.Random.Range(0, attacks.Count)])
@@ -161,7 +154,7 @@ namespace BFPlus.Extensions.EnemyAI
                 { (int)NewEnemies.SplotchSpider, 30}
             };
 
-            int enemySpawn = MainManager_Ext.GetWeightedResult(enemyTypes); 
+            int enemySpawn = MainManager_Ext.GetWeightedResult(enemyTypes);
             Vector3 targetPos = battle.GetFreeSpace(true).Value;
 
             battle.checkingdead = battle.StartCoroutine(battle.SummonEnemy(BattleControl.SummonType.Offscreen, enemySpawn, targetPos, true));
@@ -183,7 +176,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             yield return EventControl.quartersec;
 
-            GameObject rainCloud = Instance.CreateRainCloud(entity.transform.position + Vector3.up * 7, entity,60f);
+            GameObject rainCloud = Instance.CreateRainCloud(entity.transform.position + Vector3.up * 7, entity, 60f);
             ParticleSystem rain = rainCloud.GetComponentInChildren<ParticleSystem>();
 
             yield return EventControl.sec;
@@ -232,7 +225,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.animstate = (int)MainManager.Animations.Angry;
 
             yield return EventControl.tenthsec;
-            MainManager.PlaySound("LeafFlipBack",0.8f,1);
+            MainManager.PlaySound("LeafFlipBack", 0.8f, 1);
             battle.StartCoroutine(entity.ShakeSprite(0.1f, 30f));
 
             float a = 0f;
@@ -245,7 +238,7 @@ namespace BFPlus.Extensions.EnemyAI
             }
             while (a < b + 1f);
 
-            MainManager.PlaySound("ZammothSwipe",1.2f,1);
+            MainManager.PlaySound("ZammothSwipe", 1.2f, 1);
             entity.spritetransform.localEulerAngles = Vector3.zero;
             entity.animstate = 0;
             entity.overrideflip = true;
@@ -283,11 +276,11 @@ namespace BFPlus.Extensions.EnemyAI
             }
 
             entity.animstate = 100;
-            
+
             yield return EventControl.tenthsec;
             MainManager.PlaySound("Spin2");
             entity.animstate = 101;
-            for(int i = 0; i < STAFF_SPIN_AMOUNT; i++)
+            for (int i = 0; i < STAFF_SPIN_AMOUNT; i++)
             {
                 battle.DoDamage(actionid, battle.playertargetID, STAFF_SPIN_DAMAGE, BattleControl.AttackProperty.Ink, battle.commandsuccess);
                 yield return new WaitForSeconds(0.65f);
@@ -319,20 +312,20 @@ namespace BFPlus.Extensions.EnemyAI
             BattleControl.SetDefaultCamera();
             MainManager.PlaySound("Mist");
             GameObject smokeParticle = MainManager.PlayParticle("poisonsmoke", null, entity.transform.position + new Vector3(-1f, 1.3f), new Vector3(0f, -90f, 90f), 7.5f);
-            
+
             ParticleSystem ps = smokeParticle.GetComponent<ParticleSystem>();
             var main = ps.main;
             main.startColor = new MinMaxGradient(Color.blue, new Color(1, 1, 1, 0.5f));
 
             battle.CreateHelpBox(4);
-   
+
             float commandTime = 165f;
             float[] data = new float[] { 4f, 8f, 0f, 1f };
 
             //barfill decreased time
             data[2] = battle.HardMode() ? 1.35f : 1f;
 
-            battle.StartCoroutine(battle.DoCommand(commandTime,BattleControl.ActionCommands.TappingKey, data));
+            battle.StartCoroutine(battle.DoCommand(commandTime, BattleControl.ActionCommands.TappingKey, data));
 
             for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
@@ -359,7 +352,7 @@ namespace BFPlus.Extensions.EnemyAI
                 if (MainManager.instance.playerdata[i].hp > 0)
                 {
                     bool commandSuccess = battle.barfill >= 1f;
-                    battle.DoDamage(actionid, i, POWDER_DAMAGE, BattleControl.AttackProperty.Sleep, commandSuccess);
+                    battle.DoDamage(actionid, i, POWDER_DAMAGE, (BattleControl.AttackProperty)NewProperty.Dizzy, commandSuccess);
                     MainManager.instance.playerdata[i].battleentity.spin = Vector3.zero;
                 }
             }

@@ -6,10 +6,6 @@ using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -20,9 +16,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 15506;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdsfld(out _),i=>i.MatchLdfld(out _),i => i.MatchLdcI4(613));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(613));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckNewCodeString"));
@@ -47,10 +43,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 15445;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("ATKSuccess"));
-            cursor.GotoNext(MoveType.After,i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "instance")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "instance")));
             cursor.Prev.OpCode = OpCodes.Nop;
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "DoNewChallengesPrompt"));
@@ -60,7 +56,7 @@ namespace BFPlus.Patches.EventControlTranspilers
     }
 
     /// <summary>
-    /// Remove mightypebble from the mystery pool
+    /// Add new medals to mystery pool and remove mighty pebble from it
     /// </summary>
     public class PatchRemoveMightyPebbleMystery : PatchBaseEvent8
     {
@@ -68,15 +64,40 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 16116;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(EventControl),"mysterymedals")));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchRemoveMightyPebbleMystery), "RemoveMightyPebble"));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(EventControl), "mysterymedals")));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchRemoveMightyPebbleMystery), "AddMysteryMedals"));
         }
 
-        static string RemoveMightyPebble(string medals)
+        static string AddMysteryMedals(string medals)
         {
-            return medals.Replace(",13", "");
+            medals = medals.Replace(",13", "");
+            medals += ',' + MainManager_Ext.GetNewMedalsString();
+
+            return medals;
         }
     }
+
+    public class PatchResetStylishOnNewSave : PatchBaseEvent8
+    {
+        public PatchResetStylishOnNewSave()
+        {
+            priority = 16203;
+        }
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
+        {
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(694), i => i.MatchLdcI4(1), i => i.MatchStelemI1());
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchResetStylishOnNewSave), "ResetStylish"));
+        }
+
+        static void ResetStylish()
+        {
+            BattleControl_Ext.stylishBarAmount = 0;
+
+            //save is up to date to 1.1 bf plus
+            MainManager.instance.flags[983] = true;
+        }
+    }
+
 }

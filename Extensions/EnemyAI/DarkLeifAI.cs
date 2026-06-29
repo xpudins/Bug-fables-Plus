@@ -1,10 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
@@ -141,7 +136,7 @@ namespace BFPlus.Extensions.EnemyAI
                     DarkTeamSnakemouth.relayedThisTurn[2] = true;
                     break;
                 case Attacks.MiracleShake:
-                    yield return DarkTeamSnakemouth.UseItem((int)MainManager.Items.MiracleShake,entity, actionid);
+                    yield return DarkTeamSnakemouth.UseItem((int)MainManager.Items.MiracleShake, entity, actionid);
                     break;
                 case Attacks.FrozenDrill:
                     entities = new EntityControl[] { battle.enemydata[kabbuIndex].battleentity, battle.enemydata[actionid].battleentity };
@@ -211,7 +206,7 @@ namespace BFPlus.Extensions.EnemyAI
                         {
                             battle.enemydata[targets[i]].charge++;
 
-                            if(maxCharge == 5 && battle.enemydata[targets[i]].charge > 3)
+                            if (maxCharge == 5 && battle.enemydata[targets[i]].charge > 3)
                             {
                                 battle.StartCoroutine(battle.ItemSpinAnim(entity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.Powerbank], true));
                             }
@@ -330,7 +325,7 @@ namespace BFPlus.Extensions.EnemyAI
 
             singleSphere.transform.localPosition = Vector3.zero;
             singleSphere.material.color = new Color(1f, 1f, 1f, 0.5f);
- 
+
             BattleControl.SetDefaultCamera();
             MainManager.instance.camspeed = 0.3f;
             UnityEngine.Object.Destroy(UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Particles/mothicenormal"), playerTargetEntityRef.transform.position + Vector3.up / 2f, Quaternion.Euler(-90f, 0f, 0f)) as GameObject, 2f);
@@ -372,7 +367,8 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 MainManager.SetCondition(MainManager.BattleCondition.Freeze, ref MainManager.instance.playerdata[playerTargetIDRef], MainManager.ConditionTurns(entity.animid, 2));
                 MainManager.instance.playerdata[playerTargetIDRef].cantmove = 1;
-                playerTargetEntityRef.Freeze();
+                if(playerTargetEntityRef.icecube == null)
+                    playerTargetEntityRef.Freeze();
                 DoBlightfurry(entity, ref MainManager.instance.playerdata[playerTargetIDRef]);
             }
             UnityEngine.Object.Destroy(icePillar.gameObject);
@@ -471,7 +467,7 @@ namespace BFPlus.Extensions.EnemyAI
                     DoBlightfurry(entity, ref MainManager.instance.playerdata[i]);
                 }
             }
-            
+
             yield return EventControl.halfsec;
         }
 
@@ -524,7 +520,7 @@ namespace BFPlus.Extensions.EnemyAI
                 yield return EventControl.sec;
                 MainManager.StopSound(9);
                 icecles[i] = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Objects/icecle"), new Vector3(startpos.x + 0.5f, 15f, 0f), Quaternion.identity) as GameObject;
-                battle.StartCoroutine(DoIceRainDamage(startpos.x + 0.5f, icecles[i].transform, battle, actionid, DarkTeamSnakemouth.darkLeifBaseDamage+1, entity));
+                battle.StartCoroutine(DoIceRainDamage(startpos.x + 0.5f, icecles[i].transform, battle, actionid, DarkTeamSnakemouth.darkLeifBaseDamage + 1, entity));
                 entity.animstate = 100;
                 yield return EventControl.halfsec;
             }
@@ -591,11 +587,11 @@ namespace BFPlus.Extensions.EnemyAI
             UnityEngine.Object.Destroy(icecle.gameObject);
         }
 
-        public void DoBlightfurry(EntityControl entity, ref MainManager.BattleData target, bool nospin=false)
+        public void DoBlightfurry(EntityControl entity, ref MainManager.BattleData target, bool nospin = false)
         {
             BattleControl_Ext.Instance.DoPoison(ref target);
 
-            if(!nospin)
+            if (!nospin)
                 MainManager.battle.StartCoroutine(MainManager.battle.ItemSpinAnim(entity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.Blightfury], true));
         }
     }

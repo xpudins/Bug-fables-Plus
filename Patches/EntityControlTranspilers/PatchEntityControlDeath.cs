@@ -3,12 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EntityControlTranspilers
@@ -22,7 +17,7 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 5171;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(NPCControl), "vectordata")));
 
@@ -44,7 +39,7 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 5327;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(MainManager), "lastdefeated")));
             cursor.Prev.OpCode = OpCodes.Nop;
@@ -84,9 +79,9 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 4559;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdstr("Death2"));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("Death2"));
             cursor.Prev.OpCode = OpCodes.Nop;
             cursor.Emit(OpCodes.Ldloc_1);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchTermiteKnightDeathSound), "GetDeathSound"));

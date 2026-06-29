@@ -3,13 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static BattleControl;
 
@@ -23,9 +17,9 @@ namespace BFPlus.Patches.ChompyPatches
             priority = 40462;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(185), i=>i.MatchBeq(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(185), i => i.MatchBeq(out _));
 
             var beqInst = cursor.Prev;
 
@@ -39,7 +33,7 @@ namespace BFPlus.Patches.ChompyPatches
             cursor.Emit(beqInst.OpCode, beqInst.Operand);
         }
     }
-    
+
     public class PatchChompyCheckJump : PatchBaseChompy
     {
         public PatchChompyCheckJump()
@@ -88,7 +82,7 @@ namespace BFPlus.Patches.ChompyPatches
             chompy.StartCoroutine(BattleControl_Ext.LerpPosition(15, startPos, endPos, chompy.transform));
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
                 i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "chompy")),
@@ -134,7 +128,7 @@ namespace BFPlus.Patches.ChompyPatches
             cursor.Remove();
         }
     }
-    
+
     public class PatchChompyGetNextGrounded : PatchBaseChompy
     {
         public PatchChompyGetNextGrounded()
@@ -147,9 +141,9 @@ namespace BFPlus.Patches.ChompyPatches
             return MainManager.instance.flagvar[56] == (int)NewItem.WingRibbon;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdcI4(0),i=>i.MatchLdcI4(1),i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "GetNextGrounded")));
+            cursor.GotoNext(i => i.MatchLdcI4(0), i => i.MatchLdcI4(1), i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "GetNextGrounded")));
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchChompyGetNextGrounded), "HasWingRibbon"));
             cursor.Emit(OpCodes.Ldc_I4_1);

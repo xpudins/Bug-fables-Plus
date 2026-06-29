@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions.Events.NewBossesEvents
 {
@@ -24,7 +17,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
                 new Vector3(-5, 0, 0f),
                 new Vector3(-10, 0, -0.5f)
             };
-            MainManager.SetCamera(ironSuit.transform.position + new Vector3(-5,0.5f,-1), 0.01f);
+            MainManager.SetCamera(ironSuit.transform.position + new Vector3(-5, 0.5f, -1), 0.01f);
 
             foreach (var p in party)
                 p.backsprite = false;
@@ -82,7 +75,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             yield return EventControl.sec;
 
             Vector3 basePos = ironSuit.transform.position;
-            ironSuit.MoveTowards(party[2].transform.position + Vector3.right*3,1,(int)MainManager.Animations.Walk, 0);
+            ironSuit.MoveTowards(party[2].transform.position + Vector3.right * 3, 1, (int)MainManager.Animations.Walk, 0);
             yield return null;
             yield return new WaitUntil(() => !ironSuit.forcemove);
 

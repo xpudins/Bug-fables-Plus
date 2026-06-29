@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -21,7 +16,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 114334;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchBr(out _));
 
@@ -54,7 +49,7 @@ namespace BFPlus.Patches.EventControlTranspilers
                 new Vector3(-2.63f, 0, 17.37f),
                 new Vector3(-4.44f, 0, 16.95f)
             };
-            for(int i=0; i<party.Length; i++)
+            for (int i = 0; i < party.Length; i++)
             {
                 party[i].transform.position = positions[i];
             }

@@ -1,14 +1,8 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static BattleControl;
 using UnityEngine;
+using static BattleControl;
 using static BFPlus.Extensions.BattleControl_Ext;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Extensions.EnemyAI
 {
@@ -71,7 +65,7 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 battle.enemydata[actionid].data[0] = 1;
                 battle.enemydata[actionid].data[3]--;
-                yield return Instance.UseItem(entity, UnityEngine.Random.Range(0,battle.reservedata.Count), battle, MainManager.Items.MagicDrops);
+                yield return Instance.UseItem(entity, UnityEngine.Random.Range(0, battle.reservedata.Count), battle, MainManager.Items.MagicDrops);
                 yield break;
             }
 
@@ -82,7 +76,7 @@ namespace BFPlus.Extensions.EnemyAI
                 chances.Add(Attacks.HealingItem);
             }
 
-            if (battle.enemydata[actionid].data[1] <= 0  && hpPercent >0.3f&& battle.enemydata[actionid].data[3] > 0)
+            if (battle.enemydata[actionid].data[1] <= 0 && hpPercent > 0.3f && battle.enemydata[actionid].data[3] > 0)
             {
                 chances.Add(Attacks.BuffingItem);
             }
@@ -98,7 +92,7 @@ namespace BFPlus.Extensions.EnemyAI
             }
 
 
-            if(celiaIndex > -1 && battle.enemydata[celiaIndex].data != null && battle.enemydata[actionid].data[2] != 1)
+            if (celiaIndex > -1 && battle.enemydata[celiaIndex].data != null && battle.enemydata[actionid].data[2] != 1)
             {
                 if (Instance.CanRelay(entity, battle))
                 {
@@ -119,7 +113,7 @@ namespace BFPlus.Extensions.EnemyAI
                     int lowHp = Instance.GetLowHPEnemy();
                     int randomEnemy = UnityEngine.Random.Range(0, battle.enemydata.Length);
 
-                    yield return Instance.UseItem(entity, lowHp == -1 ? randomEnemy : lowHp, battle, healingItems[UnityEngine.Random.Range(0,healingItems.Length)]);
+                    yield return Instance.UseItem(entity, lowHp == -1 ? randomEnemy : lowHp, battle, healingItems[UnityEngine.Random.Range(0, healingItems.Length)]);
                     battle.enemydata[actionid].data[1] = 1;
                     battle.enemydata[actionid].data[3]--;
                     break;
@@ -153,16 +147,16 @@ namespace BFPlus.Extensions.EnemyAI
 
             battle.CameraFocusTarget();
 
-            entity.MoveTowards(playertargetentityRef.transform.position + new Vector3(1.5f, 0f, -0.1f), 2f, 1,0);
+            entity.MoveTowards(playertargetentityRef.transform.position + new Vector3(1.5f, 0f, -0.1f), 2f, 1, 0);
             while (entity.forcemove)
             {
                 yield return null;
             }
-            entity.animstate = 100;
+            entity.animstate = 101;
             yield return EventControl.thirdsec;
             battle.DoDamage(actionid, playerTargetID, SLASH_DAMAGE, AttackProperty.DefDownOnBlock, battle.commandsuccess);
 
-            yield return EventControl.quartersec;
+            yield return EventControl.sec;
             BattleControl.SetDefaultCamera();
         }
 

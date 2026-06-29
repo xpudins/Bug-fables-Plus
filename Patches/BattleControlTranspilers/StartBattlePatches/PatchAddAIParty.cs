@@ -3,11 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 {
@@ -18,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             priority = 3184;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(189));
             cursor.GotoNext(i => i.MatchLdloc(out _));
@@ -35,6 +31,11 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
         {
             if (MainManager.BadgeIsEquipped((int)Medal.EverlastingFlame))
                 return new List<int[]> { new int[] { (int)NewAnimID.Hoaxe, (int)MainManager.Animations.Flustered } };
+
+            if (MainManager.instance.flags[982])
+            {
+                aiList.Add(new int[] { (int)NewAnimID.JumpAnt, (int)MainManager.Animations.BattleIdle });
+            }
 
             return aiList;
         }

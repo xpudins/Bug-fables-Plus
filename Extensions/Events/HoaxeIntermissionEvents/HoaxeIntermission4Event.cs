@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
@@ -77,7 +72,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             EntityControl hoaxe = MainManager.instance.playerdata[0].entity;
             hoaxe.animstate = 109;
             MainManager.map.transform.Find("bookHoaxe").gameObject.SetActive(false);
-            MainManager.SetCamera(hoaxe.transform.position + new Vector3(0,-1,1), 0.05f);
+            MainManager.SetCamera(hoaxe.transform.position + new Vector3(0, -1, 1), 0.05f);
             yield return EventControl.tenthsec;
 
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[5], true, Vector3.zero, hoaxe.transform, hoaxe.npcdata));
@@ -146,7 +141,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             MainManager.SetCamera(hoaxe.transform.position + new Vector3(0, -1, 1), 1);
 
-            for(int i=0;i<box.Length;i++)
+            for (int i = 0; i < box.Length; i++)
                 UnityEngine.Object.Destroy(box[i].gameObject);
             UnityEngine.Object.Destroy(sprites[0].gameObject);
 
@@ -179,7 +174,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             Sprite bagSprite = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("Hoaxe")[65];
             SpriteRenderer bag = MainManager.NewSpriteObject(hoaxe.transform.position + new Vector3(0.6f, 0, -0.1f), MainManager.map.transform, bagSprite);
 
-            MainManager.SetCamera(hoaxe.transform.position,MainManager.defaultcamangle, new Vector3(2, 2, -6.25f), 1);
+            MainManager.SetCamera(hoaxe.transform.position, MainManager.defaultcamangle, new Vector3(2, 2, -6.25f), 1);
 
             MainManager.FadeOut(0.02f);
             yield return EventControl.sec;
@@ -208,7 +203,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             bag.transform.position = hoaxe.transform.position + new Vector3(0, 2.5f, -0.1f);
             yield return EventControl.sec;
 
-            hoaxe.animstate =(int)MainManager.Animations.Idle;
+            hoaxe.animstate = (int)MainManager.Animations.Idle;
             UnityEngine.Object.Destroy(bag.gameObject);
 
             MainManager.instance.StartCoroutine(MainManager.SetText(MainManager.map.dialogues[22], true, Vector3.zero, jayde.transform, jayde.npcdata));
@@ -220,7 +215,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.StartCoroutine(hoaxe.TempIgnoreColision(jayde.ccol, 60));
             hoaxe.animstate = 101;
             hoaxe.MoveTowards(new Vector3(-1, 0, -6f), 2, 101, 0);
-            
+
             yield return EventControl.tenthsec;
             hoaxe.PlaySound("FastWoosh");
             jayde.StartCoroutine(jayde.SlowSpinStop(new Vector3(0, 10), 60));
@@ -241,8 +236,8 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe = MainManager.instance.playerdata[0].entity;
             hoaxe.transform.position = new Vector3(-1.46f, 0, 50f);
 
-            hoaxe.MoveTowards(new Vector3(-14f, 0, 28f), 1.5f,101,101);
-            MainManager.SetCamera(hoaxe.transform.position, new Vector3(15,15,0),new Vector3(0,2.25f,-30),1);
+            hoaxe.MoveTowards(new Vector3(-14f, 0, 28f), 1.5f, 101, 101);
+            MainManager.SetCamera(hoaxe.transform.position, new Vector3(15, 15, 0), new Vector3(0, 2.25f, -30), 1);
             MainManager.FadeOut(0.02f);
             yield return EventControl.sec;
 

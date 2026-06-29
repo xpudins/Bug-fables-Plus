@@ -1,14 +1,8 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
-using BFPlus.Properties;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -22,12 +16,12 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 242836;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoPrev(i=>i.MatchLdstr("Sprites/GUI/title"));
+            cursor.GotoPrev(i => i.MatchLdstr("Sprites/GUI/title"));
             Utils.RemoveUntilInst(cursor, i => i.MatchStloc(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "LoadNewTitle"));
-            
+
             //change credits max time
             cursor.GotoNext(i => i.MatchLdcR4(9000f));
             cursor.Next.Operand = 9500f;
@@ -41,7 +35,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 243290;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcR4(-870f));
             cursor.Next.Operand = -930f;
@@ -55,7 +49,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 243133;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.Goto(0);
             cursor.GotoNext(i => i.MatchStloc3());
@@ -76,7 +70,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 243500;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcR4(1.275f));
             cursor.Next.Operand = 1.35f;
@@ -95,7 +89,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 242751;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdsfld(out _));
 

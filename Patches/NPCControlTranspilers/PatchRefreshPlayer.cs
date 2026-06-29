@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.NPCControlTranspilers
 {
@@ -18,7 +14,7 @@ namespace BFPlus.Patches.NPCControlTranspilers
         {
             priority = 57;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "PlaySound", new Type[] { typeof(string) })));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckNPCEnemySound"));

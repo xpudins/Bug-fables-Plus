@@ -3,11 +3,7 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -18,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 47;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchStloc1());
             cursor.Emit(OpCodes.Ldloc_1);
@@ -26,10 +22,12 @@ namespace BFPlus.Patches.BattleControlTranspilers
             cursor.Emit(OpCodes.Stloc_1);
         }
 
-        static MainManager.BattleCondition[] CheckUnClearableStatus(MainManager.BattleCondition[] conditions) 
+        static MainManager.BattleCondition[] CheckUnClearableStatus(MainManager.BattleCondition[] conditions)
         {
             var tempList = conditions.ToList();
             tempList.Add(MainManager.BattleCondition.Sturdy);
+            tempList.Add((MainManager.BattleCondition)NewCondition.Tiny);
+            tempList.Add((MainManager.BattleCondition)NewCondition.Huge);
 
             if (MainManager.BadgeIsEquipped((int)Medal.PermanentInk))
             {

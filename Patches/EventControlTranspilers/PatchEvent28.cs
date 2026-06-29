@@ -3,28 +3,20 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
 
     //Changes the reward for the samira got all music thing to the music player
-    public class PatchGetMusicPlayer: PatchBaseEvent28
+    public class PatchGetMusicPlayer : PatchBaseEvent28
     {
         public PatchGetMusicPlayer()
         {
             priority = 34811;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            for(int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 cursor.GotoNext(j => j.MatchLdcI4(83));
                 cursor.Emit(OpCodes.Ldc_I4, (int)NewItem.MusicPlayer);
@@ -39,7 +31,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 34310;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdtoken(out _));
             cursor.RemoveRange(2);
@@ -58,9 +50,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 35068;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(102), i=>i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(102), i => i.MatchStfld(out _));
 
             int cursorIndex = cursor.Index;
 
@@ -91,10 +83,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 35058;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(MoveType.After,i=>i.MatchLdcI4(0),i => i.MatchBlt(out label));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(0), i => i.MatchBlt(out label));
 
             var musicIdRef = cursor.Instrs[cursor.Index - 3].Operand;
             cursor.Emit(OpCodes.Ldarg_0);

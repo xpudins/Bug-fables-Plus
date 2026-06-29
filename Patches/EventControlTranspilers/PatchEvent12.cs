@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -24,16 +20,16 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 20315;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdcR4(9.6f));
+            cursor.GotoNext(i => i.MatchLdcR4(9.6f));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchAntPalace1TrainingBlocker), "GetMovePos"));
             Utils.RemoveUntilInst(cursor, i => i.MatchCallvirt(AccessTools.Method(typeof(EntityControl), "MoveTowards", new Type[] { typeof(Vector3) })));
         }
 
         static Vector3 GetMovePos()
         {
-            if(MainManager.player.entity.transform.position.z < 12)
+            if (MainManager.player.entity.transform.position.z < 12)
             {
                 return new Vector3(15.5f, 0, 8.86f);
             }

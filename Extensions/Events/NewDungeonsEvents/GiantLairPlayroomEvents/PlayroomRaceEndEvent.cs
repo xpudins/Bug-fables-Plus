@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
@@ -14,7 +9,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
         {
             OverworldTimer timer = MainManager.map.GetComponentInChildren<OverworldTimer>();
 
-            if(timer != null && timer.timer > 0)
+            if (timer != null && timer.timer > 0)
             {
                 //success
                 UnityEngine.Object.Destroy(timer.gameObject);
@@ -25,7 +20,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
                 Transform raceGate = MainManager.map.mainmesh.Find("Maze").Find("PrisonGateLocal (1)").GetChild(0);
                 Transform[] gates = { entryGate, raceGate };
 
-                MainManager.SetCamera(raceGate.transform.position + Vector3.right*3, 0.2f);
+                MainManager.SetCamera(raceGate.transform.position + Vector3.right * 3, 0.2f);
                 yield return EventControl.halfsec;
                 for (int i = 0; i < gates.Length; i++)
                 {

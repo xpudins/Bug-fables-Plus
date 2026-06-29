@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Net;
-using System.Text;
 using UnityEngine;
 using static BattleControl;
 using static BFPlus.Extensions.IronSuit;
@@ -23,7 +19,7 @@ namespace BFPlus.Extensions.EnemyAI
             SpadeCloud,
             DiamondSpikes
         }
-        BattleControl battle;
+
         const int SLOW_SWING_DMG = 4;
         const int FAST_SWING_DMG = 4;
         const int HEART_RAIN_DMG = 4;
@@ -33,7 +29,6 @@ namespace BFPlus.Extensions.EnemyAI
         const int CHAOS_CAST_DMG = 3;
         public override IEnumerator DoBattleAI(EntityControl entity, int actionid)
         {
-            battle = MainManager.battle;
             IronSuit component = entity.GetComponent<IronSuit>();
             Vector3 basePos = entity.transform.position;
             bool baseFlip = entity.flip;
@@ -142,37 +137,38 @@ namespace BFPlus.Extensions.EnemyAI
             yield return EventControl.quartersec;
         }
 
-        void DoChaosCastEffect(int projId, int[] data, int damageDone)
+        static IEnumerator DoChaosCastEffect(int projId, int[] data, int damageDone)
         {
             BattleControl.DelayedProjectileData projData = battle.delprojs[projId];
             int playerId = battle.partypointer[projData.position];
-            IronSuit.Suit suit = (IronSuit.Suit)data[0];
             if (MainManager.instance.playerdata[playerId].hp > 0)
             {
-                if (!battle.commandsuccess || suit == Suit.Spade)
+                int INK_T = 0;
+                int STICKY_T = 3;
+                if (battle.commandsuccess)
                 {
-                    int turns = 4;
-
-                    if (battle.commandsuccess)
+                    if (!battle.GetSuperBlock(0))
                     {
-                        turns--;
-                        if (battle.GetSuperBlock(0))
-                            turns--;
+                        INK_T = 2;
+                        STICKY_T = 2;
                     }
-
-                    if (turns > 1)
+                    else
                     {
-                        Vector3 targetPoint = MainManager.instance.playerdata[playerId].battleentity.transform.position + Vector3.up;
-                        BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Inked, ref MainManager.instance.playerdata[playerId], turns, "WaterSplash2", 0.8f, 1, "InkGet", targetPoint, Vector3.one);
-                        BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Sticky, ref MainManager.instance.playerdata[playerId], turns, "AhoneynationSpit", 1, 1, "StickyGet", targetPoint, Vector3.one);
+                        INK_T = 3;
+                        STICKY_T = 0;
                     }
                 }
-
-                if (suit == Suit.Heart)
+                Vector3 targetPoint = MainManager.instance.playerdata[playerId].battleentity.transform.position + Vector3.up;
+                if (INK_T > 0)
                 {
-                    DoHeartLifesteal(damageDone, projData.calledby.battleentity, projData.calledby.battleentity.battleid, suit);
+                    BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Inked, ref MainManager.instance.playerdata[playerId], INK_T, "WaterSplash2", 0.8f, 1, "InkGet", targetPoint, Vector3.one);
+                }
+                if (STICKY_T > 0)
+                {
+                    BattleControl_Ext.Instance.ApplyStatus(BattleCondition.Sticky, ref MainManager.instance.playerdata[playerId], STICKY_T, "AhoneynationSpit", 1, 1, "StickyGet", targetPoint, Vector3.one);
                 }
             }
+            yield return null;
         }
 
         IEnumerator DoClubHits(EntityControl entity, int actionid)
@@ -338,21 +334,18 @@ namespace BFPlus.Extensions.EnemyAI
                 UnityEngine.Object.Destroy(spades[i].gameObject);
 
 
-            if (!battle.commandsuccess)
+            int turns = 3;
+            if (battle.commandsuccess)
             {
-                int turns = 4;
-                if (battle.commandsuccess)
-                {
+                turns--;
+                if (battle.GetSuperBlock(0))
                     turns--;
-                    if (battle.GetSuperBlock(0))
-                        turns--;
-                }
-                for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
-                {
-                    battle.TryCondition(ref MainManager.instance.playerdata[i], MainManager.BattleCondition.Poison, turns);
-                }
-
             }
+            for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+            {
+                battle.TryCondition(ref MainManager.instance.playerdata[i], MainManager.BattleCondition.Poison, turns);
+            }
+
             yield return EventControl.halfsec;
             entity.animstate = 0;
         }
@@ -620,13 +613,9 @@ namespace BFPlus.Extensions.EnemyAI
                             break;
 
                         case IronSuit.Suit.Spade:
-                            if (battle.commandsuccess)
-                            {
-                                turns--;
-                                if (battle.GetSuperBlock(0))
-                                    turns--;
-                            }
-                            battle.TryCondition(ref MainManager.instance.playerdata[battle.playertargetID], MainManager.BattleCondition.Poison, turns);
+                            turns = BattleControl_Ext.Instance.GetConditionTurnPierce(MainManager.instance.playerdata[battle.playertargetID], turns);
+                            if (turns > -1)
+                                battle.TryCondition(ref MainManager.instance.playerdata[battle.playertargetID], (MainManager.BattleCondition)NewCondition.Dizzy, turns);
                             break;
 
                         case IronSuit.Suit.Club:

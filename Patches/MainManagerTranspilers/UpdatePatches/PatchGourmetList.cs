@@ -1,14 +1,8 @@
 ﻿using BFPlus.Extensions;
-using BFPlus.Patches.BattleControlTranspilers.SetItemPatches;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
@@ -19,9 +13,9 @@ namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
         {
             priority = 2182;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "battle")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "battle")));
             cursor.Prev.OpCode = OpCodes.Nop;
 
             int cursorIndex = cursor.Index;
@@ -52,7 +46,7 @@ namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
                     int tpCost = MainManager_Ext.GetDoubleDipCost();
                     if (MainManager.instance.tp >= tpCost)
                     {
-                        MainManager.instance.tp = Mathf.Clamp(MainManager.instance.tp- tpCost, 0,MainManager.instance.maxtp);
+                        MainManager.instance.tp = Mathf.Clamp(MainManager.instance.tp - tpCost, 0, MainManager.instance.maxtp);
                         BattleControl_Ext.Instance.gourmetItemUse = 1;
                         AccessTools.Method(typeof(MainManager), "DestroyList").Invoke(MainManager.instance, null);
                         MainManager.battle.currentaction = BattleControl.Pick.ItemList;
@@ -79,9 +73,9 @@ namespace BFPlus.Patches.MainManagerTranspilers.UpdatePatches
         {
             priority = 2398;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchCallvirt(AccessTools.Method(typeof(BattleControl), "CancelList")));
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(AccessTools.Method(typeof(BattleControl), "CancelList")));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckCancelListDoubleDip"));
         }
     }

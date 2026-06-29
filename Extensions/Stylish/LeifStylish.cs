@@ -6,24 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static MainManager;
 using static BFPlus.Extensions.BattleControl_Ext;
 namespace BFPlus.Extensions.Stylish
 {
-    
+
     public class LeifStylish : IStylish
     {
-        IEnumerator DoBasicAttackStylish()
+        IEnumerator DoBasicAttackStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.animstate = 116;
             yield return EventControl.halfsec;
         }
-
-        IEnumerator DoIcefallStylish()
+        IEnumerator DoIcefallStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.animstate = 100;
             yield return EventControl.halfsec;
             leif.animstate = 102;
@@ -36,29 +36,27 @@ namespace BFPlus.Extensions.Stylish
                 leif.transform.position + Vector3.forward * 0.5f + Vector3.up*1.5f,
             };
 
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 MainManager.PlayParticle("mothicenormal", partPos[i], 1.5f);
-                MainManager.PlaySound("IceMothHit", 1.1f + i*0.1f, 0.5f);
+                MainManager.PlaySound("IceMothHit", 1.1f + i * 0.1f, 0.5f);
                 yield return EventControl.tenthsec;
             }
             yield return EventControl.quartersec;
             leif.spin = Vector3.zero;
         }
-
-        IEnumerator DoFrigidFirstHitStylish()
+        IEnumerator DoFrigidFirstHitStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.spin = new Vector3(0, 20, 0);
             yield return EventControl.thirdsec;
             leif.spin = Vector3.zero;
         }
-
-        IEnumerator DoFrigidLastHitStylish()
+        IEnumerator DoFrigidLastHitStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif, 0.02f);
+            StylishUtils.ShowStylish(1.2f, leif, gain * 0.5f);
             leif.animstate = 111;
 
             float a = 0;
@@ -73,14 +71,14 @@ namespace BFPlus.Extensions.Stylish
             do
             {
                 currentSpeed = Mathf.Lerp(rotationSpeed, 0, a / b);
-                leif.spritetransform.Rotate(0, currentSpeed*MainManager.TieFramerate(1f), 0);
+                leif.spritetransform.Rotate(0, currentSpeed * MainManager.TieFramerate(1f), 0);
 
                 if (!failedStylish && !inLeifSpin && a < 50)
                 {
                     if (StylishUtils.CheckStylish(ref failedStylish, leif, a, 30f))
                     {
                         inLeifSpin = true;
-                        StylishUtils.ShowStylish(1.2f, leif, 0.02f);
+                        StylishUtils.ShowStylish(1.2f, leif, gain * 0.5f);
                         leif.animstate = (int)MainManager.Animations.ItemGet;
                     }
                 }
@@ -94,27 +92,27 @@ namespace BFPlus.Extensions.Stylish
             leif.overrideonlyflip = false;
         }
 
-        IEnumerator DoBuffStylish()
+        IEnumerator DoBuffStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.Jump();
             yield return null;
         }
 
-        IEnumerator DoDeBuffStylish()
+        IEnumerator DoDebuffStylish(float gain)
         {
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.animstate = 103;
             yield return null;
         }
 
-        IEnumerator DoCordycepsLeechStylish()
+        IEnumerator DoCordycepsLeechStylish(float gain)
         {
             BattleControl.SetDefaultCamera();
             EntityControl leif = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, leif);
+            StylishUtils.ShowStylish(1.2f, leif, gain);
             leif.animstate = 101;
             leif.spin = new Vector3(0, 30, 0);
 
@@ -136,73 +134,67 @@ namespace BFPlus.Extensions.Stylish
             leif.spin = Vector3.zero;
         }
 
-
-        public IEnumerator DoStylish(int actionid, int stylishID)
+        public IEnumerator DoStylish(int actionid, int stylishID, float stylishGain)
         {
-            Instance.entityAttacking?.Emoticon(MainManager.Emoticons.None);
+            Instance.entityAttacking?.Emoticon(Emoticons.None);
             switch (actionid)
             {
                 //Basic Attack
                 case -1:
-                    yield return DoBasicAttackStylish();
+                    yield return DoBasicAttackStylish(stylishGain);
                     break;
 
-                //Icefall
-                case 4:
-                    yield return DoIcefallStylish();
+                case (int)Skills.Icefall:
+                    yield return DoIcefallStylish(stylishGain);
                     break;
 
-                //Frigid Coffin
-                case 21:
+                case (int)Skills.FrigidCoffin:
                     switch (stylishID)
                     {
-                        case 0:
-                            yield return DoFrigidFirstHitStylish();
+                        case 0: // first hit
+                            yield return DoFrigidFirstHitStylish(stylishGain);
                             break;
-
-                        case 1:
-                            yield return DoFrigidLastHitStylish();
+                        case 1: // freeze
+                            yield return DoFrigidLastHitStylish(stylishGain);
                             break;
                     }
                     break;
 
-                //bubble shield lite and bubble shield
-                case 7:
-                case 17:
-                case (int)NewSkill.Vitiation:
+                case (int)Skills.BubbleShieldLite:
+                case (int)Skills.BubbleShield:
                 case (int)NewSkill.VitiationLite:
-                    yield return DoFrigidFirstHitStylish();
+                case (int)NewSkill.Vitiation:
+                    yield return DoFrigidFirstHitStylish(stylishGain);
                     break;
 
-                //buffs
-                case 8:
-                case 14:
-                case 15:
-                case 22:
-                case 23:
-                case 30:
-                    yield return DoBuffStylish();
+                // buffs
+                case (int)Skills.Empower:
+                case (int)Skills.EmpowerPlus:
+                case (int)Skills.DefenseUp:
+                case (int)Skills.DefenseUpPlus:
+                case (int)Skills.AttackUp:
+                case (int)Skills.ChargeUpPlus:
+                    yield return DoBuffStylish(stylishGain);
                     break;
 
-                //debuffs
-                case 12:
-                case 13:
-                case 28:
-                case 29:
-                case 47:
-                    yield return DoDeBuffStylish();
+                // debuffs
+                case (int)Skills.AttackDown:
+                case (int)Skills.AttackDownPlus:
+                case (int)Skills.DefenseBreak1:
+                case (int)Skills.DefenseBreakAll:
+                case (int)Skills.Cleanse:
+                    yield return DoDebuffStylish(stylishGain);
                     break;
 
-                //icerain
-                case 25:
-                    yield return DoDeBuffStylish();
+                case (int)Skills.IceRain:
+                    yield return DoDebuffStylish(stylishGain);
                     break;
 
                 case (int)NewSkill.CordycepsLeech:
-                    yield return DoCordycepsLeechStylish();
+                    yield return DoCordycepsLeechStylish(stylishGain);
                     break;
             }
         }
     }
-    
+
 }

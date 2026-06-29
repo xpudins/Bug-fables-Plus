@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
 {
@@ -18,11 +13,11 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
             priority = 282;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(MainManager.BattleData), "eatenby")));
             ILLabel label = null;
-            cursor.GotoNext(MoveType.After,i => i.MatchBrfalse(out label));
+            cursor.GotoNext(MoveType.After, i => i.MatchBrfalse(out label));
 
             cursor.Emit(OpCodes.Ldarg_1);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchEatenDamage), "IsNotLifeStealEater"));
@@ -55,7 +50,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
             priority = 383;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(19));
             cursor.Emit(OpCodes.Ldarg_1);
@@ -65,7 +60,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.AdvanceTurnEntityPatches
 
         static int GetSpitOutEvent(ref MainManager.BattleData target)
         {
-            if(target.eatenby != null)
+            if (target.eatenby != null)
             {
                 int enemyID = MainManager.battle.GetEnemyID(target.eatenby.transform);
 

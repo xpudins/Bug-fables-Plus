@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace BFPlus.Extensions.Events
 {
@@ -38,7 +32,7 @@ namespace BFPlus.Extensions.Events
             yield return EventControl.quartersec;
             MainManager.PlaySound("Scanner1");
             yield return EventControl.sec;
-            MainManager.PlaySound("Scanner2",0,1,1,true);
+            MainManager.PlaySound("Scanner2", 0, 1, 1, true);
             yield return EventControl.sec;
             yield return EventControl.sec;
             MainManager.StopSound("Scanner2");

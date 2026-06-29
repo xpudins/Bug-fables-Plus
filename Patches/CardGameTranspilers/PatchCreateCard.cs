@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.CardGameTranspilers
@@ -18,13 +14,13 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 151;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdsfld(out _), i => i.MatchLdcI4(48));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdcI4(48));
 
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldarg_1);
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(CardGame_Ext), "GetGuiSprite", new Type[] {typeof(CardGame), typeof(int)}));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(CardGame_Ext), "GetGuiSprite", new Type[] { typeof(CardGame), typeof(int) }));
             Utils.RemoveUntilInst(cursor, i => i.MatchCallvirt(out _));
 
             cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdcI4(48));

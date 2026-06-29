@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -20,14 +15,14 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 29502;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(24), i => i.MatchLdcI4(1), i => i.MatchStelemI1());
             ILLabel label = cursor.DefineLabel();
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpuderBattleHoaxeIntermissionEvent), "CheckHoaxeIntermission"));     
-            cursor.Emit(OpCodes.Brtrue,label);
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpuderBattleHoaxeIntermissionEvent), "CheckHoaxeIntermission"));
+            cursor.Emit(OpCodes.Brtrue, label);
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(41),i=>i.MatchLdcI4(1), i=>i.MatchStelemI1());
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(41), i => i.MatchLdcI4(1), i => i.MatchStelemI1());
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchSpuderBattleHoaxeIntermissionEvent), "StartIntermission1"));
             cursor.Emit(OpCodes.Ldc_I4_0);
             cursor.Emit(OpCodes.Ret);

@@ -1,12 +1,6 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 {
@@ -20,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             priority = 4189;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
                 i => i.MatchStfld(AccessTools.Field(typeof(BattleControl), "currentturn")),

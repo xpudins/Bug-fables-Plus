@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
 {
@@ -18,11 +13,11 @@ namespace BFPlus.Patches.BattleControlTranspilers.StartBattlePatches
             priority = 1659;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            for(int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
-                cursor.GotoNext(j => j.MatchLdsfld(out _),j => j.MatchLdfld(out _),j => j.MatchLdcI4(162));
+                cursor.GotoNext(j => j.MatchLdsfld(out _), j => j.MatchLdfld(out _), j => j.MatchLdcI4(162));
                 cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "IsHolo"));
                 cursor.RemoveRange(4);
             }

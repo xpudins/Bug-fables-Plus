@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.MainManagerTranspilers
 {
@@ -28,7 +24,7 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             var patchers = new DataPatcher[]
             {
@@ -36,7 +32,7 @@ namespace BFPlus.Patches.MainManagerTranspilers
                 new DataPatcher() { loader = OpCodes.Ldloc_2, name = "RecipeData", foundString = "Data/RecipeData", setter = OpCodes.Stloc_2 },
             };
 
-            foreach(var patch in patchers)
+            foreach (var patch in patchers)
             {
                 cursor.GotoNext(i => i.MatchLdstr(patch.foundString));
                 cursor.GotoNext(MoveType.After, i => i.OpCode == patch.setter);
@@ -50,5 +46,5 @@ namespace BFPlus.Patches.MainManagerTranspilers
             }
         }
     }
-    
+
 }

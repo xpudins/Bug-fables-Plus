@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.AbandonedTower
 {
@@ -25,7 +20,7 @@ namespace BFPlus.Extensions.Maps.AbandonedTower
             var baseObject = map.transform.Find("Base");
             baseObject.GetComponent<MeshRenderer>().materials = new Material[] { MainManager.Main3D };
 
-            foreach(Transform wall in baseObject.transform.Find("WallsLz"))
+            foreach (Transform wall in baseObject.transform.Find("WallsLz"))
             {
                 wall.GetComponent<MeshRenderer>().materials = new Material[] { MainManager.Main3D };
                 Fader fader = wall.gameObject.AddComponent<Fader>();

@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EntityControlTranspilers
 {
@@ -21,10 +16,10 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 59;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(59), i=>i.MatchBeq(out label));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(59), i => i.MatchBeq(out label));
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldfld, AccessTools.Field(typeof(EntityControl), "itemstate"));
             cursor.Emit(OpCodes.Ldc_I4, (int)Medal.EverlastingFlame);

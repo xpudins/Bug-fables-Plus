@@ -4,10 +4,8 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static MainManager;
 
 namespace BFPlus.Patches.MainManagerTranspilers
 {
@@ -18,15 +16,36 @@ namespace BFPlus.Patches.MainManagerTranspilers
     {
         public PatchStatusTurns()
         {
-            priority = 50;
+            priority = 48;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            ILLabel[] iLLabels = null;
-            cursor.GotoNext(i=>i.MatchSwitch(out iLLabels));
-            var jumpList = iLLabels.ToList();
-            jumpList.AddRange(new ILLabel[] { iLLabels[4], iLLabels[4] });
-            cursor.Next.Operand = jumpList.ToArray();
+            cursor.GotoNext(MoveType.After, i => i.MatchBrfalse(out _), i => i.MatchLdarg0());
+
+            ILLabel label = null;
+            int index = cursor.Index;
+            cursor.GotoNext(i => i.MatchLdstr("Player"), i => i.MatchCallvirt(out _), i => i.MatchBrfalse(out label));
+            cursor.Goto(index);
+
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchStatusTurns), "IsNewStackableStatus"));
+            cursor.Emit(OpCodes.Brtrue, label);
+            cursor.Emit(OpCodes.Ldarg_0);
+        }
+
+        static bool IsNewStackableStatus(MainManager.BattleCondition condition)
+        {
+            MainManager.BattleCondition[] newStackables =
+            {
+                //BattleCondition.Reflection,
+                BattleCondition.Shield,
+                BattleCondition.Inked,
+                BattleCondition.Sticky,
+                (BattleCondition)NewCondition.Vitiation,
+                (BattleCondition)NewCondition.Paintball,
+                (BattleCondition)NewCondition.Slugskin,
+                (BattleCondition)NewCondition.Dizzy
+            };
+            return newStackables.Contains(condition);
         }
     }
 }

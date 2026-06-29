@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.SandCastleDepths
 {
@@ -23,7 +18,7 @@ namespace BFPlus.Extensions.Maps.SandCastleDepths
             {
                 var mr = transform.gameObject.GetComponent<MeshRenderer>();
 
-                if(mr != null && mr.material != null)
+                if (mr != null && mr.material != null)
                 {
                     if (mr.material.name.Contains("MainPlane"))
                     {

@@ -1,12 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using static UnityEngine.Object;
 namespace BFPlus.Extensions.Events.NewBossesEvents
 {
     public class DeepCaveBossEvent : StartBossFightEvent
@@ -37,7 +30,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
                 yield return null;
             }
 
-            MainManager.SetCamera(null,party[0].transform.position, 0.035f);
+            MainManager.SetCamera(null, party[0].transform.position, 0.035f);
             yield return EventControl.halfsec;
             party[0].flip = true;
             yield return EventControl.halfsec;
@@ -50,7 +43,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
                 yield return null;
 
             Vector3 startPos = party[0].transform.position;
-            GameObject rock = MainManager.CreateRock(new Vector3(startPos.x + -1, 20, startPos.z), Vector3.one*1.2f, Vector3.zero);
+            GameObject rock = MainManager.CreateRock(new Vector3(startPos.x + -1, 20, startPos.z), Vector3.one * 1.2f, Vector3.zero);
             rock.AddComponent<SpinAround>().itself = new Vector3(3f, 3f, 3f);
 
             yield return EventControl.halfsec;
@@ -68,7 +61,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
 
             MainManager.PlaySound("Spin4");
             party[1].animstate = 116;
-            party[1].MoveTowards(party[0].transform.position, 2,116,101);
+            party[1].MoveTowards(party[0].transform.position, 2, 116, 101);
             while (party[1].forcemove)
             {
                 yield return null;
@@ -76,8 +69,8 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
 
             Coroutine posCoroutine = instance.StartCoroutine(BattleControl_Ext.LerpPosition(60, rock.transform.position, startPos, rock.transform));
             MainManager.PlaySound("Damage0");
-            party[0].animstate = (int)MainManager.Animations.Hurt;     
-            party[1].digging = true;          
+            party[0].animstate = (int)MainManager.Animations.Hurt;
+            party[1].digging = true;
             float a = 0f;
             float b = 30f;
             party[0].flip = false;
@@ -136,7 +129,7 @@ namespace BFPlus.Extensions.Events.NewBossesEvents
             belosslow.animstate = 102;
             yield return EventControl.sec;
             yield return StartBattle(new int[] { (int)NewEnemies.Belosslow });
-            yield return DoWinFightEvent(instance, caller, MainManager.GetEntities(new int[] {1}), party, (int)NewItem.SilverFossil, 864, 1, belosslow.transform.position);
+            yield return DoWinFightEvent(instance, caller, MainManager.GetEntities(new int[] { 1 }), party, (int)NewItem.SilverFossil, 864, 1, belosslow.transform.position);
         }
     }
 }

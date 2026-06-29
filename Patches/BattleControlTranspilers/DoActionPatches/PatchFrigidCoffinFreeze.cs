@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
 {
@@ -19,7 +14,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
             priority = 46135;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
             cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(116), i => i.MatchStfld(out _));

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Collections;
 
 namespace BFPlus.Extensions.Events.PitEvents
 {
@@ -17,7 +11,7 @@ namespace BFPlus.Extensions.Events.PitEvents
                 yield return null;
             }
 
-            int[] travelCosts = new int[]{10,30,10};
+            int[] travelCosts = new int[] { 10, 30, 10 };
             int[] floorSkips = new int[] { 2, 5 };
 
             MainManager.DialogueText(MainManager.map.dialogues[2], caller.transform, caller);
@@ -51,11 +45,11 @@ namespace BFPlus.Extensions.Events.PitEvents
                         yield return null;
                     }
 
-                    if(MainManager.instance.option < 2)
+                    if (MainManager.instance.option < 2)
                     {
                         MainManager.FadeIn();
                         yield return EventControl.sec;
-                        MainManager.instance.flagvar[(int)NewFlagVar.Pit_Floor] += floorSkips[MainManager.instance.option]-1;
+                        MainManager.instance.flagvar[(int)NewFlagVar.Pit_Floor] += floorSkips[MainManager.instance.option] - 1;
                         yield return LoadPitRoom(instance);
                         yield break;
                     }

@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.CardGameTranspilers
@@ -18,10 +14,10 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 4319;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             //New Card Effects / Post attackers effects
-            cursor.GotoNext(i => i.MatchSwitch(out _), i=>i.MatchLdloc(out _), i=>i.MatchLdcI4(19));
+            cursor.GotoNext(i => i.MatchSwitch(out _), i => i.MatchLdloc(out _), i => i.MatchLdcI4(19));
             cursor.GotoPrev(i => i.MatchLdloc(out _));
 
             int index = cursor.Index;
@@ -33,7 +29,7 @@ namespace BFPlus.Patches.CardGameTranspilers
 
 
             ILLabel quitLabel = null;
-            cursor.GotoPrev(MoveType.After,i => i.MatchBrfalse(out quitLabel));
+            cursor.GotoPrev(MoveType.After, i => i.MatchBrfalse(out quitLabel));
             int flippedCheckIndex = cursor.Index;
 
             cursor.GotoPrev(i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
@@ -52,7 +48,7 @@ namespace BFPlus.Patches.CardGameTranspilers
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(CardGame_Ext), "CardIsFlipped"));
             cursor.Emit(OpCodes.Brtrue, quitLabel);
 
-            cursor.GotoPrev(i => i.MatchStfld(out _),i=>i.MatchLdarg0(),i=>i.MatchLdloc1());
+            cursor.GotoPrev(i => i.MatchStfld(out _), i => i.MatchLdarg0(), i => i.MatchLdloc1());
             var playedRef = cursor.Next.Operand;
 
             cursor.GotoPrev(i => i.MatchLdcI4(48));
@@ -116,7 +112,7 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 3360;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             //Pre Card Loading effects (sleep)
             cursor.GotoNext(i => i.MatchLdfld(AccessTools.Field(typeof(CardGame), "attacknextturn")), i => i.MatchLdarg0());
@@ -127,9 +123,9 @@ namespace BFPlus.Patches.CardGameTranspilers
             int cursorIndex = cursor.Index;
 
             cursor.GotoNext(i => i.MatchLdcI4(48));
-            cursor.GotoPrev(i => i.MatchLdfld(out _), i=>i.MatchLdarg0(), i=>i.MatchLdfld(out _));
+            cursor.GotoPrev(i => i.MatchLdfld(out _), i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
             var atkRef = cursor.Next.Operand;
-           
+
             cursor.GotoNext(i => i.MatchLdcI4(48));
             cursor.GotoNext(i => i.MatchLdelemRef());
             cursor.GotoNext(i => i.MatchLdfld(out _));
@@ -162,10 +158,10 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 3393;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
-            cursor.GotoNext(i=>i.MatchLdarg0(), i=>i.MatchLdflda(out _),i=>i.MatchLdfld(out _),i => i.MatchBrtrue(out _));
+            cursor.GotoNext(i => i.MatchLdarg0(), i => i.MatchLdflda(out _), i => i.MatchLdfld(out _), i => i.MatchBrtrue(out _));
 
             int index = cursor.Index;
 
@@ -193,11 +189,11 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 2730;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             ILLabel label = null;
             cursor.GotoNext(i => i.MatchLdcI4(39));
-            cursor.GotoPrev(MoveType.After,i => i.MatchBrfalse(out label));
+            cursor.GotoPrev(MoveType.After, i => i.MatchBrfalse(out label));
             int index = cursor.Index;
 
             cursor.GotoPrev(i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
@@ -226,9 +222,9 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 6636;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i=>i.MatchLdcI4(45),i => i.MatchCall(out _ ), i=>i.MatchLdloc1(), i => i.MatchCall(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(45), i => i.MatchCall(out _), i => i.MatchLdloc1(), i => i.MatchCall(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchDestroyExtComponent), "DestroyCardExt"));
         }
 
@@ -244,10 +240,10 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 5666;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("Death3"));
-            cursor.GotoNext(MoveType.After,i => i.MatchStfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(out _));
 
             int cursorIndex = cursor.Index; ;
 
@@ -258,7 +254,7 @@ namespace BFPlus.Patches.CardGameTranspilers
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldfld, winstateRef);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchFreezeProperty), "GetFreezeValue"));
-            Utils.RemoveUntilInst(cursor, i=>i.MatchStindI4());
+            Utils.RemoveUntilInst(cursor, i => i.MatchStindI4());
             cursor.Remove();
         }
 
@@ -267,8 +263,8 @@ namespace BFPlus.Patches.CardGameTranspilers
             int attackedId = winstate.Value ? 1 : 0;
             int winnerId = winstate.Value ? 0 : 1;
             int attack = Mathf.Clamp(1 + CardGame_Ext.Instance.freezes[winnerId], 1, MainManager.instance.cardgame.hp[attackedId]);
-           
-            for(int i = 0; i < 2; i++)
+
+            for (int i = 0; i < 2; i++)
             {
                 CardGame_Ext.Instance.freezes[i] = 0;
             }
@@ -286,10 +282,10 @@ namespace BFPlus.Patches.CardGameTranspilers
         {
             priority = 6267;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
-                i=>i.MatchLdfld(out _),
+                i => i.MatchLdfld(out _),
                 i => i.MatchLdcI4(0),
                 i => i.MatchLdelemRef(),
                 i => i.MatchCallvirt(out _),

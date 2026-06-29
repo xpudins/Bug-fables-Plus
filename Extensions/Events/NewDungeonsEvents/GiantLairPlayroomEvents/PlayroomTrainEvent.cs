@@ -1,10 +1,5 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
@@ -37,7 +32,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
 
             text += numberOfStations + ",";
 
-            for (int i = 0; i < numberOfStations; i++) 
+            for (int i = 0; i < numberOfStations; i++)
             {
                 text += "-11,";
             }
@@ -50,7 +45,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
             {
                 int station = 4 + i;
 
-                if(toSkip != station)
+                if (toSkip != station)
                 {
                     text += station + ",";
                 }
@@ -58,7 +53,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
 
             text += "8|";
 
-            instance.StartCoroutine(MainManager.SetText(text, true, Vector3.zero, caller.transform,caller));
+            instance.StartCoroutine(MainManager.SetText(text, true, Vector3.zero, caller.transform, caller));
             while (MainManager.instance.message)
             {
                 yield return null;
@@ -124,7 +119,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
 
                 Vector3 targetPos = train.transform.position + playerOffset;
                 EntityControl[] party = MainManager.GetPartyEntities(true);
-                if(MainManager.map.chompy != null)
+                if (MainManager.map.chompy != null)
                     party = party.AddToArray(MainManager.map.chompy);
                 party[0].PlaySound("Jump");
                 for (int i = 0; i < party.Length; i++)
@@ -146,16 +141,16 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
 
 
                 train.GetComponent<Animator>().Play("Move");
-                
-                
+
+
                 MainManager.PlaySound(MainManager_Ext.assetBundle.LoadAsset<AudioClip>("ToyTrainWhistle"));
                 yield return EventControl.sec;
 
-                targetPos = train.transform.position + (behind ? Vector3.left: Vector3.right) * 10;
+                targetPos = train.transform.position + (behind ? Vector3.left : Vector3.right) * 10;
                 MainManager.PlaySound("ElevatorStart");
                 MainManager.FadeIn(0.05f);
                 yield return BattleControl_Ext.LerpPosition(180, train.transform.position, targetPos, train.transform);
-                
+
                 MainManager.LoadMap(mapToLoad);
                 yield return EventControl.halfsec;
                 train = MainManager.map.transform.Find("Base").Find("ToyTrain").gameObject;
@@ -217,11 +212,11 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
 
         Vector3 GetTrainPartyPos(int index, Vector3 targetPos, bool behind)
         {
-            Vector3 baseOffset = new Vector3(-0.7f*index,0.5f,-0.5f + (index % 2 == 0 ? 0.2f : -0.2f));
+            Vector3 baseOffset = new Vector3(-0.7f * index, 0.5f, -0.5f + (index % 2 == 0 ? 0.2f : -0.2f));
 
             if (behind)
             {
-                baseOffset = Vector3.Scale(baseOffset,new Vector3(1,0,1) * -1) + Vector3.up*0.5f;
+                baseOffset = Vector3.Scale(baseOffset, new Vector3(1, 0, 1) * -1) + Vector3.up * 0.5f;
             }
             return targetPos + baseOffset;
 
@@ -231,7 +226,7 @@ namespace BFPlus.Extensions.Events.NewDungeonsEvents.GiantLairPlayroomEvents
         IEnumerator FlipTrain(Transform train, float targetXAngle)
         {
             Vector3 groundPos = train.transform.position;
-            MainManager.PlaySound("AhoneynationBodySlamJump", 1.2f,1);
+            MainManager.PlaySound("AhoneynationBodySlamJump", 1.2f, 1);
             yield return BattleControl_Ext.LerpPosition(15, groundPos, train.transform.position + Vector3.up * 3, train.transform);
 
             float a = 0;

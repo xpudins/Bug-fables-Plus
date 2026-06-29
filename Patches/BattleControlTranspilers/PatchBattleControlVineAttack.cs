@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -21,9 +16,9 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 158572;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdfld(out _), i=>i.MatchLdelema(out _));
+            cursor.GotoNext(i => i.MatchLdfld(out _), i => i.MatchLdelema(out _));
             var callerIdRef = cursor.Next.Operand;
 
             cursor.GotoNext(i => i.MatchLdloc1());

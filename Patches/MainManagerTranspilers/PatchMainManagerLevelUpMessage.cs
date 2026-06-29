@@ -1,16 +1,10 @@
 ﻿using BFPlus.Extensions;
-using BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches;
 using BFPlus.Patches.DoActionPatches;
 using BFPlus.Patches.MainManagerTranspilers;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches
 {
@@ -20,7 +14,7 @@ namespace BFPlus.Patches
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             var patcher = new DataPatcher() { loader = OpCodes.Ldfld, name = "LevelData", foundString = "Data/LevelData", setter = OpCodes.Stfld, completeReplace = OpCodes.Ldc_I4_1 };
 

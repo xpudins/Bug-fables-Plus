@@ -1,14 +1,14 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using BFPlus.Extensions;
+using BFPlus.Extensions.BattleStuff.StatusStuff;
+using BFPlus.Patches.DoActionPatches;
+using static MainManager;
+using static BattleControl;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -16,33 +16,75 @@ namespace BFPlus.Patches.BattleControlTranspilers
     {
         public PatchBattleControlRelay()
         {
-            priority = 21;
+            priority = 16185;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor c, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdcI4(45));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchBattleControlRelay), "CheckSpiderBait"));
+            c.GotoNext(x => x.MatchLdstr("Relay"));
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchBattleControlRelay), nameof(CheckMidRelayEffects)));
 
+            c.GotoNext(i => i.MatchLdcI4(45));
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchBattleControlRelay), nameof(CheckPostRelayEffects)));
 
             //Add check max charge for status relay with charges
-            cursor.GotoNext(i => i.MatchAdd(), i => i.MatchLdcI4(0), i => i.MatchLdcI4(3));
-            cursor.GotoNext(i => i.MatchLdcI4(3));
-            cursor.Emit(OpCodes.Ldloc_1);
-            cursor.Emit(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), "option"));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckMaxCharge"));
-            cursor.Remove();
+            c.GotoNext(i => i.MatchAdd(), i => i.MatchLdcI4(0), i => i.MatchLdcI4(3));
+            c.GotoNext(i => i.MatchLdcI4(3));
+
+            c.Emit(OpCodes.Ldloc_1);
+            c.Emit(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), "option"));
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckMaxCharge"));
+            c.Remove();
+
+            c.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "EndPlayerTurn")));
+            c.Prev.OpCode = OpCodes.Nop;
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchBattleControlRelay), nameof(WaitForRelayEffects)));
+            Utils.InsertYieldReturn(c);
+
+            ILLabel label = c.DefineLabel();
+            c.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchBattleControlRelay), nameof(NoAliveEnemy)));
+            c.Emit(OpCodes.Brfalse, label);
+            c.Emit(OpCodes.Ldc_I4_0);
+            c.Emit(OpCodes.Ret);
+
+            c.MarkLabel(label);
+            c.Emit(OpCodes.Ldloc_1);
         }
 
-        static void CheckSpiderBait()
+        static void CheckMidRelayEffects()
         {
-            if (MainManager.HasCondition(MainManager.BattleCondition.Sticky, MainManager.instance.playerdata[MainManager.battle.currentturn]) > -1 && MainManager.BadgeIsEquipped((int)Medal.SpiderBait, MainManager.instance.playerdata[MainManager.battle.currentturn].trueid))
+            waitForEffects = 0;
+            int relayTarg = battle.option;
+            if (HasCondition((BattleCondition)NewCondition.Dizzy, instance.playerdata[relayTarg]) > -1)
             {
-                MainManager.battle.StartCoroutine(MainManager.battle.ItemSpinAnim(MainManager.instance.playerdata[MainManager.battle.currentturn].battleentity.transform.position + Vector3.up, MainManager.itemsprites[1, (int)Medal.SpiderBait], true));
-                MainManager.PlaySound("StatUp", -1, 1.25f, 1f);
-                MainManager.battle.StartCoroutine(MainManager.battle.StatEffect(MainManager.instance.playerdata[MainManager.battle.option].battleentity, 4));
-                MainManager.instance.playerdata[MainManager.battle.option].charge = Mathf.Clamp(MainManager.instance.playerdata[MainManager.battle.option].charge + 1, 0, MainManager_Ext.CheckMaxCharge(MainManager.battle.option));
+                if (BadgeHowManyEquipped((int)Medal.Turnado, instance.playerdata[relayTarg].trueid) > 0 && battle.enemydata.Length > 0)
+                    battle.StartCoroutine(Dizzy.DoTurnado(relayTarg));
+
+                if (BadgeHowManyEquipped((int)Medal.Corkscrew, instance.playerdata[relayTarg].trueid) > 0)
+                    battle.StartCoroutine(Dizzy.DoCorkscrew(relayTarg));
             }
+        }
+        static void CheckPostRelayEffects()
+        {
+            int relayUser = battle.currentturn;
+            int relayTarg = battle.option;
+            int spiderBaitEquipped = BadgeHowManyEquipped((int)Medal.SpiderBait, instance.playerdata[relayUser].trueid);
+            if (HasCondition(BattleCondition.Sticky, instance.playerdata[relayUser]) > -1 && spiderBaitEquipped > 0)
+            {
+                battle.StartCoroutine(battle.ItemSpinAnim(instance.playerdata[relayUser].battleentity.transform.position + Vector3.up, itemsprites[1, (int)Medal.SpiderBait], true));
+                BattleControl_Ext.Instance.ChargeUp(ref instance.playerdata[relayTarg], spiderBaitEquipped, 0.3f);
+            }
+        }
+        static IEnumerator WaitForRelayEffects()
+        {
+            yield return new WaitUntil(() => waitForEffects <= 0);
+        }
+        public static int waitForEffects;
+
+        static bool NoAliveEnemy()
+        {
+            return battle.AliveEnemies() == 0;
         }
     }
 }

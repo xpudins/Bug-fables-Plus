@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.MainManagerTranspilers
@@ -18,7 +14,7 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 26;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchStloc0());
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchLoopPoint), "AddNewLoopPoints"));

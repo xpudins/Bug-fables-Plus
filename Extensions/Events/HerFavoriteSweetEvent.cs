@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Extensions.Events
 {
@@ -17,7 +12,7 @@ namespace BFPlus.Extensions.Events
                 yield return null;
 
             EntityControl[] party = MainManager.GetPartyEntities(true);
-            EntityControl[] entities = MainManager.GetEntities(new int[] {39,41,49 });
+            EntityControl[] entities = MainManager.GetEntities(new int[] { 39, 41, 49 });
 
 
             MainManager.DialogueText(MainManager.map.dialogues[92], entities[0].transform, entities[0].npcdata);
@@ -34,7 +29,7 @@ namespace BFPlus.Extensions.Events
             party = MainManager.GetPartyEntities(true);
             entities = MainManager.GetEntities(new int[] { 39, 41, 53 });
 
-            for(int i = 0; i < entities.Length; i++)
+            for (int i = 0; i < entities.Length; i++)
             {
                 entities[i].alwaysactive = true;
                 entities[i].FacePlayer();
@@ -57,13 +52,13 @@ namespace BFPlus.Extensions.Events
                 new Vector3(-54.4f, 0, -16f)
             };
 
-            for (int i = 0; i < entities.Length; i++) 
+            for (int i = 0; i < entities.Length; i++)
             {
                 entities[i].transform.position = pos[i];
                 entities[i].startpos = entities[i].transform.position;
             }
 
-            MainManager.SetCamera(entities[0].transform.position + new Vector3(1,2,-3),1);
+            MainManager.SetCamera(entities[0].transform.position + new Vector3(1, 2, -3), 1);
             yield return EventControl.tenthsec;
 
             for (int i = 0; i < party.Length; i++)
@@ -81,7 +76,7 @@ namespace BFPlus.Extensions.Events
             MainManager.PlaySound("ElevatorEnd");
             yield return EventControl.halfsec;
 
-            for (int i = 0; i < entities.Length - 1; i++) 
+            for (int i = 0; i < entities.Length - 1; i++)
             {
                 entities[i].Emoticon(MainManager.Emoticons.Exclamation, 60);
                 entities[i].flip = false;
@@ -106,7 +101,7 @@ namespace BFPlus.Extensions.Events
             while (MainManager.instance.message)
                 yield return null;
 
-            SpriteRenderer cake = MainManager.NewSpriteObject(entities[0].transform.position + new Vector3(0,1,-0.1f), MainManager.map.transform, MainManager.itemsprites[0, (int)NewItem.MysteryCake]);
+            SpriteRenderer cake = MainManager.NewSpriteObject(entities[0].transform.position + new Vector3(0, 1, -0.1f), MainManager.map.transform, MainManager.itemsprites[0, (int)NewItem.MysteryCake]);
             MainManager.PlaySound("ItemHold");
 
             yield return EventControl.halfsec;

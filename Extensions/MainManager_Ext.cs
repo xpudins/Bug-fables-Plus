@@ -1,444 +1,52 @@
-﻿
+﻿using BFPlus.Extensions.BattleStuff;
+using BFPlus.Extensions.BattleStuff.StatusStuff;
 using BFPlus.Extensions.EnemyAI;
 using BFPlus.Extensions.Maps;
 using HarmonyLib;
 using InputIOManager;
-using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO.Compression;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
-using Mono.Cecil;
+using static MainManager;
 
 namespace BFPlus.Extensions
 {
-    public enum NewParticle
+    public enum MusicSetting
     {
-        HeartHit,
-        ClubHit,
-        DiamondHit,
-        SpadeHit,
-        DiamondParticle,
-        ClubParticle,
-        HeartParticle,
-        SpadeParticle,
-        SpadeExplosion,
-        SuitSphere,
-        SuitHit,
-        HoaxeDiamond,
-        Ripples
+        Mix,
+        OnlyFight,
+        OnlyTIGS,
+        Off,
     }
-
-    public enum NewCode
-    {
-        BIGFABLE = 831,
-        EVEN=832, 
-        COMMAND=841,
-        SCAVENGE=843
-    }
-    public enum Medal
-    {
-        Vengeance = 91, FlavorCharger, Blightfury,ThinIce, FrostNeedles, FireNeedles, TanjyToss, KineticEnergy, PotentialEnergy,Adrenaline, BugBattery, 
-        FlashFreeze, SpuderCard, HoloSkill, Powerbank,Wildfire, HeatingUp, Phoenix, FierySpirit, IgnitedMite, TeamEffort, Perkfectionist,
-        Cryostatis, DestinyDream, TPComa, SleepSchedule, Yawn, SweetDreams,DeepCleaning, RinseRegen, Liquidate, LifeLust, GrumbleGravel, 
-        SkippingStone, RockyRampUp,Avalanche, TeamGleam, Recharge, ViolentVitiation, ChargeGuard, TwinedFate, HPDown, Switcheroo,
-        GamerFX, Nightmare, TeamCheer, OddWarrior, MPPlus, Revengarang, StrikeBlaster,NoPainNoGain,TrustFall, TimingTutor, GourmetStomach,
-        InkBubble,Inkblot,Smearcharge,CatalystSpill,PermanentInk,InvisibleInk,Inkwell,WebSheet,Loomlegs,ThickSilk,SpiderBait,SturdyStrands,
-        FlavorlessAdhesive,Honeyweb,Slugskin,TribalDance,PurifyingPulse,RevitalizingRipple,FieryHeart,EverlastingFlame,Mothflower,Hailstorm
-    }
-
-    public enum LeifSpell
-    {
-        Fortify,
-        ChargeUp,
-        Empower,
-        Break,
-        Enfeeble
-    }
-    public enum NewAnimID
-    {
-        Worm = 407,
-        WormSwarm =408,
-        Mars=409,
-        MarsSummon=410,
-        TermiteKnight=411,
-        LeafbugShaman=412,
-        Jester=413,
-        Hoaxe,
-        IronSuit,
-        HoaxeMom,
-        BabyHoaxe,
-        FirePopper,
-        AlexOld,
-        HoaxeCrown
-    }
-
-    public enum NewItem
-    {
-        MusicPlayer = 188,
-        SeedlingWhistle,
-        SucculentCookies2,
-        SucculentCookie1,
-        GoldenLeaf,
-        SquashCandy2,
-        SquashCandy1,
-        WingRibbon,
-        MysteryPouch,
-        InkBomb,
-        InkTrap,
-        WebWad,
-        StickyBomb,
-        SplotchScramble,
-        MurkyPizza,
-        MurkyPizza2,
-        MurkyPizza1,
-        InkblotGravy,
-        LeafbugSkewer,
-        StickySoup,
-        Arachnomuffins,
-        Arachnomuffins2,
-        Arachnomuffins1,
-        Cottoncap,
-        BanditDelights,
-        PointSwap,
-        SilverClaw,
-        SilverFuse,
-        SilverFossil,
-        SilverCard,
-        RejuvenativePunch,
-        BolsteringBlend,
-        SoothingJuice,
-        SucculentSeed,
-        SquashberrySoda,
-        SleepingSquash,
-        SquashSeed,
-        Napcap,
-        BeeBattery,
-        EnergyBar,
-        SurgingSpud,
-        FlameBomb,
-        CleanPotato,
-        WaterPitcher,
-        MysterySeed,
-        MysteryBomb,
-        MysteryCake,
-        JoltMush,
-        DynamoDish,
-        SilverHandle,
-        TauntBerry,
-        HeartyBreakfast2
-    }
-
-    public enum NewGui
-    {
-        FrostNeedles = 228,
-        FireNeedles,
-        FlavorCharger,
-        DeepCleaning,
-        Liquidate,
-        RinseRegen,
-        HoloSkill,
-        HoloVi,
-        HoloKabbu,
-        HoloLeif,
-        GrumbleGravel,
-        Avalanche,
-        RockyRampUp,
-        SkippingStone,
-        TanjyToss,
-        TrustFall,
-        TPLossBack,
-        TPLossFront,
-        DebuffStylish,
-        BuffStylish,
-        LoreBook,
-        ItemLeaf,
-        Sticky,
-        PointSwap,
-        SpycardsTen,
-        SpycardsEleven,
-        SpycardsTwelve
-    }
-
-    public enum NewSkill
-    {
-        HoloVi = 50,
-        HoloKabbu = 51,
-        HoloLeif = 52,
-        SleepSchedule = 53,
-        VitiationLite = 54,
-        Vitiation = 55,
-        Steal = 56,
-        Lecture,
-        CordycepsLeech,
-        RainDance,
-        SeedlingWhistle,
-        ThrowableItems,
-        InkTrap,
-        StickyBomb,
-        PointSwap,
-        FlameBomb
-    }
-
-    public enum NewEnemies
-    {
-        DarkVi=116,
-        DarkKabbu,
-        DarkLeif,
-        Caveling,
-        FlyingCaveling,
-        Frostfly,
-        PirahnaChomp,
-        Moeruki,
-        Abomiberry,
-        SplotchSpider,
-        Worm,
-        WormSwarm,
-        Spineling,
-        Dewling,
-        FireAnt,
-        Belosslow,
-        DynamoSpore,
-        BatteryShroom,
-        DullScorp,
-        IronSuit,
-        Mars,
-        MarsSprout,
-        Levi,
-        Celia,
-        Mothmite,
-        MarsBud,
-        TermiteKnight,
-        LeafbugShaman,
-        Jester,
-        FirePopper,
-        Patton,
-        LonglegsSpider
-    }
-
-    public enum NewMaps
-    {
-        Pit100BaseRoom = 246,
-        Pit100Reward = 247,
-        PitBossRoom=248,
-        SeedlingMinigame=249,
-        AntPalaceTrainingRoom=250,
-        PowerPlantExtra=251,
-        PowerPlantBigRoom=252,
-        PowerPlantElecPuzzle=253,
-        PowerPlantBoss=254,
-        SandCastleDepths1=255,
-        SandCastleDepthsWall=256,
-        SandCastleDepthsIcePuzzle = 257,
-        SandCastleDepthsMain=258,
-        SandCastleDepthsBoss=259,
-        DeepCaveEntrance=260,
-        DeepCave1,
-        DeepCave2,
-        DeepCaveBoss,
-        AbandonedTower,
-        AbandonedTower1,
-        AbandonedTower2,
-        AbandonedTower3,
-        AbandonedTowerBoss,
-        AbandonedTowerCards,
-        BeehiveMinigame,
-        LeafbugVillage,
-        LeafbugShamanHut,
-        GiantLairPlayroom1,
-        GiantLairPlayroom2,
-        GiantLairPlayroom3,
-        GiantLairPlayroomBoss
-    }
-
-    public enum NewMenuText
-    {
-        TextSkip=283,
-        TrustFall,
-        TrustFallDesc,
-        ShowResistance,
-        NewBattleThemes
-    }
-
-    public enum NewItemUse
-    {
-        MultiUse=41,
-        MultiUseRandom=42,
-        AddInk,
-        AddInkParty,
-        AddSticky,
-        AddStickyParty,
-        RandomBuff,
-        RandomBuffParty,
-        RandomDebuff,
-        RandomDebuffParty,
-        AddSturdy,
-        AddAtkDown,
-        AddDefDown,
-        AddTaunt,
-        AddFire,
-        ChargeMax
-    }
-
-    public enum NewMusic
-    {
-        MarsTheme=75,
-        PlusBosses,
-        KabbuTheme,
-        ViTheme,
-        AngryViTheme,
-        SadKabbuTheme,
-        BattleRubberPrison,
-        BattleGoldenHills,
-        BattleLostSands,
-        Playroom,
-        BattleFactory,
-        BattleOutskirts,
-        DarkSnek,
-        BattleMetalLake,
-        BattleForsakenLands,
-        BattleCaves,
-        BattleSandCastle,
-        BattleFarGrasslands,
-        BattleSwamplands,
-        BattleSnakemouthLab,
-        HoaxeSadTheme
-    }
-
-    public enum NewListType
-    {
-        GourmetItem=37,
-        MedalCategories,
-        BadgeShops,
-        MedalPreset
-    }
-
-    public enum NewDiscoveries
-    {
-        PitOfTrials=50,
-        SandCastleDepths,
-        PowerPlantExtra,
-        LushAbyss,
-        IronTower,
-        TrainingGrounds,
-        SeedlingSnatch,
-        GourmetRace,
-        LeafbugVillage,
-        GiantsPlayroom
-    }
-
-    public enum NewRecipes
-    {
-        InkBomb = 70,
-        StickyBomb,
-        SplotchScramble,
-        MurkyPizza,
-        InkblotGravy,
-        StickySoup,
-        Arachnomuffins,
-        Cottoncap,
-        RejuvenativePunch,
-        BolsteringBlend,
-        SoothingJuice,
-        SucculentSeed,
-        SquashberrySoda,
-        SleepingSquash,
-        SquashSeed,
-        Napcap,
-        EnergyBar,
-        SurgingSpud,
-        FlameBomb,
-        CleanPotato,
-        WaterPitcher,
-        MysterySeed,
-        MysteryBomb,
-        MysteryCake,
-        JoltMush,
-        DynamoDish
-    }
-
-    public enum NewFlagVar
-    {
-        Aria_Reward=68,
-        Pit_Floor,
-        Seedling_Highscore,
-        Gourmet_Highscore,
-        TermiteKnight_Reward,
-        LeafbugShaman_Reward,
-        MaxConditions,
-        Patton_Reward,
-        Intermission5RichNPCTalked,
-        PitEnemyDeadLastFloor,
-        TeamCelia_Reward,
-        Mars_Reward
-    }
-
-    public enum NewPrizeFlag
-    {
-        Aria=23,
-        Termite=24,
-        Shaman=25,
-        Patton,
-        TeamCelia,
-        Mars
-    }
-
-    public enum NewQuest
-    {
-        TeamSnakemouth=64,
-        WormInfestation,
-        RoughCough,
-        CaveInvestigation,
-        InNeedOfTraining,
-        AWorthyOpponent,
-        NewAnalysis,
-        ConflictingVisions,
-        BountyDullScorp,
-        BountyDynamoSpore,
-        BountyBelosslow,
-        BountyIronSuit,
-        BountyJester,
-        HerFavoriteSweet,
-        MyNewestExperiment
-    }
-
-    public enum NewAchievement
-    {
-        GodofWar=30,
-        UndergroundExplorer,
-        HDWGH,
-        SuperBug,
-        OverKill,
-        WellRested,
-        NothingButAHoaxe
-    }
-
-    public enum NewCommand
-    {
-        CheckShop=219
-    }
-
     public class MainManager_Ext : MonoBehaviour
     {
         public static AssetBundle assetBundle;
         public static AssetBundle mapPrefabs;
         public static int DiscoveriesRewardAmount = 12;
         public static int FlagNumber = 1000;
-        public static int CBFlagNumber = 67;
+        public static int CBFlagNumber = 73;
         public static int DashFlag = 699;
-        public static int FlagVarNumber = 80;
-        public static Medal[] medalDupes = new Medal[] { Medal.Powerbank, Medal.HPDown, Medal.MPPlus, Medal.MPPlus, Medal.MPPlus,
-            Medal.InkBubble, Medal.Smearcharge };
+        public static int FlagVarNumber = 83;
+        public static Medal[] medalDupes = new Medal[] 
+        { 
+            Medal.Powerbank, 
+            Medal.HPDown, 
+            Medal.MPPlus, Medal.MPPlus, Medal.MPPlus, 
+            Medal.Smearcharge, 
+            Medal.DizzyResistance,
+            Medal.Whirliwig    
+        };
         public static string[] enemyData;
+        public static string[,] extraEnemyData;
         public static bool fastText = false;
         public static bool showResistance = false;
-        public static bool newBattleThemes = false;
+        public static MusicSetting musicOption = MusicSetting.Mix;
         public bool guiSwapped = false;
         public static int skillListType = -1;
         public bool musicPlayer = false;
@@ -460,6 +68,34 @@ namespace BFPlus.Extensions
         public static int oldOutline = -1;
         public const int MYSTERY_SHADE_PRICE = 3;
         public MedalPreset[] medalPresets = new MedalPreset[10];
+        public Dictionary<int, bool> balanceChanges = new Dictionary<int, bool>()
+        {
+            { (int)NewMenuText.TornadoToss, true },
+            { (int)NewMenuText.HurricaneToss, true },
+            { (int)NewMenuText.NeedleToss, true },
+            { (int)NewMenuText.NeedlePincer, true },
+            { (int)NewMenuText.Understrike, true },
+            { (int)NewMenuText.IceRain, true },
+            { (int)NewMenuText.HeavyStrike, true },
+            { (int)NewMenuText.FlyDrop, true}
+        };
+
+        Dictionary<NewMusic, NewMusic> fightMusics = new Dictionary<NewMusic, NewMusic>()
+        {
+            {(NewMusic)Musics.Battle0, (NewMusic)Musics.Battle6 },
+            {NewMusic.BattleCaves, NewMusic.TigsCave },
+            {NewMusic.BattleFactory, NewMusic.TigsFactory },
+            {NewMusic.BattleFarGrasslands, NewMusic.TigsGrasslands },
+            {NewMusic.BattleOutskirts, NewMusic.TigsOutskirts },
+            {NewMusic.BattleForsakenLands, NewMusic.TigsForsaken },
+            {NewMusic.BattleGoldenHills, NewMusic.TigsHills },
+            {NewMusic.BattleMetalLake, NewMusic.TigsLake },
+            {NewMusic.BattleLostSands, NewMusic.TigsDesert },
+            {NewMusic.BattleRubberPrison, NewMusic.TigsPrison },
+            {NewMusic.BattleSandCastle, NewMusic.TigsCastle },
+            {NewMusic.BattleSwamplands, NewMusic.TigsSwamp },
+            {NewMusic.BattleSnakemouthLab, NewMusic.TigsLab },
+        };
 
         public static MainManager_Ext Instance
         {
@@ -496,16 +132,23 @@ namespace BFPlus.Extensions
 
         static void SetOptionsText(int settingType, SpriteRenderer spriteRenderer)
         {
-            Dictionary<int, bool> settingsType = new Dictionary<int, bool>() 
-            { 
+            Dictionary<int, bool> settingsType = new Dictionary<int, bool>()
+            {
                 { (int)NewMenuText.TextSkip, fastText },
-                { (int)NewMenuText.ShowResistance, showResistance },
-                { (int)NewMenuText.NewBattleThemes, newBattleThemes },
+                { (int)NewMenuText.ShowResistance, showResistance }
             };
 
             if (settingsType.ContainsKey(settingType))
             {
                 MainManager.instance.StartCoroutine(MainManager.SetText("|center||size,0.75|" + MainManager.menutext[settingsType[settingType] ? 38 : 39],
+                    new Vector3(6.25f, -0.15f), spriteRenderer.transform));
+            }
+
+            if(settingType == (int)NewMenuText.NewBattleThemes)
+            {
+                int menuText = musicOption == MusicSetting.Off ? 39 : (int)NewMenuText.MusicMix + (int)musicOption;
+
+                MainManager.instance.StartCoroutine(MainManager.SetText("|center||size,0.75|" + MainManager.menutext[menuText],
                     new Vector3(6.25f, -0.15f), spriteRenderer.transform));
             }
         }
@@ -568,13 +211,32 @@ namespace BFPlus.Extensions
                     text += $"|icon,{(int)NewGui.TanjyToss}|";
                 }
             }
+            if (skillID == (int)MainManager.Skills.PebbleTossPlus)
+            {
+                text = " |size,0.48,0.53|";
+                if (MainManager.BadgeIsEquipped((int)Medal.Avalanche))
+                    text += $"|icon,{(int)NewGui.Avalanche}|";
+
+                if (MainManager.BadgeIsEquipped((int)Medal.HornRattle))
+                    text += $"|icon,{(int)NewGui.HornRattle}|";
+            }
+
+            if (BadgeIsEquipped((int)Medal.HornRattle))
+            {
+                if (skillID == (int)Skills.HeavyStrike ||
+                    skillID == (int)Skills.HornDash ||
+                    skillID == (int)Skills.BeeFly)
+                {
+                    text += $" |size,0.48,0.53||icon,{(int)NewGui.HornRattle}|";
+                }
+            }
 
             if (BattleControl_Ext.Instance.holoSkillID != -1)
             {
                 bar.color = Color.black;
             }
 
-            if(skillID >= (int)NewSkill.HoloVi  && skillID <= (int)NewSkill.HoloLeif)
+            if (skillID >= (int)NewSkill.HoloVi && skillID <= (int)NewSkill.HoloLeif)
             {
                 var guiID = 0;
 
@@ -587,12 +249,12 @@ namespace BFPlus.Extensions
 
                 bar.color = Color.black;
 
-                foreach(Transform child in bar.transform)
+                foreach (Transform child in bar.transform)
                 {
                     Destroy(child.gameObject);
                 }
 
-                int destinyDreamBug = BattleControl_Ext.GetDestinyDreamBug();
+                int destinyDreamBug = Sleep.GetDestinyDreamBug();
                 if (destinyDreamBug != -1)
                 {
                     var destinyDreamIcon = bar.transform.Find("destinyDream");
@@ -630,9 +292,9 @@ namespace BFPlus.Extensions
             if (!completeReplace)
             {
                 List<string> oldItems = items.ToList();
-                if(assetName != "Items" && assetName != "ItemData")
+                if (assetName != "Items" && assetName != "ItemData")
                     oldItems.RemoveAll(string.IsNullOrEmpty);
-                
+
                 var newItems = assetBundle.LoadAsset<TextAsset>(assetName).ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i != newItems.Length; i++)
                 {
@@ -646,7 +308,7 @@ namespace BFPlus.Extensions
                     }
                     oldItems.Add(newItems[i]);
                 }
-                if(addEmpty)
+                if (addEmpty)
                     oldItems.Add("");
                 return oldItems.ToArray();
             }
@@ -668,6 +330,8 @@ namespace BFPlus.Extensions
                     MainManager.enemydata[i, j] = data[j];
                 }
             }
+
+            SetEnemyExtraData();
         }
 
         public static void SetQuestChecks()
@@ -703,7 +367,6 @@ namespace BFPlus.Extensions
             return 3 + MainManager.BadgeHowManyEquipped((int)Medal.Powerbank, MainManager.instance.playerdata[index].trueid);
         }
 
-        //need to change menutext to be loaded from textfile instead
         public static void SetMenuText()
         {
             List<string> tempList = new List<string>(MainManager.menutext);
@@ -715,6 +378,7 @@ namespace BFPlus.Extensions
             tempSetting.Add((int)NewMenuText.TextSkip);
             tempSetting.Add((int)NewMenuText.ShowResistance);
             tempSetting.Add((int)NewMenuText.NewBattleThemes);
+            tempSetting.Add((int)NewMenuText.BalanceChanges);
             MainManager.settingsindex = tempSetting.ToArray();
         }
 
@@ -745,7 +409,7 @@ namespace BFPlus.Extensions
 
         static void CheckCustomMap(int id)
         {
-            if(id <= Enum.GetValues(typeof(MainManager.Maps)).Cast<int>().Max())
+            if (id <= Enum.GetValues(typeof(MainManager.Maps)).Cast<int>().Max())
             {
                 GameObject gameObject = Instantiate(Resources.Load("Prefabs/Maps/" + (MainManager.Maps)id)) as GameObject;
                 MainManager.map = gameObject.GetComponent<MapControl>();
@@ -874,14 +538,14 @@ namespace BFPlus.Extensions
                 musicParticles.transform.localPosition = new Vector3(0f, 2f, -0.1f);
             }
         }
-        
+
         static string[] GetEntityValues()
         {
             if (assetBundle == null)
             {
                 assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vengeance);
             }
-            string[] baseValues = Resources.Load<TextAsset>("Data/EntityValues").ToString().Split(new char[]{'\n'});
+            string[] baseValues = Resources.Load<TextAsset>("Data/EntityValues").ToString().Split(new char[] { '\n' });
             string[] newValues = assetBundle.LoadAsset<TextAsset>("NewEntityValues").ToString().Replace("\r\n", "\n").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return baseValues.AddRangeToArray(newValues);
         }
@@ -914,7 +578,7 @@ namespace BFPlus.Extensions
                     }
                     RefreshHudSprites();
 
-                    foreach(var player in MainManager.instance.playerdata)
+                    foreach (var player in MainManager.instance.playerdata)
                     {
                         player.entity.SetAnimator();
                     }
@@ -997,6 +661,9 @@ namespace BFPlus.Extensions
                     881, //honey web
                     883, //slugskin
                     964, //hailstorm
+                    989, //whirliwig
+                    990, //corkscrew
+                    992, //spinout
                 };
                 oldFlags[1] = oldFlags[1].AddRangeToArray(newFlags);
             }
@@ -1005,12 +672,12 @@ namespace BFPlus.Extensions
 
         public static void CheckGamerFX(ref AudioClip soundclip)
         {
-            if (soundclip != null && MainManager.basicload&& MainManager.player != null && MainManager.BadgeIsEquipped((int)Medal.GamerFX) && !MainManager.instance.flags[916])
+            if (soundclip != null && MainManager.basicload && MainManager.player != null && MainManager.BadgeIsEquipped((int)Medal.GamerFX) && !MainManager.instance.flags[916])
             {
                 bool replaceSound = false;
                 string[] validSounds = new string[] { "Damage0", "OverworldIce", "Cut", "WoodHit", "ShieldHit" };
 
-                foreach(var sound in validSounds)
+                foreach (var sound in validSounds)
                 {
                     if (soundclip.name == sound)
                     {
@@ -1031,7 +698,7 @@ namespace BFPlus.Extensions
 
         static Sprite GetDewlingCopter(EntityControl entity)
         {
-            if(entity.animid == (int)MainManager.AnimIDs.Flowering - 1)
+            if (entity.animid == (int)MainManager.AnimIDs.Flowering - 1)
             {
                 if (IsNewEnemy(entity, NewEnemies.Dewling))
                     return assetBundle.LoadAssetWithSubAssets<Sprite>("Dewling").Where(s => s.name == "seedlingking_46").FirstOrDefault();
@@ -1051,7 +718,7 @@ namespace BFPlus.Extensions
 
         static Sprite[] LoadNewTitle()
         {
-            if(assetBundle == null)
+            if (assetBundle == null)
                 assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vengeance);
             return new Sprite[] { assetBundle.LoadAsset<Sprite>("BFPlusTitle") };
         }
@@ -1061,7 +728,9 @@ namespace BFPlus.Extensions
             int[] enemyIds = new int[] { MainManager.listvar[MainManager.instance.option] };
             int index = 0;
 
-            if (enemyIds[0] == (int)NewEnemies.Mars || enemyIds[0] == (int)NewEnemies.LeafbugShaman || enemyIds[0] == (int)NewEnemies.DynamoSpore || enemyIds[0] == (int)NewEnemies.Patton)
+            if (enemyIds[0] == (int)NewEnemies.Mars
+                || enemyIds[0] == (int)NewEnemies.LeafbugShaman || enemyIds[0] == (int)NewEnemies.DynamoSpore
+                || enemyIds[0] == (int)NewEnemies.Patton || enemyIds[0] == (int)NewEnemies.JumpAnt)
             {
                 return MainManager.librarysprites[MainManager.GetEnemyPortrait(enemyIds[0])];
             }
@@ -1082,7 +751,7 @@ namespace BFPlus.Extensions
                 index = Mathf.Sin(Time.time * 2.5f) > 0 ? 0 : 1;
 
             }
-            
+
             return MainManager.librarysprites[MainManager.GetEnemyPortrait(enemyIds[index])];
         }
 
@@ -1099,11 +768,11 @@ namespace BFPlus.Extensions
                     break;
 
                 case (int)NewEnemies.Levi:
-                    enemyIds = new int[] { (int)NewEnemies.Levi, (int)NewEnemies.Celia};
+                    enemyIds = new int[] { (int)NewEnemies.Levi, (int)NewEnemies.Celia };
                     break;
 
                 case (int)NewEnemies.LeafbugShaman:
-                    enemyIds = new int[] { (int)MainManager.Enemies.LeafbugNinja,(int)NewEnemies.LeafbugShaman, (int)MainManager.Enemies.LeafbugArcher };
+                    enemyIds = new int[] { (int)MainManager.Enemies.LeafbugNinja, (int)NewEnemies.LeafbugShaman, (int)MainManager.Enemies.LeafbugArcher };
                     break;
                 case (int)NewEnemies.DynamoSpore:
                     enemyIds = new int[] { (int)NewEnemies.BatteryShroom, (int)NewEnemies.DynamoSpore, (int)NewEnemies.BatteryShroom };
@@ -1121,18 +790,22 @@ namespace BFPlus.Extensions
                     break;
 
                 case (int)MainManager.Enemies.TermiteSoldier:
-                    enemyIds = new int[] { (int)MainManager.Enemies.TermiteSoldier, (int)MainManager.Enemies.TermiteNasute};
+                    enemyIds = new int[] { (int)MainManager.Enemies.TermiteSoldier, (int)MainManager.Enemies.TermiteNasute };
                     break;
 
                 case (int)NewEnemies.Patton:
-                    enemyIds = new int[] { (int)NewEnemies.Abomiberry, (int)NewEnemies.LonglegsSpider, (int)NewEnemies.Patton };
+                    enemyIds = new int[] { (int)NewEnemies.MechaJaw, (int)NewEnemies.LonglegsSpider, (int)NewEnemies.Patton };
+                    break;
+
+                case (int)NewEnemies.JumpAnt:
+                    enemyIds = new int[] { (int)NewEnemies.JumpAnt, (int)NewEnemies.Caveling };
                     break;
             }
         }
 
-        static void SetNewBossEntity(int[] enemyIDs,EntityControl enemy, ref string music, ref Vector3 epos, ref int mapId)
+        static void SetNewBossEntity(int[] enemyIDs, EntityControl enemy, ref string music, ref Vector3 epos, ref int mapId)
         {
-            Instance.newBossMap = -1; 
+            Instance.newBossMap = -1;
             if (MainManager.instance.flags[899])
             {
                 int bossMap = Instance.GetBossMap(enemyIDs[0]);
@@ -1145,7 +818,7 @@ namespace BFPlus.Extensions
                 {
                     Instance.newBossMap = Instance.GetNewBossMap(enemyIDs[0]);
                 }
- 
+
             }
 
             switch (enemyIDs[0])
@@ -1154,7 +827,7 @@ namespace BFPlus.Extensions
                     music = "Alert";
                     break;
                 case (int)MainManager.Enemies.TANGYBUG:
-                    music = "Battle1";
+                    music = NewMusic.PlusBosses.ToString();
                     break;
 
                 case (int)MainManager.Enemies.Stratos:
@@ -1167,14 +840,21 @@ namespace BFPlus.Extensions
                     break;
 
                 case (int)NewEnemies.DullScorp:
-                case (int)MainManager.Enemies.LeafbugNinja:
-                case (int)NewEnemies.Levi:
                 case (int)NewEnemies.IronSuit:
                 case (int)NewEnemies.BatteryShroom:
                 case (int)NewEnemies.Belosslow:
                 case (int)NewEnemies.Jester:
-                case (int)NewEnemies.Abomiberry:
                     music = NewMusic.PlusBosses.ToString();
+                    break;
+
+                case (int)MainManager.Enemies.LeafbugNinja:
+                case (int)NewEnemies.Levi:
+                case (int)NewEnemies.MechaJaw:
+                    music = NewMusic.NewMiniboss.ToString();
+                    break;
+
+                case (int)NewEnemies.JumpAnt:
+                    music = NewMusic.JumpAntTheme.ToString();
                     break;
             }
 
@@ -1207,7 +887,7 @@ namespace BFPlus.Extensions
                     {
                         animid = (int)MainManager.AnimIDs.DeadLanderC;
                     }
-                    EntityControl deadlander = EntityControl.CreateNewEntity("deadlander", animid - 1, epos + new Vector3(3f + 1+ i, 0, 1f));
+                    EntityControl deadlander = EntityControl.CreateNewEntity("deadlander", animid - 1, epos + new Vector3(3f + 1 + i, 0, 1f));
                     deadlander.transform.parent = enemy.transform;
                     deadlander.height = i == 0 ? 1 : 0;
                     deadlander.hologram = true;
@@ -1225,7 +905,7 @@ namespace BFPlus.Extensions
                     {
                         animid = (int)MainManager.AnimIDs.YinMoth;
                     }
-                    EntityControl bug = EntityControl.CreateNewEntity("bug", animid - 1, epos + new Vector3(3f + (i*2f), 0, 0f));
+                    EntityControl bug = EntityControl.CreateNewEntity("bug", animid - 1, epos + new Vector3(3f + (i * 2f), 0, 0f));
                     bug.transform.parent = enemy.transform;
                     bug.hologram = true;
                 }
@@ -1311,20 +991,20 @@ namespace BFPlus.Extensions
                     }
                 }
 
-                if (enemyIDs[0] == (int)NewEnemies.Abomiberry)
+                if (enemyIDs[0] == (int)NewEnemies.MechaJaw)
                 {
                     epos = new Vector3(5f, 0.7865f, 11.85f);
-                    int animid = (int)MainManager.AnimIDs.LongLegs;
+                    int animid = (int)MainManager.AnimIDs.LongLegs -1;
 
                     for (int i = 0; i < 2; i++)
                     {
                         string name = "spider";
                         if (i == 1)
                         {
-                            animid = (int)MainManager.AnimIDs.Abomihoney;
-                            name = NewEnemies.Abomiberry.ToString();
+                            animid = (int)NewAnimID.MechaJaw;
+                            name = NewEnemies.MechaJaw.ToString();
                         }
-                        EntityControl bug = EntityControl.CreateNewEntity(name, animid - 1, epos + new Vector3(-3.5f *(1+(i*0.5f)), 0, 1f));
+                        EntityControl bug = EntityControl.CreateNewEntity(name, animid, epos + new Vector3(-3.5f * (1 + (i * 0.5f)), 0, 1f));
                         bug.transform.parent = enemy.transform;
                         bug.hologram = true;
                     }
@@ -1357,8 +1037,12 @@ namespace BFPlus.Extensions
         static int[] CheckBossList(List<int> bosslist)
         {
             bosslist.Remove(-2);
+            var tempList = new List<int>(bosslist);
+            tempList.AddRange(new int[] {
+                (int)NewEnemies.JumpAnt
+            });
             Instance.bossAmount = bosslist.Count;
-            return bosslist.ToArray();
+            return tempList.ToArray();
         }
 
         static int[] CheckMinibossList(int[] minibosslist)
@@ -1583,15 +1267,21 @@ namespace BFPlus.Extensions
             return 120 + Enum.GetValues(typeof(Medal)).Length + medalDupes.Length - 3; //Tp coma & Everlasting Flame && Pebble Toss;
         }
 
+        static int GetMaxQuests()
+        {
+            return 60 + Enum.GetValues(typeof(NewQuest)).Length;
+        }
+
         static void CheckCustomAI()
         {
             //add entity ext to everyone, this is after both array are initiated with entities so its perfect right here
-            foreach (var player in MainManager.instance.playerdata)
+            
+            for(int i=0; i < MainManager.instance.playerdata.Length; i++)
             {
-                var entityExt = Entity_Ext.GetEntity_Ext(player.battleentity);
-                entityExt.id = player.trueid;
-                entityExt.lastHp = player.hp; //lifelust medal
-                entityExt.lastTurnHp = player.hp; //determination medal
+                var entityExt = Entity_Ext.GetEntity_Ext(MainManager.instance.playerdata[i].battleentity);
+                entityExt.id = i;
+                entityExt.lastHp = MainManager.instance.playerdata[i].hp; //lifelust medal
+                entityExt.lastTurnHp = MainManager.instance.playerdata[i].hp; //determination medal
             }
 
             foreach (var enemy in MainManager.battle.enemydata)
@@ -1599,15 +1289,23 @@ namespace BFPlus.Extensions
                 var entityExt = Entity_Ext.GetEntity_Ext(enemy.battleentity);
             }
 
+            BattleControl_Ext.Instance.statusInfo = new StatusInfo();
+
             if (MainManager.HasFollower(MainManager.AnimIDs.AntCapitain) && ((NewMaps)MainManager.map.mapid == NewMaps.Pit100BaseRoom || (NewMaps)MainManager.map.mapid == NewMaps.Pit100Reward) && MainManager.instance.flags[834] && !MainManager.instance.flags[835])
             {
                 MainManager.battle.AddAI((int)MainManager.AnimIDs.AntCapitain - 1, (int)MainManager.Animations.BattleIdle);
             }
+
+            int[] jumpAntEvents = { (int)NewEvents.JumpAntIntermission1, (int)NewEvents.JumpAntIntermission2, (int)NewEvents.JumpAntIntermission3End, (int)NewEvents.JumpAntIntermission4End, (int)NewEvents.JumpAntIntermission5, (int)NewEvents.JumpAntIntermission6 };
+
+            if (jumpAntEvents.Contains(lastevent) || HasFollower((AnimIDs)NewAnimID.JumpAnt + 1))
+                battle.AddAI((int)NewAnimID.JumpAnt, (int)Animations.BattleIdle);
+
         }
 
-        static UnityEngine.Object CheckModel(EntityControl entity,string path)
+        static UnityEngine.Object CheckModel(EntityControl entity, string path)
         {
-            if(entity.animid == (int)NewAnimID.Mars || entity.animid==(int)NewAnimID.MarsSummon || entity.animid == (int)NewAnimID.Jester || entity.animid == (int)NewAnimID.FirePopper)
+            if (entity.animid == (int)NewAnimID.Mars || entity.animid == (int)NewAnimID.MarsSummon || entity.animid == (int)NewAnimID.Jester || entity.animid == (int)NewAnimID.FirePopper || entity.animid == (int)NewAnimID.MechaJaw)
             {
                 return assetBundle.LoadAsset(((NewAnimID)entity.animid).ToString());
             }
@@ -1615,7 +1313,7 @@ namespace BFPlus.Extensions
             return Resources.Load(path);
         }
 
-        public static void AddJesterComponent(Transform obj, int linkCount, Vector3 middle, Transform parent, bool jester=true)
+        public static void AddJesterComponent(Transform obj, int linkCount, Vector3 middle, Transform parent, bool jester = true)
         {
             JesterSprings midPos = obj.gameObject.AddComponent<JesterSprings>();
             var links = new List<Transform>();
@@ -1644,7 +1342,7 @@ namespace BFPlus.Extensions
                 }
                 volume = 0.1f;
             }
-            entity.PlaySound(sound,volume);
+            entity.PlaySound(sound, volume);
         }
 
         public static void DoNewItemUse(NewItemUse itemUse, int value, int? characterid)
@@ -1655,7 +1353,7 @@ namespace BFPlus.Extensions
                     MainManager.instance.items[0].Add(value);
                     break;
                 case NewItemUse.MultiUseRandom:
-                    if(UnityEngine.Random.Range(0,100) < 50)
+                    if (UnityEngine.Random.Range(0, 100) < 50)
                     {
                         MainManager.instance.items[0].Add(value);
                     }
@@ -1678,7 +1376,7 @@ namespace BFPlus.Extensions
                     MainManager.PlaySound("WaterSplash2");
                     for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
                     {
-                        if(MainManager.instance.playerdata[i].hp > 0 && MainManager.instance.playerdata[i].eatenby == null)
+                        if (MainManager.instance.playerdata[i].hp > 0 && MainManager.instance.playerdata[i].eatenby == null)
                             MainManager.SetCondition(MainManager.BattleCondition.Inked, ref MainManager.instance.playerdata[i], value);
                     }
                     break;
@@ -1703,7 +1401,7 @@ namespace BFPlus.Extensions
                     }
                     break;
 
- 
+
                 case NewItemUse.RandomBuffParty:
                 case NewItemUse.RandomBuff:
                     if (!MainManager.instance.inbattle)
@@ -1730,7 +1428,7 @@ namespace BFPlus.Extensions
                     {
                         return;
                     }
-                    for(int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                    for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
                     {
                         bool once = itemUse == NewItemUse.RandomDebuff;
                         if (once)
@@ -1797,6 +1495,94 @@ namespace BFPlus.Extensions
                     MainManager.instance.playerdata[characterid.Value].charge = CheckMaxCharge(characterid.Value);
                     MainManager.battle.StartCoroutine(MainManager.battle.StatEffect(MainManager.instance.playerdata[characterid.Value].battleentity, 4));
                     break;
+
+                case NewItemUse.AddSlugskin:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    MainManager.PlaySound("Shield", 1.4f, 1);
+                    MainManager.SetCondition((MainManager.BattleCondition)NewCondition.Slugskin, ref MainManager.instance.playerdata[characterid.Value], value);
+                    break;
+
+                case NewItemUse.AtkUpParty:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                    {
+                        if (MainManager.instance.playerdata[i].hp > 0)
+                            MainManager.battle.StatusEffect(MainManager.instance.playerdata[i], MainManager.BattleCondition.AttackUp, value, true, false);
+                    }
+                    break;
+
+                case NewItemUse.DefUpParty:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                    {
+                        if (MainManager.instance.playerdata[i].hp > 0)
+                            MainManager.battle.StatusEffect(MainManager.instance.playerdata[i], MainManager.BattleCondition.DefenseUp, value, true, false);
+                    }
+                    break;
+
+                case NewItemUse.GradualTPParty:
+
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    MainManager.PlaySound("Heal3");
+                    for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                    {
+                        if (MainManager.instance.playerdata[i].hp > 0)
+                        {
+                            MainManager.SetCondition(MainManager.BattleCondition.GradualTP, ref MainManager.instance.playerdata[i], value);
+                        }
+                    }
+                    break;
+
+                case NewItemUse.AddVitiation:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    MainManager.PlaySound("Shield");
+                    MainManager.SetCondition((MainManager.BattleCondition)NewCondition.Vitiation, ref MainManager.instance.playerdata[characterid.Value], value);
+                    break;
+
+                case NewItemUse.AddDizzy:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    BattleControl_Ext.Instance.TryDizzy(null, ref MainManager.instance.playerdata[characterid.Value], value);
+                    break;
+
+                case NewItemUse.AddDizzyParty:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                    {
+                        if (MainManager.instance.playerdata[i].hp > 0)
+                        {
+                            BattleControl_Ext.Instance.TryDizzy(null, ref MainManager.instance.playerdata[i], value);
+                        }
+                    }
+                    break;
+
+                case NewItemUse.DizzyAfter:
+                    if (!MainManager.instance.inbattle)
+                    {
+                        return;
+                    }
+                    Entity_Ext.GetEntity_Ext(MainManager.instance.playerdata[characterid.Value].battleentity).extraData.dizzyAfter.Add(value);
+                    break;
             }
         }
 
@@ -1836,7 +1622,8 @@ namespace BFPlus.Extensions
                 else if (randomBuff == MainManager.ItemUsage.DefUpStat)
                 {
                     MainManager.battle.StatusEffect(MainManager.instance.playerdata[characterid], MainManager.BattleCondition.DefenseUp, value, true, false);
-                }else if(randomBuff == MainManager.ItemUsage.AddFreeze)
+                }
+                else if (randomBuff == MainManager.ItemUsage.AddFreeze)
                 {
                     MainManager.PlayParticle("mothicenormal", null, MainManager.instance.playerdata[characterid].battleentity.transform.position + Vector3.up).transform.localScale = Vector3.one * 1.5f;
                     if (MainManager.HasCondition(MainManager.BattleCondition.Freeze, MainManager.instance.playerdata[characterid]) > -1 && (MainManager.instance.playerdata[characterid].battleentity.icecube == null || !MainManager.instance.playerdata[characterid].battleentity.icecube.activeInHierarchy))
@@ -1855,16 +1642,11 @@ namespace BFPlus.Extensions
             }
         }
 
-        public static void CheckEnemyVariantAnimator(EntityControl __instance) 
+        public static void CheckEnemyVariantAnimator(EntityControl __instance)
         {
-            NewEnemies[] variants = new NewEnemies[] 
+            NewEnemies[] variants = new NewEnemies[]
             {
-                NewEnemies.Caveling,
-                NewEnemies.FlyingCaveling,
-                NewEnemies.Frostfly, 
-                NewEnemies.PirahnaChomp, 
-                NewEnemies.Moeruki, 
-                NewEnemies.Abomiberry,
+                NewEnemies.PirahnaChomp,
                 NewEnemies.SplotchSpider,
                 NewEnemies.Spineling,
                 NewEnemies.Dewling,
@@ -1872,25 +1654,16 @@ namespace BFPlus.Extensions
                 NewEnemies.DynamoSpore,
                 NewEnemies.Belosslow,
                 NewEnemies.BatteryShroom,
-                NewEnemies.Mothmite,
                 NewEnemies.MarsBud
-            }; 
+            };
 
             foreach (var v in variants)
             {
                 if (IsNewEnemy(__instance, v))
                 {
                     NewEnemies enemyId = v;
-                    if (enemyId == NewEnemies.FlyingCaveling)
-                        enemyId = NewEnemies.Caveling;
 
-                    MainManager.AnimIDs animID = (MainManager.AnimIDs)__instance.animid+1;
-
-                    if (enemyId == NewEnemies.Abomiberry && __instance.animid == (int)MainManager.AnimIDs.Abombhoney - 1)
-                    {
-                        __instance.anim.runtimeAnimatorController = assetBundle.LoadAsset<RuntimeAnimatorController>("Abombberry");
-                        break;
-                    }
+                    MainManager.AnimIDs animID = (MainManager.AnimIDs)__instance.animid + 1;
 
                     if (__instance.anim.runtimeAnimatorController.name == animID.ToString())
                     {
@@ -1904,7 +1677,7 @@ namespace BFPlus.Extensions
 
         public static void LoadMapsBundle()
         {
-            if(mapPrefabs == null)
+            if (mapPrefabs == null)
                 mapPrefabs = AssetBundle.LoadFromMemory(Properties.Resources.mapprefabs);
         }
 
@@ -1924,7 +1697,7 @@ namespace BFPlus.Extensions
             string[] areaNames = new string[] { "Pit of Trials", "Power Plant", "Iron Tower", "Lush Abyss", "Peacock Island", "Sand Castle Depths", "Leafbug Village", "Giant's Playroom" };
             int areaId = GetNewAreaId(mapid);
 
-            if(areaId != -1)
+            if (areaId != -1)
             {
                 __result = areaNames[areaId];
             }
@@ -1946,7 +1719,7 @@ namespace BFPlus.Extensions
                 new int[]{ (int)NewMaps.GiantLairPlayroom1,(int)NewMaps.GiantLairPlayroom2,(int)NewMaps.GiantLairPlayroom3,(int)NewMaps.GiantLairPlayroomBoss},
             };
 
-            for(int i = 0; i < newAreasId.GetLength(0); i++)
+            for (int i = 0; i < newAreasId.GetLength(0); i++)
             {
                 if (newAreasId[i].Contains(mapId))
                     return i;
@@ -1956,6 +1729,13 @@ namespace BFPlus.Extensions
 
         public static bool CheckNewMusic(string musicClip, float fadeSpeed, int id, bool seamless)
         {
+            if(BattleControl_Ext.inStartBattle)
+            {
+                if(BattleControl_Ext.Instance != null)
+                    BattleControl_Ext.Instance.battleMusic = musicClip;
+                BattleControl_Ext.inStartBattle = false;
+            }
+
             if (musicClip != null)
             {
                 if (Enum.TryParse(musicClip, out NewMusic result))
@@ -1999,7 +1779,7 @@ namespace BFPlus.Extensions
 
         }
 
-        static bool CheckListType(int type)
+        static bool CheckListType(int type, ref bool showDescription)
         {
             if (type == (int)NewListType.GourmetItem)
             {
@@ -2021,18 +1801,38 @@ namespace BFPlus.Extensions
                     badgeId = 1;
 
                 MainManager.listvar = MainManager.instance.badgeshops[badgeId].ToArray();
+                showDescription = !MainManager.instance.flags[681];
                 return true;
             }
 
             if (type == (int)NewListType.MedalPreset)
             {
-                if(PauseMenu_Ext.Instance.presetId == -1)
+                if (PauseMenu_Ext.Instance.presetId == -1)
                     MainManager.listvar = MainManager.GradualFill(10);
                 else
                     MainManager.listvar = MainManager.GradualFill(8);
 
                 return true;
             }
+
+            if (type == (int)NewListType.MusicPlayer)
+            {
+                List<int> list = new List<int>();
+                for (int i = 0; i < MainManager.instance.samiramusics.Count; i++)
+                {
+                    if (MainManager.instance.samiramusics[i][1] >= 0)
+                        list.Add(MainManager.instance.samiramusics[i][0]);
+                }
+                MainManager.listvar = list.ToArray();
+                return true;
+            }
+
+            if (type == (int)NewListType.BalanceChanges)
+            {
+                MainManager.listvar = Instance.balanceChanges.Keys.ToArray();
+                return true;
+            }
+
             return false;
         }
 
@@ -2052,7 +1852,7 @@ namespace BFPlus.Extensions
                 Vector3 size = index == 0 ? new Vector3(0.55f, 0.6f, 1f) : new Vector3(0.45f, 0.5f, 1f);
                 MainManager.NewUIObject("barSprite", listBar.transform, new Vector3(-2.5f, 0f), size, barSprite, 10);
 
-                if(index == 1)
+                if (index == 1)
                 {
                     MainManager.instance.StartCoroutine(MainManager.SetText("|sort,10||size,0.75||font,0|" + colorText + tpCost.ToString().PadLeft(2, ' '), new Vector3(1.6f, -0.15f), listBar.transform));
                     MainManager.NewUIObject("tp", listBar.transform, new Vector3(2.55f, 0f), new Vector3(0.45f, 0.5f, 1f), MainManager.guisprites[28], 10);
@@ -2073,7 +1873,7 @@ namespace BFPlus.Extensions
                 icon.sprite = category.iconId >= 0 ? PauseMenu_Ext.Instance.categoryIcons[category.iconId] : MainManager.guisprites[Mathf.Abs(category.iconId)];
                 icon.transform.parent = listBar.transform;
                 icon.gameObject.layer = 5;
-                icon.transform.localScale = Vector3.one*0.45f;
+                icon.transform.localScale = Vector3.one * 0.45f;
                 icon.transform.localPosition = new Vector2(8.8f, category.iconId >= 0 ? 0f : -0.45f);
 
                 return text;
@@ -2082,6 +1882,22 @@ namespace BFPlus.Extensions
             if (type == (int)NewListType.MedalPreset)
             {
                 return Instance.GetMedalPresetListText(type, index, listBar, ref barYOffset, ref textSizeX, ref textSizeY);
+            }
+
+            if (type == (int)NewListType.BalanceChanges)
+            {
+                float offset = 2.25f;
+                for (int i = 0; i < 2; i++)
+                {
+                    SpriteRenderer slider = MainManager.NewUIObject("slider" + i, listBar.transform, new Vector3(offset, 0f), Vector3.one, MainManager.guisprites[1]).GetComponent<SpriteRenderer>();
+                    slider.sortingOrder = 10;
+                    slider.transform.localEulerAngles = new Vector3(0f, 0f, i == 0 ? -90f : 90f);
+                    offset += 4;
+                }
+                int menuTextId = Instance.balanceChanges[MainManager.listvar[index]] ? (int)NewMenuText.BFPlus : (int)NewMenuText.Vanilla;
+                MainManager.instance.StartCoroutine(MainManager.SetText("|center||size,0.75|" + MainManager.menutext[menuTextId],
+                    new Vector3(4.25f, -0.15f), listBar.transform));
+                return MainManager.menutext[MainManager.listvar[index]];
             }
 
             return "";
@@ -2104,9 +1920,9 @@ namespace BFPlus.Extensions
                     var preset = Instance.medalPresets[MainManager.listvar[index]];
                     presetName = preset.name;
 
-                    for(int i = 0; i < 3; i++)
+                    for (int i = 0; i < 3; i++)
                     {
-                        MainManager.NewUIObject("icon" + i, listBar.transform, new Vector2(4.8f + i*0.8f, 0f), Vector3.one * 0.45f, PauseMenu_Ext.Instance.categoryIcons[preset.icons[i]]);
+                        MainManager.NewUIObject("icon" + i, listBar.transform, new Vector2(4.8f + i * 0.8f, 0f), Vector3.one * 0.45f, PauseMenu_Ext.Instance.categoryIcons[preset.icons[i]]);
                     }
                     MainManager.instance.StartCoroutine(MainManager.SetText("|font,0|" + preset.mpNeeded.ToString().PadLeft(3), 0, null, false, false, new Vector3(7.2f, -0.2f), Vector3.zero, Vector3.one, listBar.transform, null));
                     MainManager.NewUIObject("mpIcon", listBar.transform, new Vector2(8.8f, -0.45f), Vector3.one * 0.45f, MainManager.guisprites[109]);
@@ -2119,21 +1935,21 @@ namespace BFPlus.Extensions
                 List<string> listText = new List<string>();
 
                 int count = 1;
-                for(int i = 0; i < 8; i++)
+                for (int i = 0; i < 8; i++)
                 {
                     int baseIndex = i < 5 ? 294 : 304;
                     listText.Add(MainManager.menutext[i < 5 ? baseIndex + i : baseIndex]);
 
                     if (i >= 5)
                     {
-                        listText[i]= listText[i] +" " +count;
+                        listText[i] = listText[i] + " " + count;
                         count++;
                     }
                 }
 
                 string colorText = "";
 
-                if (Instance.medalPresets[PauseMenu_Ext.Instance.presetId] == null && (MainManager.listvar[index] == 0 || MainManager.listvar[index] == 2 || MainManager.listvar[index] == 3 || MainManager.listvar[index]>=5))
+                if (Instance.medalPresets[PauseMenu_Ext.Instance.presetId] == null && (MainManager.listvar[index] == 0 || MainManager.listvar[index] == 2 || MainManager.listvar[index] == 3 || MainManager.listvar[index] >= 5))
                 {
                     colorText = "|color,1|";
                 }
@@ -2142,7 +1958,7 @@ namespace BFPlus.Extensions
                 {
                     int spriteId = 0;
 
-                    if(Instance.medalPresets[PauseMenu_Ext.Instance.presetId] != null)
+                    if (Instance.medalPresets[PauseMenu_Ext.Instance.presetId] != null)
                     {
                         spriteId = Instance.medalPresets[PauseMenu_Ext.Instance.presetId].icons[index - 5];
                     }
@@ -2157,8 +1973,8 @@ namespace BFPlus.Extensions
 
                     for (int i = 0; i < 2; i++)
                     {
-                        Transform sideIcon = MainManager.NewUIObject("side",listBar.transform, new Vector3(i ==0 ? 5.5f : 8.5f, 0f), Vector3.one, MainManager.guisprites[1]).transform;
-                        sideIcon.localEulerAngles = new Vector3(0f, 0f, i == 0 ? -90f:90f);
+                        Transform sideIcon = MainManager.NewUIObject("side", listBar.transform, new Vector3(i == 0 ? 5.5f : 8.5f, 0f), Vector3.one, MainManager.guisprites[1]).transform;
+                        sideIcon.localEulerAngles = new Vector3(0f, 0f, i == 0 ? -90f : 90f);
                     }
 
                 }
@@ -2175,7 +1991,7 @@ namespace BFPlus.Extensions
                 return descText[MainManager.instance.option];
             }
 
-            if(type == (int)NewListType.MedalCategories)
+            if (type == (int)NewListType.MedalCategories)
             {
                 int categoryIndex = MainManager.listvar[MainManager.instance.option];
 
@@ -2235,7 +2051,7 @@ namespace BFPlus.Extensions
             bool inked = MainManager.HasCondition(MainManager.BattleCondition.Inked, MainManager.instance.playerdata[MainManager.battle.currentturn]) == -1;
             return inked || (!inked && MainManager.BadgeIsEquipped((int)Medal.InvisibleInk));
         }
-        static bool CantUseSkillSticky()
+        static bool CantUseItemSticky()
         {
             bool stickied = MainManager.HasCondition(MainManager.BattleCondition.Sticky, MainManager.instance.playerdata[MainManager.battle.currentturn]) == -1;
             return stickied || (!stickied && MainManager.BadgeIsEquipped((int)Medal.FlavorlessAdhesive));
@@ -2250,14 +2066,14 @@ namespace BFPlus.Extensions
                 new List<int>(){(int)Medal.InkBubble,(int)Medal.Smearcharge,(int)Medal.InvisibleInk}
             };
 
-            if(MainManager.instance.avaliablebadgepool.Length < 2 + newShops.Count)
+            if (MainManager.instance.avaliablebadgepool.Length < 2 + newShops.Count)
             {
                 Array.Resize(ref MainManager.instance.avaliablebadgepool, 2 + newShops.Count);
                 Array.Resize(ref MainManager.instance.badgeshops, 2 + newShops.Count);
 
                 for (int i = 0; i < newShops.Count; i++)
                 {
-                    if (MainManager.instance.badgeshops[2+i] == null)
+                    if (MainManager.instance.badgeshops[2 + i] == null)
                     {
                         MainManager.instance.badgeshops[2 + i] = new List<int>(newShops[i]);
                         MainManager.instance.avaliablebadgepool[2 + i] = new List<int>();
@@ -2273,7 +2089,7 @@ namespace BFPlus.Extensions
 
         public int GetBossMap(int boss)
         {
-            Dictionary<int, MainManager.BattleMaps> bossToMap = new Dictionary<int, MainManager.BattleMaps> ()
+            Dictionary<int, MainManager.BattleMaps> bossToMap = new Dictionary<int, MainManager.BattleMaps>()
             {
                 {(int)MainManager.Enemies.Acolyte, MainManager.BattleMaps.GoldenSettlementArena },
                 {(int)MainManager.Enemies.Ahoneynation, MainManager.BattleMaps.FactoryS2 },
@@ -2309,6 +2125,7 @@ namespace BFPlus.Extensions
                 {(int)MainManager.Enemies.HoloVi, MainManager.BattleMaps.AssociationHQ},
                 {(int)NewEnemies.TermiteKnight, MainManager.BattleMaps.TermiteColiseum },
                 {(int)MainManager.Enemies.TermiteSoldier, MainManager.BattleMaps.TermiteColiseum },
+                {(int)NewEnemies.JumpAnt, MainManager.BattleMaps.AssociationHQ },
             };
 
             if (bossToMap.ContainsKey(boss))
@@ -2337,7 +2154,7 @@ namespace BFPlus.Extensions
                 {(int)NewEnemies.MarsSprout, (int)NewMaps.PitBossRoom },
                 {(int)NewEnemies.DarkVi, (int)MainManager.Maps.SnakemouthEmpty },
                 //pattons fight
-                {(int)NewEnemies.Abomiberry, (int)MainManager.Maps.BarrenLandsEntrance },
+                {(int)NewEnemies.MechaJaw, (int)MainManager.Maps.BarrenLandsEntrance },
             };
 
             if (bossToMap.ContainsKey(boss))
@@ -2419,8 +2236,8 @@ namespace BFPlus.Extensions
             {
                 skyboxMat = skyBox;
                 fogColor = fog;
-                fogEndDistance = endDistance; 
-                ambientSkyColor = skyColor;       
+                fogEndDistance = endDistance;
+                ambientSkyColor = skyColor;
                 globalLight = ambientLight;
             }
         }
@@ -2459,7 +2276,7 @@ namespace BFPlus.Extensions
             }
         }
 
-        public static T GetWeightedResult<T>(Dictionary<T,int> dictionnary)
+        public static T GetWeightedResult<T>(Dictionary<T, int> dictionnary)
         {
             float totalWeight = dictionnary.Sum(r => r.Value);
             float randomValue = UnityEngine.Random.Range(0, totalWeight);
@@ -2487,7 +2304,7 @@ namespace BFPlus.Extensions
 
         public static int[] GetNewBounties()
         {
-            return new int[]{ (int)NewQuest.BountyDullScorp, (int)NewQuest.BountyDynamoSpore, (int)NewQuest.BountyBelosslow, 
+            return new int[]{ (int)NewQuest.BountyDullScorp, (int)NewQuest.BountyDynamoSpore, (int)NewQuest.BountyBelosslow,
                 (int)NewQuest.BountyIronSuit, (int)NewQuest.BountyJester };
 
         }
@@ -2512,9 +2329,9 @@ namespace BFPlus.Extensions
 
             foreach (var boss in superbosses)
             {
-                if(boss == -2)
+                if (boss == -2)
                 {
-                    for(int i = 0; i < holoTeamSnek.Length; i++)
+                    for (int i = 0; i < holoTeamSnek.Length; i++)
                     {
                         if (MainManager.instance.enemyencounter[holoTeamSnek[i], 1] <= 0)
                         {
@@ -2528,11 +2345,29 @@ namespace BFPlus.Extensions
                 {
                     return;
                 }
- 
+
             }
             MainManager.UpdateJounal(MainManager.Library.Logbook, (int)NewAchievement.SuperBug);
         }
 
+        public void ChangeSpritePivot(EntityControl entity, Vector2? pivot = null)
+        {
+            if (pivot == null)
+                pivot = new Vector2(0.5f, 0.5f);
+
+            Sprite originalSprite = entity.sprite.sprite;
+            Rect spriteRect = originalSprite.rect;
+            Sprite newSprite = Sprite.Create(
+                originalSprite.texture,
+                spriteRect,
+                pivot.Value,
+                originalSprite.pixelsPerUnit,
+                0,
+                SpriteMeshType.Tight,
+                originalSprite.border
+            );
+            entity.sprite.sprite = newSprite;
+        }
         public class MedalPreset
         {
             public List<int[]> medals = new List<int[]>();
@@ -2563,14 +2398,14 @@ namespace BFPlus.Extensions
                     string[] medals = parts[1].Split('|');
                     foreach (var medal in medals)
                     {
-                        if (string.IsNullOrWhiteSpace(medal)) 
+                        if (string.IsNullOrWhiteSpace(medal))
                             continue;
                         int[] nums = medal.Split(',').Select(s => int.Parse(s)).ToArray();
                         preset.medals.Add(nums);
                     }
 
                     string[] icons = parts[2].Split(',');
-                    for(int i = 0; i < preset.icons.Length; i++)
+                    for (int i = 0; i < preset.icons.Length; i++)
                     {
                         preset.icons[i] = int.Parse(icons[i]);
                     }
@@ -2621,6 +2456,349 @@ namespace BFPlus.Extensions
                     return null;
                 }
             }
+        }
+
+        static bool CantUseRelayDizzy()
+        {
+            bool dizzy = MainManager.HasCondition((MainManager.BattleCondition)NewCondition.Dizzy, MainManager.instance.playerdata[MainManager.battle.currentturn]) > -1;
+            return dizzy;
+        }
+
+        public static Bounds GetCombinedSpriteBounds(GameObject root)
+        {
+            SpriteRenderer[] renderers =
+                root.GetComponentsInChildren<SpriteRenderer>(true);
+
+            if (renderers.Length == 0)
+                return new Bounds(root.transform.position, Vector3.zero);
+
+            Bounds bounds = renderers[0].bounds;
+
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+
+            return bounds;
+        }
+
+        public void CheckJumpAntHintsFlags()
+        {
+            if (MainManager.instance.flags[41] && !MainManager.instance.flags[966] && !MainManager.instance.flags[969])
+                MainManager.instance.flags[969] = true;
+
+            if (MainManager.instance.flags[966] && MainManager.instance.flags[88] && !MainManager.instance.flags[967])
+            {
+                MainManager.instance.flags[968] = true;
+            }
+
+            if (MainManager.instance.flags[967] && MainManager.instance.flags[299])
+            {
+                MainManager.instance.flags[972] = true;
+            }
+
+            if (MainManager.instance.flags[971] && MainManager.instance.flags[345] && !MainManager.instance.flags[974])
+            {
+                MainManager.instance.flags[975] = true;
+            }
+
+            if (MainManager.instance.flags[974] && MainManager.instance.flags[359] && !MainManager.instance.flags[976])
+            {
+                MainManager.instance.flags[977] = true;
+            }
+
+            if (MainManager.instance.flags[976] && MainManager.instance.flags[454] && !MainManager.instance.flags[978])
+            {
+                MainManager.instance.flags[979] = true;
+            }
+        }
+
+        public static bool IsOutdoorMap(MapControl map)
+        {
+            MainManager.Areas[] indoorAreas = new MainManager.Areas[]
+            {
+                MainManager.Areas.BanditHideout,
+                MainManager.Areas.Beehive,
+                MainManager.Areas.UpperSnakemouth,
+                MainManager.Areas.StreamMountain,
+                MainManager.Areas.ChomperCaves,
+                MainManager.Areas.GiantLair,
+                MainManager.Areas.HoneyFactory,
+                MainManager.Areas.SandCastle,
+                MainManager.Areas.TermiteCity,
+                MainManager.Areas.WaspKingdom,
+                MainManager.Areas.Snakemouth,
+            };
+
+            MainManager.Maps[] indoorMapsOfOutdoorAreas = new MainManager.Maps[]
+            {
+                MainManager.Maps.AbandonedCityTent,
+                MainManager.Maps.GoldenPathTunnel,
+                MainManager.Maps.GoldenPathTunnel2,
+                MainManager.Maps.CaveOfTrials,
+                (MainManager.Maps)NewMaps.Pit100BaseRoom,
+                MainManager.Maps.MysteryIslandInside,
+                MainManager.Maps.PowerPlant,
+                MainManager.Maps.BroodmotherLair,
+                MainManager.Maps.FGCave,
+                MainManager.Maps.WizardTowerAttic,
+                MainManager.Maps.WizardTowerBasement,
+                MainManager.Maps.WizardTowerStairs,
+                MainManager.Maps.BarrenLandsAntTunnel,
+                MainManager.Maps.MetalIsland2,
+                MainManager.Maps.MetalIslandAuditorium,
+                MainManager.Maps.HermitCave
+            };
+
+            int newAreaId = GetNewAreaId((int)map.mapid);
+
+            int[] indoorNewAreas =
+            {
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            };
+
+            int[] outdoorMaps =
+            {
+                (int)NewMaps.LeafbugVillage,
+                (int)MainManager.Maps.RubberPrisonPier,
+                (int)MainManager.Maps.SandCastleRoof,
+                (int)MainManager.Maps.WaspKingdomOutside
+
+            };
+
+            return (!indoorAreas.Contains(map.areaid) && !indoorMapsOfOutdoorAreas.Contains(map.mapid) && (newAreaId == -1 || !indoorNewAreas.Contains(newAreaId))) || outdoorMaps.Contains((int)map.mapid);
+        }
+
+        public bool GetWhirlySeedChance()
+        {
+            int roll = UnityEngine.Random.Range(0, 100);
+            return roll <= 2;
+        }
+
+        public void ChangeBalanceChanges(int index)
+        {
+            MainManager.pausemenu.SettingsToggleSound();
+            Instance.balanceChanges[index] = !Instance.balanceChanges[index];
+            MainManager.pausemenu.UpdateText();
+        }
+
+        public bool GetBalanceChangeState(int index)
+        {
+            return Instance.balanceChanges[index];
+        }
+
+        public void ReloadSkillData()
+        {
+            string[] skillNames = Resources.Load<TextAsset>("Data/Dialogues" + MainManager.languageid + "/Skills").ToString().Split(new char[] { '\n' });
+            string[] skillData = Resources.Load<TextAsset>("Data/SkillData").ToString().Split(new char[] { '\n' });
+
+            Dictionary<int, string> newSkillNames = assetBundle.LoadAsset<TextAsset>("SkillsName").text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(s => s.Contains("{"))
+            .Select(s => s.Split(new[] { '{' }, 2))
+            .ToDictionary(
+                p => int.Parse(p[0]),
+                p => p[1]
+            );
+
+            Dictionary<int, string> newSkillData = assetBundle.LoadAsset<TextAsset>("SkillData").text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(s => s.Contains("{"))
+            .Select(s => s.Split(new[] { '{' }, 2))
+            .ToDictionary(
+                p => int.Parse(p[0]),
+                p => p[1]
+            );
+
+
+            foreach (int key in Instance.balanceChanges.Keys)
+            {
+                int skillIndex = -1;
+                switch (key)
+                {
+                    case (int)NewMenuText.BubbleShield:
+                        skillIndex = (int)MainManager.Skills.BubbleShieldLite;
+                        break;
+
+                    case (int)NewMenuText.HeavyStrike:
+                        skillIndex = (int)MainManager.Skills.HeavyStrike;
+                        break;
+
+                    case (int)NewMenuText.IceRain:
+                        skillIndex = (int)MainManager.Skills.IceRain;
+                        break;
+
+                    case (int)NewMenuText.NeedleToss:
+                        skillIndex = (int)MainManager.Skills.NeedleToss;
+                        break;
+
+                    case (int)NewMenuText.NeedlePincer:
+                        skillIndex = (int)MainManager.Skills.NeedlePincer;
+                        break;
+                }
+
+
+                if (skillIndex != -1)
+                {
+                    int times = skillIndex == (int)MainManager.Skills.BubbleShieldLite ? 2 : 1;
+
+                    for (int i = 0; i < times; i++)
+                    {
+                        string[] data = null;
+                        string[] names = null;
+                        if (Instance.balanceChanges[key])
+                        {
+                            if (newSkillData.ContainsKey(skillIndex))
+                                data = newSkillData[skillIndex].Split(new char[] { '@' });
+
+                            if (newSkillNames.ContainsKey(skillIndex))
+                                names = newSkillNames[skillIndex].Split(new char[] { '@' });
+                        }
+                        else
+                        {
+                            data = skillData[skillIndex].Split(new char[] { '@' });
+                            names = skillNames[skillIndex].Split(new char[] { '@' });
+                        }
+
+                        if (names != null)
+                        {
+                            MainManager.skilldata[skillIndex, 0] = names[0];
+                            MainManager.skilldata[skillIndex, 1] = names[1];
+                        }
+
+                        if (data != null)
+                        {
+                            for (int j = 2; j < MainManager.skilldata.GetLength(1); j++)
+                            {
+                                MainManager.skilldata[skillIndex, j] = data[j - 2];
+                            }
+                        }
+
+                        if (skillIndex == (int)MainManager.Skills.BubbleShieldLite)
+                        {
+                            skillIndex = (int)MainManager.Skills.BubbleShield;
+                        }
+                    }
+                }
+            }
+        }
+
+        static void SetEnemyExtraData()
+        {
+            string[] data = assetBundle.LoadAsset<TextAsset>("BattleDataExtra")
+                .ToString().Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            extraEnemyData = new string[data.Length, data[0].Split(new char[] { ',' }).Length];
+            for (int i = 0; i != data.Length; i++)
+            {
+                string[] enemyData = data[i].Split(new char[] { ',' });
+                for (int j = 0; j != enemyData.Length; j++)
+                {
+                    extraEnemyData[i, j] = enemyData[j];
+                }
+            }
+        }
+
+        public BattleDataExtra GetEnemyExtraData(int enemyId)
+        {
+            BattleDataExtra data = default(BattleDataExtra);
+            data.DizzyRes = int.Parse(extraEnemyData[enemyId, 0]);
+            data.MaxCharge = int.Parse(extraEnemyData[enemyId, 1]);
+
+            data.dizzyStarOffset = ReadExtraDataVector3(enemyId, 2);
+            data.slugskinOffset = ReadExtraDataVector3(enemyId, 3);
+            data.slugskinScale = ReadExtraDataVector3(enemyId, 4);
+            data.vitiationOffset = ReadExtraDataVector3(enemyId, 5);
+            data.vitationScale = ReadExtraDataVector3(enemyId, 6);
+            data.inkBubbleOffset = ReadExtraDataVector3(enemyId, 7);
+            data.inkBubbleScale = ReadExtraDataVector3(enemyId, 8);
+            data.noDizzySpinAnim = bool.Parse(extraEnemyData[enemyId, 9]);
+            data.dizzyAfter = new List<int>();
+            return data;
+        }
+
+        //temporary for offset and scales stuff
+        public BattleDataExtra GetPlayerExtraData(int playerId)
+        {
+            BattleDataExtra data = default(BattleDataExtra);
+            switch (playerId)
+            {
+                case 0:
+                    data = GetEnemyExtraData((int)NewEnemies.DarkVi);
+                    break;
+                case 1:
+                    data = GetEnemyExtraData((int)NewEnemies.DarkKabbu);
+                    break;
+                case 2:
+                    data = GetEnemyExtraData((int)NewEnemies.DarkLeif);
+                    break;
+            }
+            data.DizzyRes = BadgeHowManyEquipped((int)Medal.DizzyResistance, playerId) * 50;
+            if (BadgeIsEquipped((int)BadgeTypes.ResistAll, playerId))
+                data.DizzyRes += 50;
+            return data;
+        }
+
+        Vector3 ReadExtraDataVector3(int enemyId, int field)
+        {
+            string[] vector3String = extraEnemyData[enemyId, field].Split(';');
+            return new Vector3(float.Parse(vector3String[0]), float.Parse(vector3String[1]), float.Parse(vector3String[2]));
+        }
+
+        public static void ResetRecords(int[] records)
+        {
+            foreach (var record in records)
+            {
+                MainManager.instance.librarystuff[(int)MainManager.Library.Logbook, record] = false;
+            }
+        }
+
+        /// <summary>
+        /// Gives both TIGS and FIGHT version of songs in samiras if you heard one or the other.
+        /// </summary>
+        public void FixSamiraFightMusic()
+        {
+            Dictionary<NewMusic, NewMusic> reverseFightMusics = fightMusics.ToDictionary(x => x.Value, x => x.Key);
+            List<int[]> toAdd = new List<int[]>();
+
+            foreach (int[] music in MainManager.instance.samiramusics)
+            {
+                NewMusic current = (NewMusic)music[0];
+
+                if (fightMusics.TryGetValue(current, out NewMusic linkedMusic) && 
+                    !MainManager.instance.samiramusics.Any(x => x[0] == (int)linkedMusic) && 
+                    !toAdd.Any(x => x[0] == (int)linkedMusic))
+                {
+                    toAdd.Add(new int[] { (int)linkedMusic, -1 });
+                }
+
+                if (reverseFightMusics.TryGetValue(current, out NewMusic reverseLinkedMusic) && 
+                    !MainManager.instance.samiramusics.Any(x => x[0] == (int)reverseLinkedMusic)&& 
+                    !toAdd.Any(x => x[0] == (int)reverseLinkedMusic))
+                {
+                    toAdd.Add(new int[] { (int)reverseLinkedMusic, -1 });
+                }
+            }
+            MainManager.instance.samiramusics.AddRange(toAdd);
+        }
+
+        public bool IsNewFightMusic(NewMusic music)
+        {
+            return fightMusics.ContainsKey(music) || fightMusics.ContainsValue(music);
+        }
+
+        public static string GetNewMedalsString()
+        {
+            var randomMedals = new List<int>(Enum.GetValues(typeof(Medal)).Cast<int>());
+            randomMedals.Remove((int)Medal.TPComa);
+            randomMedals.Remove((int)Medal.EverlastingFlame);
+            randomMedals.AddRange(MainManager_Ext.medalDupes.Cast<int>());
+            return String.Join(",", Array.ConvertAll(randomMedals.ToArray(), x => x.ToString()));
         }
     }
 

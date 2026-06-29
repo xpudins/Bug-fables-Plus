@@ -1,13 +1,7 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -21,7 +15,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 257617;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("|face,party,caller|"));
             cursor.Emit(OpCodes.Ldloc_1);
@@ -33,7 +27,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             var callRef = AccessTools.StaticFieldRefAccess<NPCControl>(typeof(EventControl), "call");
 
-            if(MainManager.map.mapid == MainManager.Maps.HBsLab)
+            if (MainManager.map.mapid == MainManager.Maps.HBsLab)
             {
                 if (callRef.mapid == 6)
                 {

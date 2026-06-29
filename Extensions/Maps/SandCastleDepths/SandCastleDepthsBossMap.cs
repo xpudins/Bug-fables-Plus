@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static MainManager;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.SandCastleDepths
 {
@@ -32,7 +26,7 @@ namespace BFPlus.Extensions.Maps.SandCastleDepths
             RenderSettings.ambientSkyColor = new Color(0.8924f, 0.9875f, 0.99f);
             RenderSettings.fogEndDistance = 35;
 
-            battleMap.transform.position = new Vector3(0,10.19f, 0);
+            battleMap.transform.position = new Vector3(0, 10.19f, 0);
             return battleMap;
         }
 

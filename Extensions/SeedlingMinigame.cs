@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace BFPlus.Extensions
@@ -31,13 +25,13 @@ namespace BFPlus.Extensions
 
         protected virtual void SetUIText()
         {
-            if(timeUI != null)
+            if (timeUI != null)
                 timeUI.text = ":" + timer.ToString().PadLeft(2, '0');
         }
 
         void Update()
         {
-            if(MainManager.instance.inbattle || MainManager.instance.pause || MainManager.instance.minipause)
+            if (MainManager.instance.inbattle || MainManager.instance.pause || MainManager.instance.minipause)
             {
                 if (UIActive)
                 {
@@ -134,7 +128,7 @@ namespace BFPlus.Extensions
         protected override void SetUIText()
         {
             base.SetUIText();
-            if(pointsUI != null)
+            if (pointsUI != null)
                 pointsUI.text = MainManager.instance.flagvar[1].ToString().PadLeft(3, '0');
         }
 
@@ -153,8 +147,8 @@ namespace BFPlus.Extensions
             {
                 animId = (int)MainManager.AnimIDs.GoldenSeedling;
                 speed = 4.5f;
-            }   
-            else if(odds >=10 && odds <30)
+            }
+            else if (odds >= 10 && odds < 30)
             {
                 animId = (int)MainManager.AnimIDs.Underling;
                 speed = 2.5f;
@@ -163,9 +157,9 @@ namespace BFPlus.Extensions
             {
                 animId = (int)MainManager.AnimIDs.Seedling;
             }
-            NPCControl seedling = EntityControl.CreateNewEntity(name, animId-1, position).gameObject.AddComponent<NPCControl>();
+            NPCControl seedling = EntityControl.CreateNewEntity(name, animId - 1, position).gameObject.AddComponent<NPCControl>();
 
-            seedling.behaviors = new NPCControl.ActionBehaviors[] { NPCControl.ActionBehaviors.Wander,NPCControl.ActionBehaviors.WalkAwayFromPlayer };
+            seedling.behaviors = new NPCControl.ActionBehaviors[] { NPCControl.ActionBehaviors.Wander, NPCControl.ActionBehaviors.WalkAwayFromPlayer };
             seedling.entity = seedling.GetComponent<EntityControl>();
             seedling.entity.npcdata = seedling;
             seedling.entitytype = NPCControl.NPCType.Enemy;
@@ -174,8 +168,8 @@ namespace BFPlus.Extensions
             seedling.teleportradius = 999;
             seedling.radiuslimit = 50;
             seedling.entity.destroytype = NPCControl.DeathType.Smoke;
-            seedling.entity.emoticonoffset = new Vector3(0,2,0);
-            seedling.actionfrequency = new float[] { 500,500 };
+            seedling.entity.emoticonoffset = new Vector3(0, 2, 0);
+            seedling.actionfrequency = new float[] { 500, 500 };
             seedling.insideid = -1;
             seedling.emoticonflag = new Vector2[10];
             for (int i = 0; i < seedling.emoticonflag.Length; i++)
@@ -195,9 +189,9 @@ namespace BFPlus.Extensions
             {
                 EntityControl entity = col.GetComponent<EntityControl>();
                 int point = 2;
-                if (entity.animid == (int)MainManager.AnimIDs.GoldenSeedling-1)
+                if (entity.animid == (int)MainManager.AnimIDs.GoldenSeedling - 1)
                     point = 10;
-                else if (entity.animid == (int)MainManager.AnimIDs.Underling-1)
+                else if (entity.animid == (int)MainManager.AnimIDs.Underling - 1)
                     point = 4;
 
                 MainManager.instance.flagvar[1] += point;
@@ -215,7 +209,7 @@ namespace BFPlus.Extensions
         {
             base.OnDestroy();
             Destroy(pointsUI?.gameObject);
-            foreach(var seedling in seedlings)
+            foreach (var seedling in seedlings)
             {
                 if (seedling != null)
                     Destroy(seedling.gameObject);

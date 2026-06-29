@@ -1,9 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace BFPlus.Extensions.EnemyAI
@@ -60,7 +56,7 @@ namespace BFPlus.Extensions.EnemyAI
             if (hpPercent <= 0.66f && battle.enemydata[actionid].data[1] == 0)
             {
                 //charge + def up;
-                battle.dontusecharge=true;
+                battle.dontusecharge = true;
 
                 entity.animstate = 102;
                 entity.StartCoroutine(entity.ShakeSprite(0.1f, 45f));
@@ -77,11 +73,13 @@ namespace BFPlus.Extensions.EnemyAI
                 battle.enemydata[actionid].data[0] = 0;
                 yield break;
             }
- 
+
 
             if (battle.enemydata[actionid].data[0] == 0)
             {
-                if(battle.enemydata[actionid].data[1] == 1)
+                BattleControl_Ext.Instance.SetStartState(entity, (int)MainManager.Animations.Idle);
+
+                if (battle.enemydata[actionid].data[1] == 1)
                 {
                     battle.enemydata[actionid].data[1] = 2;
                     yield return DoSeismicSlam(entity, actionid);
@@ -111,20 +109,22 @@ namespace BFPlus.Extensions.EnemyAI
                 }
 
                 if (battle.enemydata[actionid].data[2] != 1)
+                {
                     battle.enemydata[actionid].data[0] = 1;
+                    BattleControl_Ext.Instance.SetStartState(entity, (int)MainManager.Animations.Sleep);
+
+                }
             }
             else
             {
-                MainManager.PlaySound("Lost",0.8f,1);
+                MainManager.PlaySound("Lost", 0.8f, 1);
                 entity.Emoticon(MainManager.Emoticons.QuestionMark, 45);
                 battle.enemydata[actionid].data[0] = 0;
+                BattleControl_Ext.Instance.SetStartState(entity, (int)MainManager.Animations.Idle);
                 yield return EventControl.halfsec;
             }
-            
             yield return null;
-
         }
-
 
         IEnumerator DoHeavyToss(EntityControl entity, int actionid)
         {
@@ -307,7 +307,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.animstate = 28;
 
             int originalTarget = battle.playertargetID;
-            battle.DoDamage(actionid, originalTarget, SUPER_SLAM_DAMAGE,BattleControl.AttackProperty.Pierce, battle.commandsuccess);
+            battle.DoDamage(actionid, originalTarget, SUPER_SLAM_DAMAGE, BattleControl.AttackProperty.Pierce, battle.commandsuccess);
 
             MainManager.PlayParticle("DirtExplode", playerTargetEntityRef.transform.position + new Vector3(0f, -1f));
             battle.playertargetID = -1;
@@ -508,7 +508,7 @@ namespace BFPlus.Extensions.EnemyAI
                 var rock = MainManager.CreateRock(new Vector3(targetEntity.transform.position.x, 20f, targetEntity.transform.position.z), new Vector3(0.2f, 0.2f, 0.2f), Vector3.zero);
                 rock.AddComponent<SpinAround>().itself = new Vector3(3, 3, 3);
 
-                MainManager.PlaySound("Fall",0.9f,0.7f);
+                MainManager.PlaySound("Fall", 0.9f, 0.7f);
 
                 Vector3 startrockPos = rock.transform.position;
                 a = 0;

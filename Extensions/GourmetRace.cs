@@ -1,14 +1,8 @@
-﻿using HarmonyLib;
-using InputIOManager;
-using System;
+﻿using InputIOManager;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions
 {
@@ -50,8 +44,8 @@ namespace BFPlus.Extensions
 
         private Dictionary<GourmetItemType, float> itemRatios = new Dictionary<GourmetItemType, float>
         {
-            { GourmetItemType.Bad, 0.5f }, 
-            { GourmetItemType.Good, 0.25f }, 
+            { GourmetItemType.Bad, 0.5f },
+            { GourmetItemType.Good, 0.25f },
             { GourmetItemType.VeryGood, 0.20f },
             { GourmetItemType.Rare, 0.05f }
         };
@@ -88,7 +82,7 @@ namespace BFPlus.Extensions
             contestantFaces[2] = MainManager.NewUIObject("leifIcon", MainManager.GUICamera.transform, new Vector3(6f, 4.2f, 10f), Vector3.one * 0.75f, MainManager.guisprites[173]);
 
 
-            foreach (var point in points) 
+            foreach (var point in points)
             {
                 point.dropshadow = true;
             }
@@ -116,7 +110,7 @@ namespace BFPlus.Extensions
                 if (itemEaten == ITEM_AMOUNT)
                 {
                     start = false;
-                    foreach(var contestant in contestants)
+                    foreach (var contestant in contestants)
                     {
                         contestant.entity.StopForceMove();
                         contestant.isActive = false;
@@ -144,7 +138,7 @@ namespace BFPlus.Extensions
         void CreateContestants()
         {
             contestants[0] = GourmetContestant.CreateContestant((int)MainManager.AnimIDs.Zasp - 1, new Vector3(-5.13f, -4f, -23.72f), 1.2f, 0.75f, "zasp", (int)MainManager.Animations.ItemGet, new Vector3(-0.5f, 1.5f, -0.1f));
-            contestants[1] = GourmetContestant.CreateContestant((int)MainManager.AnimIDs.Chubee - 1, new Vector3(5f, -4f, -23.72f), 0.5f, 2f, "chubee",0, new Vector3(0f, 0.9f, -0.1f));
+            contestants[1] = GourmetContestant.CreateContestant((int)MainManager.AnimIDs.Chubee - 1, new Vector3(5f, -4f, -23.72f), 0.5f, 2f, "chubee", 0, new Vector3(0f, 0.9f, -0.1f));
 
             for (int i = 0; i < contestants.Length; i++)
             {
@@ -181,7 +175,7 @@ namespace BFPlus.Extensions
                     {
                         zoneID = UnityEngine.Random.Range(0, 5);
 
-                        if(UnityEngine.Random.Range(0, 10) > 7)
+                        if (UnityEngine.Random.Range(0, 10) > 7)
                         {
                             zoneID = UnityEngine.Random.Range(4, spawnZones.Length);
                         }
@@ -196,9 +190,9 @@ namespace BFPlus.Extensions
                     }
 
                     bool itemTooClose = false;
-                    foreach(var itemObject in items)
+                    foreach (var itemObject in items)
                     {
-                        if(Vector3.Distance(position, itemObject.transform.position) < 2)
+                        if (Vector3.Distance(position, itemObject.transform.position) < 2)
                         {
                             i--;
                             itemTooClose = true;
@@ -217,7 +211,7 @@ namespace BFPlus.Extensions
                     npcItem.entity.alwaysactive = true;
                     npcItem.entity.Invoke("SetFixed", 0.1f);
                     GourmetItem gourmetItem = npcItem.gameObject.AddComponent<GourmetItem>();
-                    gourmetItem.presses = MainManager.mashcommandalt ? sequentialKeys[(int)itemType] :inputRequired[(int)itemType];
+                    gourmetItem.presses = MainManager.mashcommandalt ? sequentialKeys[(int)itemType] : inputRequired[(int)itemType];
                     gourmetItem.point = pointsPerItem[(int)itemType];
                     gourmetItem.type = itemType;
                     gourmetItem.zoneID = zoneID;
@@ -229,7 +223,7 @@ namespace BFPlus.Extensions
 
         void OnDestroy()
         {
-            foreach(var point in points)
+            foreach (var point in points)
                 Destroy(point.gameObject);
 
             foreach (var icon in contestantFaces)
@@ -242,10 +236,10 @@ namespace BFPlus.Extensions
         public GourmetItem FindClosestItem(Vector3 pos)
         {
             float closestDistance = float.MaxValue;
-            GourmetItem closestItem= null;
+            GourmetItem closestItem = null;
             foreach (GourmetItem item in items)
             {
-                if(item != null && item.available)
+                if (item != null && item.available)
                 {
                     float distance = Vector3.Distance(pos, item.transform.position);
                     if (distance < closestDistance)
@@ -266,11 +260,11 @@ namespace BFPlus.Extensions
                 point.gameObject.SetActive(false);
         }
 
-        public (int AnimId,int Points)[] GetContestantsPoints()
+        public (int AnimId, int Points)[] GetContestantsPoints()
         {
             int playerPoints = MainManager.instance.flagvar[1];
             var allParticipants = contestants
-            .Select(c => (AnimId: c.entity.animid, Points :c.points ))
+            .Select(c => (AnimId: c.entity.animid, Points: c.points))
             .Append((AnimId: 2, Points: playerPoints))
             .OrderBy(p => p.Points)
             .ToArray();
@@ -289,7 +283,7 @@ namespace BFPlus.Extensions
         EntityControl entity;
         void Start()
         {
-            entity = GetComponent<EntityControl>(); 
+            entity = GetComponent<EntityControl>();
         }
 
 
@@ -297,7 +291,7 @@ namespace BFPlus.Extensions
         {
             if (available)
             {
-                if (other.CompareTag("Player")&& !MainManager.instance.minipause)
+                if (other.CompareTag("Player") && !MainManager.instance.minipause)
                 {
                     available = false;
                     EntityControl.IgnoreColliders(entity, MainManager.player.entity, true);
@@ -330,7 +324,7 @@ namespace BFPlus.Extensions
             float b = presses * 20f / eater.eatingSpeed;
             eater.entity.animstate = eater.eatAnim;
             bool isZasp = eater.entity.animid == (int)MainManager.AnimIDs.Zasp - 1;
-            do 
+            do
             {
                 if (!eater.entity.sound.isPlaying)
                 {
@@ -342,7 +336,7 @@ namespace BFPlus.Extensions
                     break;
 
                 yield return null;
-            } while (a<b);
+            } while (a < b);
             yield return null;
             eater.points += point;
             yield return EventControl.quartersec;
@@ -378,7 +372,7 @@ namespace BFPlus.Extensions
                     buttonIds[i] = UnityEngine.Random.Range(0, 7);
                 }
 
-                float spacing = 1f; 
+                float spacing = 1f;
                 float totalWidth = (presses - 1) * spacing;
                 Vector3 startPos = new Vector3(0, -2, 8);
                 float startX = startPos.x - totalWidth / 2;
@@ -417,7 +411,8 @@ namespace BFPlus.Extensions
                             buttons[currentPress].basesprite.color = Color.white;
                         }
                         eatingFrames = 25f;
-                    }else if(currentPress < buttonIds.Length && MainManager.GetKey(-4, false))
+                    }
+                    else if (currentPress < buttonIds.Length && MainManager.GetKey(-4, false))
                     {
                         buttons[currentPress].basesprite.color = Color.red;
                         MainManager.PlayBuzzer();
@@ -476,7 +471,7 @@ namespace BFPlus.Extensions
         }
     }
 
-    public class GourmetContestant : MonoBehaviour 
+    public class GourmetContestant : MonoBehaviour
     {
         public float speed;
         public float eatingSpeed;
@@ -522,7 +517,7 @@ namespace BFPlus.Extensions
 
 
 
-                    if(targetItem != null)
+                    if (targetItem != null)
                     {
                         foundTarget = true;
                         if (targetItem.transform.position.y > -4f)
@@ -536,13 +531,13 @@ namespace BFPlus.Extensions
                         isActive = false;
                     }
                 }
-                else if(!doingPath && targetItem != null && !checkedPath)
+                else if (!doingPath && targetItem != null && !checkedPath)
                 {
-                    if(entity.forcetimer < 350f)
+                    if (entity.forcetimer < 350f)
                     {
                         CheckPath();
                     }
-                } 
+                }
             }
         }
 
@@ -564,18 +559,18 @@ namespace BFPlus.Extensions
         IEnumerator DoPath(int pathId)
         {
             Vector3[] path = specialPaths[pathId];
-            for(int i=0;i< path.Length; i++)
+            for (int i = 0; i < path.Length; i++)
             {
                 entity.forcejump = true;
 
-                if(Vector3.Distance(transform.position, path[i]) > 1)
+                if (Vector3.Distance(transform.position, path[i]) > 1)
                 {
                     entity.MoveTowards(path[i], speed);
                     yield return new WaitUntil(() => !entity.forcemove);
                 }
             }
 
-            if(targetItem != null)
+            if (targetItem != null)
             {
                 entity.forcejump = true;
                 entity.MoveTowards(targetItem.transform.position, speed);
@@ -585,9 +580,9 @@ namespace BFPlus.Extensions
 
         int GetPathID(GourmetItem item)
         {
-            if(item.zoneID >= 4)
+            if (item.zoneID >= 4)
             {
-                if(item.zoneID < 9)
+                if (item.zoneID < 9)
                 {
                     return 0;
                 }
@@ -597,7 +592,7 @@ namespace BFPlus.Extensions
                 }
             }
 
-            if(item.zoneID < 0)
+            if (item.zoneID < 0)
             {
                 switch (item.zoneID)
                 {
@@ -617,13 +612,13 @@ namespace BFPlus.Extensions
         {
             EntityControl entity = EntityControl.CreateNewEntity(name, animid, position);
             entity.alwaysactive = true;
-            GourmetContestant contestant  = entity.gameObject.AddComponent<GourmetContestant>();
+            GourmetContestant contestant = entity.gameObject.AddComponent<GourmetContestant>();
             contestant.speed = speed;
             contestant.eatingSpeed = eatingSpeed;
             contestant.eatAnim = eatAnimstate;
             contestant.itemPos = itemPosition;
             return contestant;
         }
-    
+
     }
 }

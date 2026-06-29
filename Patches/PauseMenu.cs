@@ -1,14 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.IO;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using UnityEngine;
-using BFPlus.Extensions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using InputIOManager;
-using System.Reflection;
 
 namespace BFPlus.Patches
 {
@@ -61,7 +53,7 @@ namespace BFPlus.Patches
         {
             MainManager_Ext.Instance.CheckSwitcheroo();
 
-            if(__instance.windowid == 6)
+            if (__instance.windowid == 6)
             {
                 Transform textHolder = __instance.boxes[0].transform.GetChild(0).GetChild(0);
                 MainManager.DestroyText(textHolder);
@@ -69,8 +61,8 @@ namespace BFPlus.Patches
                 {
                     int cbPercent = PauseMenu_Ext.Instance.areaItems[__instance.option].GetCBPercent();
                     __instance.StartCoroutine(MainManager.SetText(
-                        "|sort,30||size,0.45,0.4||icon,83|", 
-                        new Vector3(-2.8f,-0.3f), textHolder));
+                        "|sort,30||size,0.45,0.4||icon,83|",
+                        new Vector3(-2.8f, -0.3f), textHolder));
                     __instance.StartCoroutine(MainManager.SetText(
                         "|sort,30||size,0.7|" + (cbPercent.ToString() + "%").PadLeft(4),
                         new Vector3(-2.15f, -0.13f), textHolder));
@@ -92,6 +84,49 @@ namespace BFPlus.Patches
                         new Vector3(1.68f, -0.13f), textHolder));
                 }
             }
+
+            if (__instance.windowid == (int)NewWindowId.BalanceChanges)
+            {
+                UpdateTextBalanceChanges(__instance);
+            }
+        }
+
+        static void UpdateTextBalanceChanges(PauseMenu pauseMenu)
+        {
+            MainManager.listammount = 9;
+            MainManager.ShowItemList((int)NewListType.BalanceChanges, Vector2.zero, false, false);
+            MainManager.instance.itemlist.parent = pauseMenu.boxes[0].transform;
+            MainManager.instance.itemlist.localScale = Vector3.one;
+            MainManager.instance.itemlist.localPosition = new Vector2(-3.75f, 2.5f);
+
+            MainManager.DestroyText(pauseMenu.boxes[2].transform);
+            pauseMenu.StartCoroutine(MainManager.SetText("|single|" + GetBalanceChangeDesc(MainManager.listvar[MainManager.instance.option]), new Vector3(-2.35f, 2.5f), pauseMenu.boxes[2].transform));
+
+        }
+
+        static string GetBalanceChangeDesc(int changeIndex)
+        {
+            switch (changeIndex)
+            {
+                case (int)NewMenuText.BubbleShield:
+                    return MainManager.menutext[(int)NewMenuText.BubbleShieldDesc];
+                case (int)NewMenuText.TornadoToss:
+                case (int)NewMenuText.HurricaneToss:
+                    return MainManager.menutext[(int)NewMenuText.TornadoTossDesc];
+                case (int)NewMenuText.Understrike:
+                    return MainManager.menutext[(int)NewMenuText.UnderstrikeDesc];
+                case (int)NewMenuText.IceRain:
+                    return MainManager.menutext[(int)NewMenuText.IceRainDesc];
+                case (int)NewMenuText.HeavyStrike:
+                    return MainManager.menutext[(int)NewMenuText.HeavyStrikeDesc];
+                case (int)NewMenuText.NeedleToss:
+                    return MainManager.menutext[(int)NewMenuText.NeedleTossDesc];
+                case (int)NewMenuText.NeedlePincer:
+                    return MainManager.menutext[(int)NewMenuText.NeedlePincerDesc];
+                case (int)NewMenuText.FlyDrop:
+                    return MainManager.menutext[(int)NewMenuText.FlyDropDesc];
+            }
+            return "";
         }
     }
 }

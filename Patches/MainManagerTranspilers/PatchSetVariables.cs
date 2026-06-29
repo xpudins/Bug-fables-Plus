@@ -1,14 +1,9 @@
 ﻿using BFPlus.Extensions;
-using BFPlus.Patches.BattleControlTranspilers.AddExperiencePatches;
 using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.MainManagerTranspilers
 {
@@ -19,7 +14,7 @@ namespace BFPlus.Patches.MainManagerTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             var patchers = new DataPatcher[]
             {
@@ -65,9 +60,16 @@ namespace BFPlus.Patches.MainManagerTranspilers
             }
 
             cursor.Goto(0);
+
+            cursor.GotoNext(i => i.MatchLdcI4(256));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchMaxItemSprites), "GetNewItemMax"));
+            cursor.Remove();
+
             cursor.GotoNext(i => i.MatchLdcI4(70));
             cursor.Next.OpCode = OpCodes.Ldc_I4;
             cursor.Next.Operand = MainManager_Ext.FlagVarNumber;
+
+
         }
     }
 }

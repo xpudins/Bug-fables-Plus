@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.SeedlingMinigameEvents
@@ -93,7 +88,7 @@ namespace BFPlus.Extensions.Events.SeedlingMinigameEvents
             {
                 if (MainManager.instance.flagvar[1] > 0)
                 {
-                    text = "|break||giveitem,-1," + Mathf.Clamp(Mathf.FloorToInt((float)MainManager.instance.flagvar[1] * 1.15f), 1, MainManager.instance.flagvar[1]) + $",{dialogueEndID}|";
+                    text = "|break||giveitem,-1," + Mathf.Clamp(Mathf.FloorToInt((float)MainManager.instance.flagvar[1] * 0.5f), 1, MainManager.instance.flagvar[1]) + $",{dialogueEndID}|";
                 }
             }
 

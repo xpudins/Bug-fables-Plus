@@ -1,14 +1,9 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using UnityEngine;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
+using UnityEngine;
 
 namespace BFPlus.Patches.DoActionPatches.EnemyPatches
 {
@@ -76,6 +71,15 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             return BattleControl.AttackProperty.Pierce;
         }
 
+        static BattleControl.AttackProperty? GetSpinelingSpinProperty()
+        {
+            if (MainManager.battle.enemydata[BattleControl_Ext.actionID].animid == (int)NewEnemies.Spineling)
+            {
+                return BattleControl.AttackProperty.Poison;
+            }
+            return (BattleControl.AttackProperty)NewProperty.Dizzy;
+        }
+
         static int GetSpinelingSpinHits()
         {
             if (MainManager.battle.enemydata[BattleControl_Ext.actionID].animid == (int)NewEnemies.Spineling)
@@ -92,10 +96,10 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             priority = 65355;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(256));
-            cursor.GotoNext(i=>i.MatchLdcI4(0),i => i.MatchLdcI4(100));
+            cursor.GotoNext(i => i.MatchLdcI4(0), i => i.MatchLdcI4(100));
             cursor.RemoveRange(4);
             var label = cursor.Next.Operand;
 
@@ -104,15 +108,15 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             cursor.Remove();
         }
     }
-    
-    public class PatchSpinelingProjectileType: PatchBaseDoAction
+
+    public class PatchSpinelingProjectileType : PatchBaseDoAction
     {
         public PatchSpinelingProjectileType()
         {
             priority = 65437;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(258));
 
@@ -122,7 +126,7 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             cursor.RemoveRange(4);
         }
     }
-    
+
     public class PatchSpinelingProjectileDMG : PatchBaseDoAction
     {
         public PatchSpinelingProjectileDMG()
@@ -130,7 +134,7 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             priority = 65676;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(259));
             cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "playertargetID")));
@@ -140,8 +144,8 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             cursor.RemoveRange(3);
         }
     }
-    
-    public class PatchSpinelingSpinHits: PatchBaseDoAction
+
+    public class PatchSpinelingSpinHits : PatchBaseDoAction
     {
 
         public PatchSpinelingSpinHits()
@@ -149,15 +153,15 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             priority = 65966;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(266));
             cursor.GotoNext(i => i.MatchLdcI4(2));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Spineling), "GetSpinelingSpinHits"));
-            cursor.Remove();       
+            cursor.Remove();
         }
     }
-   
+
     public class PatchSpinelingSpinAttack : PatchBaseDoAction
     {
         public PatchSpinelingSpinAttack()
@@ -165,13 +169,13 @@ namespace BFPlus.Patches.DoActionPatches.EnemyPatches
             priority = 65931;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(265));
             cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(BattleControl), "playertargetID")));
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Spineling), "GetSpinelingSpinDamage"));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Spineling), "GetSpinelingProperty"));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(Spineling), "GetSpinelingSpinProperty"));
             cursor.RemoveRange(3);
         }
     }

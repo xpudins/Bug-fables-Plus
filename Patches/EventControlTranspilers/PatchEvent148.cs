@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -22,7 +18,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 173744;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchCall(AccessTools.Method(typeof(MainManager), "GetPartyEntities", new Type[] { typeof(bool) })),
                 i => i.MatchStfld(out _));
@@ -33,7 +29,7 @@ namespace BFPlus.Patches.EventControlTranspilers
             cursor.Emit(OpCodes.Brtrue, label);
 
             cursor.GotoNext(i => i.MatchLdcR4(0.65f));
-            cursor.GotoNext(i => i.MatchLdarg0(), i=>i.MatchLdfld(out _));
+            cursor.GotoNext(i => i.MatchLdarg0(), i => i.MatchLdfld(out _));
 
             var transitionRef = cursor.Instrs[cursor.Index + 1].Operand;
             cursor.Emit(OpCodes.Ldc_I4, (int)NewEvents.HoaxeIntermission5);
@@ -62,7 +58,7 @@ namespace BFPlus.Patches.EventControlTranspilers
             }
 
             if (MainManager.map.chompy != null)
-                MainManager.map.chompy.transform.position = positions[1] + new Vector3(0,0,0.1f);
+                MainManager.map.chompy.transform.position = positions[1] + new Vector3(0, 0, 0.1f);
 
             MainManager.ChangeMusic();
         }

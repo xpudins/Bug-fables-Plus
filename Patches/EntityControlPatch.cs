@@ -1,30 +1,14 @@
-﻿using HarmonyLib;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using System;
-using UnityEngine;
-using BFPlus.Extensions;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Collections;
-using UnityEditorInternal;
-using UnityEngine.Rendering;
+using UnityEngine;
+using static BFPlus.Extensions.StatusInfo;
 
 namespace BFPlus.Patches
 {
-
-    [HarmonyPatch(typeof(EntityControl), "SetAnim", new Type[] {typeof(string), typeof(bool)})]
-    public class PatchEntityControlSetAnim
-    {
-        static void Prefix(EntityControl __instance)
-        {
-            if(__instance.animid == (int)MainManager.AnimIDs.ShielderAnt -1 && __instance.animstate == (int)MainManager.Animations.KO)
-            {
-                __instance.animstate = 100;
-            }
-        }
-    }
-
     [HarmonyPatch(typeof(EntityControl), "ChompyRibbon")]
     public class PatchEntityControlChompyRibbon
     {
@@ -32,7 +16,7 @@ namespace BFPlus.Patches
         {
             int num = MainManager.instance.flagvar[56];
 
-            if(num == (int)NewItem.WingRibbon)
+            if (num == (int)NewItem.WingRibbon)
             {
                 sprite.material.color = new Color(0.3384f, 0.8271f, 1, 1);
             }
@@ -44,9 +28,9 @@ namespace BFPlus.Patches
     {
         static void Prefix(EntityControl __instance)
         {
-            if(MainManager.player != null && MainManager.BadgeIsEquipped((int)Medal.SpuderCard) && __instance.CompareTag("Player"))
+            if (MainManager.player != null && MainManager.BadgeIsEquipped((int)Medal.SpuderCard) && __instance.CompareTag("Player"))
             {
-                MainManager_Ext.CheckSpuderCardEffect(__instance.transform);                
+                MainManager_Ext.CheckSpuderCardEffect(__instance.transform);
             }
         }
 
@@ -63,6 +47,9 @@ namespace BFPlus.Patches
 
             if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.MarsBud))
                 __instance.bleeppitch = 0.7f;
+
+            if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.Frostfly) && __instance.battle)
+                __instance.initialheight = 2;
         }
     }
 
@@ -71,9 +58,9 @@ namespace BFPlus.Patches
     {
         static void Prefix(EntityControl __instance)
         {
-            if(MainManager.map != null && (NewMaps)MainManager.map.mapid == NewMaps.Pit100BaseRoom && PitData.GetCurrentFloor() > 80)
+            if (MainManager.map != null && (NewMaps)MainManager.map.mapid == NewMaps.Pit100BaseRoom && PitData.GetCurrentFloor() > 80)
             {
-                if(__instance.animid == (int)MainManager.AnimIDs.Krawler -1 || __instance.animid == (int)MainManager.AnimIDs.CursedSkull - 1 || __instance.animid == (int)MainManager.AnimIDs.Cape - 1)
+                if (__instance.animid == (int)MainManager.AnimIDs.Krawler - 1 || __instance.animid == (int)MainManager.AnimIDs.CursedSkull - 1 || __instance.animid == (int)MainManager.AnimIDs.Cape - 1)
                 {
                     __instance.forcefire = true;
                 }
@@ -89,17 +76,15 @@ namespace BFPlus.Patches
                 __instance.ForceCOT();
             }
 
-            if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.Frostfly))
+            if (__instance.animid == (int)NewAnimID.Frostfly)
             {
-                var extras = __instance.extras.ToList();
                 var particles = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Particles/Snowflakes")) as GameObject;
                 particles.transform.parent = __instance.spritetransform;
-                particles.transform.localPosition = new Vector3(0f, 1.5f);
-                extras.Add(particles);
-                __instance.extras = extras.ToArray();
+                particles.transform.localPosition = new Vector3(0f, 0.5f);
+                __instance.extras = new GameObject[] { particles };
             }
 
-            if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.Moeruki) || MainManager_Ext.IsNewEnemy(__instance, NewEnemies.FireAnt))
+            if (__instance.animid == (int)NewAnimID.Moeruki || MainManager_Ext.IsNewEnemy(__instance, NewEnemies.FireAnt))
             {
                 var particles = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Particles/Flame")) as GameObject;
                 particles.transform.parent = __instance.spritetransform;
@@ -109,19 +94,27 @@ namespace BFPlus.Patches
 
             if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.SplotchSpider))
             {
+                var legMat = MainManager_Ext.assetBundle.LoadAsset<Material>("SplotchSpiderLegMat");
                 for (int i = 0; i < 8; i++)
                 {
                     Renderer render = __instance.model.GetChild(3 + i).GetComponent<Renderer>();
-                    render.material.color = new Color(0.263f, 0.14f, 0.561f);
+                    render.materials = new Material[] { legMat };
+                }
+
+                Sprite collar = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("splotchSpider")[5];
+                if (BattleControl_Ext.IsLeafBugSplotchSpider(__instance))
+                {
+                    Transform collarObj = __instance.model.GetChild(0).GetChild(0).GetChild(0);
+                    MainManager.NewSpriteObject(new Vector3(-0.2f, -0.2f, 0.04f), collarObj, collar);
                 }
             }
-
-
 
             if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.Belosslow))
             {
                 __instance.rotater.localScale = new Vector3(1.2f, 1.2f, 1.2f);
                 __instance.startscale = __instance.rotater.localScale;
+                if (MainManager.instance != null && MainManager.battle != null)
+                    Entity_Ext.GetEntity_Ext(__instance).baseScale = __instance.startscale;
             }
 
             if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.DynamoSpore))
@@ -131,12 +124,19 @@ namespace BFPlus.Patches
                 __instance.freezeoffset = new Vector3(0, 1.8f);
                 __instance.initialfrezeoffset = __instance.freezeoffset;
                 __instance.startscale = __instance.rotater.localScale;
+                if(MainManager.instance != null && MainManager.battle != null)
+                    Entity_Ext.GetEntity_Ext(__instance).baseScale = __instance.startscale;
                 var light = __instance.gameObject.AddComponent<DynamoSporeLight>();
 
                 if ((int)MainManager.map.mapid == (int)NewMaps.PowerPlantBoss && !MainManager.instance.inevent)
                 {
                     light.mode = DynamoSporeLight.Mode.ChargeUp;
                 }
+            }
+
+            if (__instance.animid == (int)NewAnimID.Moeruki)
+            {
+                __instance.gameObject.AddComponent<MoerukiAnim>();
             }
 
             if (__instance.animid == (int)NewAnimID.IronSuit)
@@ -187,16 +187,16 @@ namespace BFPlus.Patches
                     new Vector3(0.8f, 0f, 0.15f)
                 };
                 __instance.subentity = new EntityControl[10];
-                for (int l = 0; l < __instance.subentity.Length; l++)
+                for (int i = 0; i < __instance.subentity.Length; i++)
                 {
-                    __instance.subentity[l] = EntityControl.CreateNewEntity("worm" + l, (int)NewAnimID.Worm, __instance.transform.position + array[l]);
-                    __instance.subentity[l].transform.parent = __instance.transform;
-                    __instance.subentity[l].hologram = __instance.hologram;
-                    __instance.subentity[l].battle = __instance.battle;
-                    __instance.subentity[l].animstate = 0;
-                    __instance.subentity[l].gameObject.layer = 9;
-                    __instance.subentity[l].destroytype = __instance.destroytype;
-                    __instance.subentity[l].battleid = __instance.battleid;
+                    __instance.subentity[i] = EntityControl.CreateNewEntity("worm" + i, (int)NewAnimID.Worm, __instance.transform.position + array[i]);
+                    __instance.subentity[i].transform.parent = __instance.transform;
+                    __instance.subentity[i].hologram = __instance.hologram;
+                    __instance.subentity[i].battle = __instance.battle;
+                    __instance.subentity[i].animstate = 0;
+                    __instance.subentity[i].gameObject.layer = 9;
+                    __instance.subentity[i].destroytype = __instance.destroytype;
+                    __instance.subentity[i].battleid = __instance.battleid;
                 }
             }
 
@@ -236,7 +236,7 @@ namespace BFPlus.Patches
             if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.LonglegsSpider))
             {
                 __instance.freezesize = new Vector3(3f, 6f, 2.5f);
-                __instance.freezeoffset = new Vector3(0, 3.2f,-0.3f);
+                __instance.freezeoffset = new Vector3(0, 3.2f, -0.3f);
                 __instance.initialfrezeoffset = __instance.freezeoffset;
             }
 
@@ -255,7 +255,7 @@ namespace BFPlus.Patches
                 };
             }
 
-            if (__instance.hologram && (__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon || __instance.animid == (int)NewAnimID.Jester))
+            if (__instance.hologram && (__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon || __instance.animid == (int)NewAnimID.Jester || __instance.animid == (int)NewAnimID.MechaJaw))
             {
                 SpriteRenderer[] spriteInChild = __instance.model.GetComponentsInChildren<SpriteRenderer>();
                 for (int i = 0; i < spriteInChild.Length; i++)
@@ -268,13 +268,13 @@ namespace BFPlus.Patches
 
         static Transform FindEndBone(Transform parent)
         {
-            foreach(Transform t in parent)
+            foreach (Transform t in parent)
             {
-                if(t.name == "Bone.012")
+                if (t.name == "Bone.012")
                 {
                     return t;
                 }
-               Transform child = FindEndBone(t);
+                Transform child = FindEndBone(t);
 
                 if (child != null)
                     return child;
@@ -298,7 +298,7 @@ namespace BFPlus.Patches
             }
         }
 
-        
+
     }
 
     [HarmonyPatch(typeof(EntityControl), "UpdateConditionBubbles")]
@@ -335,7 +335,7 @@ namespace BFPlus.Patches
                 if (__instance.playerentity)
                 {
                     CreateIcon(__instance, BattleControl_Ext.Instance.InVengeance && MainManager.BadgeIsEquipped((int)Medal.Vengeance, data.trueid), list, pos, (int)Medal.Vengeance);
-                    CreateIcon(__instance, MainManager.BadgeIsEquipped((int)Medal.Blightfury) && __instance.animid == 2, list, pos, (int)Medal.Blightfury);
+                    CreateIcon(__instance, MainManager.BadgeIsEquipped((int)Medal.Blightfury) && data.trueid == 2, list, pos, (int)Medal.Blightfury);
                     CreateIcon(__instance, data.hp <= 4 && MainManager.BadgeIsEquipped((int)Medal.Adrenaline, data.trueid) && !entityExt.adrenalineUsed, list, pos, (int)Medal.Adrenaline);
 
                     if (MainManager.HasCondition(MainManager.BattleCondition.Freeze, data) > -1)
@@ -384,15 +384,38 @@ namespace BFPlus.Patches
 
                     CreateIcon(__instance, turns == BattleControl_Ext.Instance.trustFallTurn + 1 && BattleControl_Ext.Instance.trustFallTurn > -1, list, pos, (int)Medal.TrustFall);
 
-                    if (MainManager.HasCondition(MainManager.BattleCondition.Inked, data) > -1)
-                    {
-                        CreateIcon(__instance, MainManager.BadgeIsEquipped((int)Medal.InkBubble, data.trueid), list, pos, (int)Medal.InkBubble);
-                    }
-
                     if (MainManager.HasCondition(MainManager.BattleCondition.Sticky, data) > -1)
                     {
                         CreateIcon(__instance, MainManager.BadgeIsEquipped((int)Medal.ThickSilk, data.trueid), list, pos, (int)Medal.ThickSilk);
                         CreateIcon(__instance, MainManager.BadgeIsEquipped((int)Medal.SpiderBait, data.trueid), list, pos, (int)Medal.SpiderBait);
+                    }
+
+                    int effectStacks = entityExt?.corkscrewRelays ?? 0;
+                    if (effectStacks > 0) // corkscrew relays are saved even after the bug stops being dizzy
+                    {
+                        CreateIcon(__instance, effectStacks > 0, list, pos, (int)Medal.Corkscrew);
+                        __instance.StartCoroutine(MainManager.SetText($"|triui||center||sort,100||color,4||dropshadow,0.05,-0.05|x{effectStacks}", 2, null, false, false, new Vector3(0.15f, -0.3f, -0.01f), Vector3.zero, Vector2.one * 0.8f, list[list.Count - 1], null));
+                    }
+
+                    if (MainManager.HasCondition((MainManager.BattleCondition)NewCondition.Dizzy, data) > -1)
+                    {
+                        effectStacks = MainManager.BadgeHowManyEquipped((int)Medal.Whirliwig, data.trueid);
+                        if (effectStacks > 0)
+                        {
+                            CreateIcon(__instance, true, list, pos, (int)Medal.Whirliwig);
+                            __instance.StartCoroutine(MainManager.SetText($"|triui||center||sort,100||color,4||dropshadow,0.05,-0.05|x{effectStacks}", 2, null, false, false, new Vector3(0, -0.2f, -0.01f), Vector3.zero, Vector2.one, list[list.Count - 1], null));
+                        }
+                    }
+                }
+                else
+                {
+                    int delProjTurns = BattleControl_Ext.Instance.HasDelProjOnEnemy(__instance);
+                    if(delProjTurns > -1)
+                    {
+                        CreateIcon(__instance, true, list, pos, MainManager.guisprites[111]);
+                        __instance.StartCoroutine(MainManager.SetText("|triui||color,1||center||sort,100|" + delProjTurns, 
+                            2, null, false, false, new Vector3(0f, -0.3f, -0.01f), Vector3.zero, Vector2.one,
+                            list[list.Count - 1], null));
                     }
                 }
 
@@ -408,24 +431,44 @@ namespace BFPlus.Patches
                 }
 
                 CreateIcon(__instance, entityExt.permanentInkTriggered, list, pos, (int)Medal.PermanentInk);
-                CreateIcon(__instance, data.charge >0 && data.animid == (int)NewEnemies.LeafbugShaman, list, pos, (int)Medal.ChargeGuard);
+                CreateIcon(__instance, data.charge > 0 && data.animid == (int)NewEnemies.LeafbugShaman, list, pos, (int)Medal.ChargeGuard);
 
+                int shieldTurn = MainManager.HasCondition(MainManager.BattleCondition.Shield, data);
+                if (shieldTurn > -1)
+                {
+                    CreateIcon(__instance, true, list, pos, MainManager.guisprites[(int)NewGui.BubbleShield]);
+                    __instance.StartCoroutine(MainManager.SetText("|triui||center||sort,100||color,4|x" + "|dropshadow,0.05,-0.05|" + shieldTurn, 2, null, false, false, new Vector3(0f, -0.15f, -0.01f), Vector3.zero, Vector2.one * 0.9f, list[list.Count - 1], null));
+                }
+
+                if (data.animid == (int)NewEnemies.JumpAnt)
+                {
+                    CreateIcon(__instance, data.data != null && data.data[3] < 5 && data.hp <= 0, list, pos, (int)MainManager.BadgeTypes.MiracleMatter);
+                    bool isLowHp = MainManager.battle.HPPercent(data) <= 0.2f;
+                    CreateIcon(__instance, isLowHp, list, pos, (int)MainManager.BadgeTypes.AttackUp);
+                    CreateIcon(__instance, isLowHp, list, pos, (int)MainManager.BadgeTypes.DefenseUp);
+
+                }
                 if (list.Count != __instance.statusicons.Length)
                 {
                     __instance.statusicons = list.ToArray();
                 }
+
+                if (BattleControl_Ext.Instance.statusInfo != null && BattleControl_Ext.Instance.statusInfo.holders != null)
+                {
+                    __instance.GetComponent<StatusHolder>()?.RefreshStatusIcons();
+                }
             }
-		}
+        }
     }
 
-    [HarmonyPatch(typeof(EntityControl), "Death", new Type[] { typeof(bool)})]
+    [HarmonyPatch(typeof(EntityControl), "Death", new Type[] { typeof(bool) })]
     public class PatchEntityControlDeath
     {
         static void Prefix(EntityControl __instance, bool activatekill, ref IEnumerator __result)
         {
-            if(__instance.animid == (int)NewAnimID.WormSwarm)
+            if (__instance.animid == (int)NewAnimID.WormSwarm)
             {
-                foreach(var entity in __instance.subentity)
+                foreach (var entity in __instance.subentity)
                     entity.deathcoroutine = entity.StartCoroutine(entity.Death(true));
             }
         }
@@ -448,29 +491,35 @@ namespace BFPlus.Patches
                 }
             }
 
-            if (!MainManager.instance.flags[616])   
+            if (!MainManager.instance.flags[616] && !(__instance.playerentity && MainManager.instance.flags[614] && MainManager.BadgeIsEquipped(11)))
             {
-                if (!__instance.isplayer && !__instance.mainparty)
+                MainManager.AnimIDs[] newAnims = new MainManager.AnimIDs[] {
+                    MainManager.AnimIDs.Bee,MainManager.AnimIDs.Jayde, MainManager.AnimIDs.Patton,
+                    MainManager.AnimIDs.TeaMoth, MainManager.AnimIDs.DragonflyLady, MainManager.AnimIDs.WaspGeneral, MainManager.AnimIDs.WaspQueen,
+                    MainManager.AnimIDs.Beetle, MainManager.AnimIDs.Moth, MainManager.AnimIDs.MessengerAnt, MainManager.AnimIDs.ShielderAnt,
+                    MainManager.AnimIDs.LadybugKnight, MainManager.AnimIDs.Strider
+                };
+
+                foreach (var newAnim in newAnims)
                 {
-                    MainManager_Ext.CheckEnemyVariantAnimator(__instance);
-
-                    MainManager.AnimIDs[] newAnims = new MainManager.AnimIDs[] { MainManager.AnimIDs.Jayde, MainManager.AnimIDs.Patton, 
-                        MainManager.AnimIDs.TeaMoth, MainManager.AnimIDs.DragonflyLady, MainManager.AnimIDs.WaspGeneral, MainManager.AnimIDs.WaspQueen };
-
-                    foreach(var newAnim in newAnims)
-                    {
-                        if (__instance.animid == (int)newAnim - 1)
-                            __instance.anim.runtimeAnimatorController = MainManager_Ext.assetBundle.LoadAsset<RuntimeAnimatorController>(newAnim.ToString());
-                    }
+                    if (__instance.animid == (int)newAnim - 1)
+                        __instance.anim.runtimeAnimatorController = MainManager_Ext.assetBundle.LoadAsset<RuntimeAnimatorController>(newAnim.ToString());
                 }
-                else
+
+                if (__instance.isplayer || __instance.mainparty)
                 {
                     if (MainManager.BadgeIsEquipped((int)Medal.Switcheroo) && !MainManager.instance.flags[916])
                     {
                         __instance.anim.runtimeAnimatorController = MainManager_Ext.Instance.GetSwitcherooAnim(__instance.animid);
                     }
                 }
+                else
+                {
+                    MainManager_Ext.CheckEnemyVariantAnimator(__instance);
+                }
             }
+
+            __instance.SetAnim("", true);
         }
     }
 
@@ -479,19 +528,30 @@ namespace BFPlus.Patches
     {
         static void Prefix(EntityControl __instance)
         {
-            if (__instance.animid == (int)MainManager.AnimIDs.Mushroom - 1 && MainManager_Ext.IsNewEnemy(__instance, NewEnemies.BatteryShroom))
+            bool isVoltShroom = __instance.animid == (int)MainManager.AnimIDs.Mushroom - 1 && MainManager_Ext.IsNewEnemy(__instance, NewEnemies.BatteryShroom);
+            if (isVoltShroom || (__instance.animid == (int)NewAnimID.Caveling && __instance.animstate <= 1))
             {
                 if (__instance.height > 0.1f && (__instance.extras == null || __instance.extras.Length == 0 || __instance.extras[0] == null))
                 {
-                    Sprite copterSprite = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("BatteryShroom").Where(s => s.name == "BatteryShroom_20").FirstOrDefault();
+                    Sprite copterSprite;
+                    if (__instance.animid == (int)NewAnimID.Caveling)
+                    {
+                        copterSprite = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("Caveling")[18];
+
+                    }
+                    else
+                    {
+                        copterSprite = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("BatteryShroom").Where(s => s.name == "BatteryShroom_20").FirstOrDefault();
+                    }
+
                     __instance.extras = new GameObject[]
                     {
-                        MainManager.NewSpriteObject("copter", new Vector3(0f, 0f, 0f), new Vector3(85f, 0f, 0f), __instance.spritetransform, copterSprite, MainManager.spritemat).gameObject
+                        MainManager.NewSpriteObject("copter", new Vector3(0f, isVoltShroom ?0 : 1.45f, 0f), new Vector3(85f, 0f, 0f), __instance.spritetransform, copterSprite, MainManager.spritemat).gameObject
                     };
-                    __instance.spinextra = new Vector3[] { new Vector3(0f, 0f, 15f) };
+
+                    __instance.spinextra = new Vector3[] { new Vector3(0f, 0f, isVoltShroom ? 15f : 20) };
 
                     __instance.extras[0].transform.localEulerAngles = new Vector3(85f, 25f, 25f);
-                    __instance.extras[0].transform.localPosition = Vector3.zero;
                     __instance.extras[0].transform.localScale = Vector3.one;
                 }
 
@@ -506,24 +566,26 @@ namespace BFPlus.Patches
                     __instance.startbf = __instance.bobrange;
                 }
 
-                if(__instance.animstate >= 103)
+                if (isVoltShroom)
                 {
-                    __instance.bobrange = 0;
-                    __instance.startbf = __instance.bobrange;
-                    __instance.bobspeed = 0;
-                    __instance.startbs = __instance.bobspeed;
-                }
-
-                if (__instance.extras != null && __instance.extras.Length > 0 && __instance.extras[0] != null)
-                {
-                    if(__instance.anim.GetCurrentAnimatorClipInfo(0).Length > 0)
+                    if (__instance.animstate >= 103)
                     {
-                        string animName = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-                        __instance.extras[0].gameObject.SetActive((animName.Contains('f') || __instance.animstate == 100 || __instance.animstate == 101) && __instance.animstate != (int)MainManager.Animations.Hurt && __instance.animstate != (int)MainManager.Animations.HurtFallen);
-
+                        __instance.bobrange = 0;
+                        __instance.startbf = __instance.bobrange;
+                        __instance.bobspeed = 0;
+                        __instance.startbs = __instance.bobspeed;
                     }
 
-                    __instance.extras[0].transform.localEulerAngles += __instance.spinextra[0] * MainManager.framestep;
+                    if (__instance.extras != null && __instance.extras.Length > 0 && __instance.extras[0] != null)
+                    {
+                        if (__instance.anim.GetCurrentAnimatorClipInfo(0).Length > 0)
+                        {
+                            string animName = __instance.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+                            __instance.extras[0].gameObject.SetActive((animName.Contains('f') || __instance.animstate == 100 || __instance.animstate == 101) && __instance.animstate != (int)MainManager.Animations.Hurt && __instance.animstate != (int)MainManager.Animations.HurtFallen);
+
+                        }
+                        __instance.extras[0].transform.localEulerAngles += __instance.spinextra[0] * MainManager.framestep;
+                    }
                 }
             }
         }
@@ -559,33 +621,39 @@ namespace BFPlus.Patches
             }
 
 
-            if(__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon)
+            if (__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon)
             {
-                if (__instance.extras != null && __instance.extras.Length > 0 && __instance.extras[0] != null && __instance.extras[1]!=null)
+                if (__instance.extras != null && __instance.extras.Length > 0 && __instance.extras[0] != null && __instance.extras[1] != null)
                 {
                     __instance.extras[1].transform.position = __instance.extras[0].transform.position + __instance.spinextra[0];
                 }
             }
-   
+
         }
     }
 
-    //Create Resistance icon under hp bar
     [HarmonyPatch(typeof(EntityControl), "Jump", new Type[] { })]
     public class PatchEntityControlJump
     {
         static void Postfix(EntityControl __instance)
         {
-            if (__instance.animid == (int)NewAnimID.Jester || __instance.animid == (int)NewAnimID.FirePopper)
+            switch (__instance.animid)
             {
-                __instance.PlaySound("Boing1",1f,1.2f);
+                case (int)NewAnimID.Jester:
+                case (int)NewAnimID.FirePopper:
+                    __instance.PlaySound("Boing1", 1f, 1.2f);
+                    break;
+
+                case (int)NewAnimID.MechaJaw:
+                    __instance.PlaySound("AhoneynationHopJump", 1f, 1.2f);
+                    break;
             }
         }
 
     }
 
 
-    //Create Resistance icon under hp bar
+
     [HarmonyPatch(typeof(EntityControl), "UpdateSpriteMat")]
     public class PatchEntityControlUpdateSpriteMat
     {
@@ -605,7 +673,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(EntityControl __instance)
         {
-            Entity_Ext.GetEntity_Ext(__instance).CreateResIcons();            
+            Entity_Ext.GetEntity_Ext(__instance).CreateResIcons();
         }
     }
 
@@ -614,14 +682,18 @@ namespace BFPlus.Patches
     {
         static void Postfix(EntityControl __instance)
         {
-            if(MainManager_Ext.IsNewEnemy(__instance, NewEnemies.SplotchSpider))
+            List<MainManager.AnimIDs> changedAnimator = new List<MainManager.AnimIDs>{ MainManager.AnimIDs.ChompyChan, MainManager.AnimIDs.Strider, MainManager.AnimIDs.LongLegs, MainManager.AnimIDs.Spuder };
+            
+            if(changedAnimator.Contains((MainManager.AnimIDs)(__instance.animid +1)))
+                __instance.anim.runtimeAnimatorController = MainManager_Ext.assetBundle.LoadAsset<RuntimeAnimatorController>(((MainManager.AnimIDs)__instance.animid+1).ToString());
+
+            if (MainManager_Ext.IsNewEnemy(__instance, NewEnemies.SplotchSpider))
             {
                 __instance.anim.runtimeAnimatorController = MainManager_Ext.assetBundle.LoadAsset<RuntimeAnimatorController>(NewEnemies.SplotchSpider.ToString());
             }
 
             if (__instance.animid == (int)MainManager.AnimIDs.LongLegs - 1)
             {
-                __instance.anim.runtimeAnimatorController = MainManager_Ext.assetBundle.LoadAsset<RuntimeAnimatorController>(MainManager.AnimIDs.LongLegs.ToString());
                 __instance.model.transform.localPosition = new Vector3(0, 4.7f, 0);
             }
 
@@ -631,7 +703,7 @@ namespace BFPlus.Patches
                     renderer.material = MainManager.spritemat;
 
 
-                if(__instance.animid == (int)NewAnimID.Jester)
+                if (__instance.animid == (int)NewAnimID.Jester)
                 {
                     foreach (var renderer in __instance.model.GetComponentsInChildren<MeshRenderer>())
                     {
@@ -664,32 +736,28 @@ namespace BFPlus.Patches
                 {
                     GameObject bodySprings = __instance.model.transform.GetChild(0).gameObject;
 
-                    MainManager_Ext.AddJesterComponent(bodySprings.transform, 4, Vector3.zero, __instance.model.transform,false);
+                    MainManager_Ext.AddJesterComponent(bodySprings.transform, 4, Vector3.zero, __instance.model.transform, false);
                 }
             }
 
-            if(__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon)
+            if (__instance.animid == (int)NewAnimID.Mars || __instance.animid == (int)NewAnimID.MarsSummon)
             {
                 foreach (var renderer in __instance.model.GetComponentsInChildren<SpriteRenderer>())
                     renderer.material = MainManager.spritemat;
-
-                /*foreach (var renderer in __instance.model.GetComponentsInChildren<SkinnedMeshRenderer>())
-                    renderer.material.shader = MainManager.spritemat.shader;*/
-
-
-                if (__instance.animid == (int)NewAnimID.Mars)
-                {
-                    Transform pot = __instance.model.transform.Find("MarsPot");
-
-                    //vines
-                    //pot.GetChild(0).GetComponent<MeshRenderer>().material.shader = MainManager.spritemat.shader;
-                }
 
                 if (__instance.animid == (int)NewAnimID.MarsSummon)
                 {
                     Transform dirt = __instance.model.transform.Find("Dirt");
                     dirt.GetComponent<SpriteRenderer>().sprite = Resources.LoadAll<Sprite>("Sprites/Entities/pitcher")[16];
                 }
+            }
+
+            if (__instance.animid == (int)NewAnimID.MechaJaw)
+            {
+                foreach (var renderer in __instance.model.GetComponentsInChildren<SpriteRenderer>())
+                    renderer.material = MainManager.spritemat;
+
+                __instance.gameObject.AddComponent<MechaJawComp>();
             }
         }
 
@@ -706,7 +774,7 @@ namespace BFPlus.Patches
                 __instance.dialoguebleepid = 8;
             }
 
-            if (__instance.animid == (int)MainManager.AnimIDs.WaspBomber-1)
+            if (__instance.animid == (int)MainManager.AnimIDs.WaspBomber - 1)
             {
                 __instance.bleeppitch = 1f;
                 __instance.dialoguebleepid = 5;
@@ -734,6 +802,36 @@ namespace BFPlus.Patches
             {
                 __instance.icecube = null; // make sure to set icecube to null after it being destroyed,
                                            // fix annoying stuff with flash freeze
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(EntityControl), "UpdateAnimSpecific")]
+    public class PatchEntityControlUpdateAnimSpecific
+    {
+        static void Postfix(EntityControl __instance)
+        {
+            if (!__instance.item)
+            {
+                if (__instance.animid == (int)NewAnimID.Caveling)
+                {
+                    if (__instance.animstate == 11 && __instance.height > 0.1f && __instance.spritetransform.childCount > 0)
+                    {
+                        MainManager.instance.StartCoroutine(MainManager.LerpObject(__instance.spritetransform.GetChild(0), __instance.transform.position + Vector3.up * 10f, 0.01f, true));
+                        __instance.spritetransform.GetChild(0).parent = null;
+                    }
+                }
+
+                if(__instance.animid+1 == (int)MainManager.AnimIDs.Moth && __instance.animstate == 126)
+                {
+                    __instance.animspecific = new GameObject[] 
+                    { 
+                        UnityEngine.Object.Instantiate(Resources.Load("Prefabs/AnimSpecific/mothbattlesphere")) as GameObject 
+                    };
+                    __instance.animspecific[0].transform.parent = __instance.spritetransform;
+                    __instance.animspecific[0].transform.localPosition = Vector3.zero;
+                    __instance.animspecific[0].transform.localScale = Vector3.one;
+                }
             }
         }
     }

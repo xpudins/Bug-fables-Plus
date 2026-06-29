@@ -3,13 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BFPlus.Patches.StartMenuTranspilers
 {
@@ -19,7 +12,7 @@ namespace BFPlus.Patches.StartMenuTranspilers
         {
             priority = 121;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdloc2());
             cursor.GotoPrev(MoveType.After, i => i.MatchLdarg0());
@@ -34,7 +27,7 @@ namespace BFPlus.Patches.StartMenuTranspilers
         static AccessTools.FieldRef<StartMenu, float[]> entitycdRef = AccessTools.FieldRefAccess<StartMenu, float[]>("entitycd");
         static void CheckNewEntityBehavior(StartMenu startmenu, int index)
         {
-            if(MainManager_Ext.backgroundData != null)
+            if (MainManager_Ext.backgroundData != null)
             {
                 EntityControl[] entities = entitiesRef(startmenu);
                 switch ((MainManager.AnimIDs)entities[index].animid + 1)
@@ -45,7 +38,7 @@ namespace BFPlus.Patches.StartMenuTranspilers
                             entities[index].animstate = 100;
                         }
                         break;
- 
+
                     case MainManager.AnimIDs.Kina:
                         entities[index].talking = true;
                         break;

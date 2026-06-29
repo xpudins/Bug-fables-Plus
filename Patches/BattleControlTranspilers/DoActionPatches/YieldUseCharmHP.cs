@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
 {
@@ -19,10 +14,10 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
             priority = 150794;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
-                i=>i.MatchLdcI4(3),
+                i => i.MatchLdcI4(3),
                 i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "UseCharm"))
             );
             cursor.Remove();
@@ -45,7 +40,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
             priority = 62804;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After,
                 i => i.MatchLdcI4(0),

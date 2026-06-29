@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -21,9 +16,9 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 74;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdsfld(out _), i=>i.MatchLdfld(out _), i=>i.MatchLdcI4(11), i=>i.MatchLdelemI4(), i=>i.MatchLdcI4(3));
+            cursor.GotoNext(i => i.MatchLdsfld(out _), i => i.MatchLdfld(out _), i => i.MatchLdcI4(11), i => i.MatchLdelemI4(), i => i.MatchLdcI4(3));
             cursor.Next.OpCode = OpCodes.Nop;
             cursor.GotoNext(i => i.MatchLdfld(out _));
 
@@ -38,7 +33,7 @@ namespace BFPlus.Patches.BattleControlTranspilers
 
         static bool CheckStylishTutorial()
         {
-            if(MainManager.battle.turns ==2 && !MainManager.instance.flags[963])
+            if (MainManager.battle.turns == 2 && !MainManager.instance.flags[963])
             {
                 MainManager.battle.StartCoroutine(MainManager.battle.EventDialogue((int)NewEventDialogue.StylishTutorial));
                 return true;

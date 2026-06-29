@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -23,11 +18,11 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 178555;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdfld(AccessTools.Field(typeof(NPCControl), "mapid")));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchIslandName), "CheckIslandName"));
-            
+
         }
 
         static int CheckIslandName(int mapid)
@@ -49,12 +44,12 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 178825;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
-                i=>i.MatchSwitch(out _),
-                i=>i.MatchBr(out _),
-                i=>i.MatchLdsfld(AccessTools.Field(typeof(MainManager),"player"))
+                i => i.MatchSwitch(out _),
+                i => i.MatchBr(out _),
+                i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "player"))
                 );
 
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchNewIslandMap), "CheckIslandMap"));
@@ -80,13 +75,13 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 179210;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdloc(out _), i => i.MatchLdcI4(54));
 
             var originalMapRef = cursor.Next.Operand;
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdstr("Prefabs/Objects/Submarine"));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdstr("Prefabs/Objects/Submarine"));
 
             cursor.Prev.OpCode = OpCodes.Nop;
             cursor.Emit(OpCodes.Ldloc_S, originalMapRef);

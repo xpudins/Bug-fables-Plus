@@ -1,52 +1,40 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static BattleControl;
-using static HarmonyLib.Code;
+using static BFPlus.Extensions.BattleControl_Ext;
 using static MainManager;
 using static UnityEngine.ParticleSystem;
-using static BFPlus.Extensions.BattleControl_Ext;
 
 namespace BFPlus.Extensions.EnemyAI
 {
-//    Attacks :
-//Shield Boomerang(All Party)
-//TK will spin around before chucking his shield at Team Snakemouth, hitting the entire party twice, once on the way out, once on the way back, and then catch his shield.This attack will deal 2/3 damage per hit.
+    //    Attacks :
+    //Shield Boomerang(All Party)
+    //TK will spin around before chucking his shield at Team Snakemouth, hitting the entire party twice, once on the way out, once on the way back, and then catch his shield.This attack will deal 2/3 damage per hit.
 
-//    Shield Surf (All Party)
-//TK will walk up to Team Snakemouth and bounce on each of them once dealing 4/5 damage per bounce.This is very similar to the Dynamo Spore's Bounce attack.
+    //    Shield Surf (All Party)
+    //TK will walk up to Team Snakemouth and bounce on each of them once dealing 4/5 damage per bounce.This is very similar to the Dynamo Spore's Bounce attack.
 
-//Grab n' Slam (Single target)
-//TK will walk up to a single target and grab the target with both arms dealing 2/2 damage with the grab. After grabbing onto the targeted bug, TK will leap into the air before slamming down into the ground with his foe held beneath him to deal 8/10 damage
+    //Grab n' Slam (Single target)
+    //TK will walk up to a single target and grab the target with both arms dealing 2/2 damage with the grab. After grabbing onto the targeted bug, TK will leap into the air before slamming down into the ground with his foe held beneath him to deal 8/10 damage
 
-//Taunt (Single target)
-//    Just a single target enemy Taunt.Like Zazp's and Tanjerin's. (Does not consume a turn)
+    //Taunt (Single target)
+    //    Just a single target enemy Taunt.Like Zazp's and Tanjerin's. (Does not consume a turn)
 
 
-//The Termite Knight will also have acess to variety of potions.If he has more than 1 action, he will always spend his first first action to use a normal attack, and his second action to use a potion. if he has a third action he can eiter do Attack, Attack, Potion or Attack, Potion, Potion.He can never use an attack after having used a potion on that same turn (ideally).
+    //The Termite Knight will also have acess to variety of potions.If he has more than 1 action, he will always spend his first first action to use a normal attack, and his second action to use a potion. if he has a third action he can eiter do Attack, Attack, Potion or Attack, Potion, Potion.He can never use an attack after having used a potion on that same turn (ideally).
 
-//Each of these potions (aside from Super HP) have 3 uses:
-//Super HP Potion: A full 99 HP heal(scripted event/1 time use.)
-//Super TP Potion:  Instantly gain +3 charge.
-//    MP Potion:  Gains an extra turn both immediately AND for next turn
-//ATK potion: +1 ATK for 3 turns
-//    DEF Potion: +1 DEF for 3 turns
-//    Mite Knight Potion: A potion that he throws at a single member of Team Snakemouth.It deals 4/5 damage, but also heals the targeted bug for 1 HP (in reference to it actually being a healing potion for 1 heart in the arcade game)
+    //Each of these potions (aside from Super HP) have 3 uses:
+    //Super HP Potion: A full 99 HP heal(scripted event/1 time use.)
+    //Super TP Potion:  Instantly gain +3 charge.
+    //    MP Potion:  Gains an extra turn both immediately AND for next turn
+    //ATK potion: +1 ATK for 3 turns
+    //    DEF Potion: +1 DEF for 3 turns
+    //    Mite Knight Potion: A potion that he throws at a single member of Team Snakemouth.It deals 4/5 damage, but also heals the targeted bug for 1 HP (in reference to it actually being a healing potion for 1 heart in the arcade game)
 
-//In the middle of the battle after hitting 10 HP(damage cap) he'll use his Super HP potion to heal back up to full HP, AND He'll use a Mite Knight Key to give himself permanent hustle status for the second half of the fight.
+    //In the middle of the battle after hitting 10 HP(damage cap) he'll use his Super HP potion to heal back up to full HP, AND He'll use a Mite Knight Key to give himself permanent hustle status for the second half of the fight.
 
-//TK will also have the "stance" mechanic from Asthotheles or the Numbnails, where he can sometimes raise his shield to gain +2 defense.Hitting him with a flipping attack will break his stance.
+    //TK will also have the "stance" mechanic from Asthotheles or the Numbnails, where he can sometimes raise his shield to gain +2 defense.Hitting him with a flipping attack will break his stance.
     public class TermiteKnightAI : AI
     {
         enum Attacks
@@ -83,7 +71,7 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 battle.enemydata[actionid].data = new int[5];
             }
-    
+
             if (battle.enemydata[actionid].hp <= 10 && battle.enemydata[actionid].data[1] == 0)
             {
                 MainManager.SetCamera(new Vector3(entity.transform.position.x, entity.sprite.transform.localPosition.y + 0.25f, 2.5f));
@@ -118,7 +106,7 @@ namespace BFPlus.Extensions.EnemyAI
             {
                 battle.enemydata[actionid].data[i]--;
             }
-           
+
             List<Attacks> attacks = new List<Attacks>() { Attacks.ShieldSurf, Attacks.GrabSlam, Attacks.ShieldBoomerang, Attacks.ShieldBoomerang };
 
             switch (attacks[UnityEngine.Random.Range(0, attacks.Count)])
@@ -138,7 +126,7 @@ namespace BFPlus.Extensions.EnemyAI
             battle.playertargetID = -1;
             yield return EventControl.quartersec;
 
-            if(MainManager.GetAlivePlayerAmmount() >0)
+            if (MainManager.GetAlivePlayerAmmount() > 0)
                 yield return UsePotion(entity, actionid, GetRandomPotion(actionid));
         }
 
@@ -246,7 +234,7 @@ namespace BFPlus.Extensions.EnemyAI
                 itemSprite.color = Color.yellow;
 
             yield return EventControl.sec;
-            if(type != PotionType.MitePotion)
+            if (type != PotionType.MitePotion)
             {
                 UnityEngine.Object.Destroy(itemSprite.gameObject);
             }
@@ -263,16 +251,7 @@ namespace BFPlus.Extensions.EnemyAI
                     battle.enemydata[actionid].data[2] = 4;
                     break;
                 case PotionType.MP:
-                    MainManager.PlaySound("Heal3");
-                    battle.ClearStatus(ref battle.enemydata[actionid]);
-                    MainManager.SetCondition(MainManager.BattleCondition.Sturdy, ref battle.enemydata[actionid], 2);
-                    MainManager.PlayParticle("MagicUp", entity.transform.position);
-                    battle.enemydata[actionid].delayedcondition = null;
-
-                    if (battle.enemydata[actionid].frostbitep != null)
-                    {
-                        UnityEngine.Object.Destroy(battle.enemydata[actionid].frostbitep.gameObject);
-                    }
+                    BattleControl_Ext.Instance.SetSturdy(ref battle.enemydata[actionid], 2, actionid);
                     break;
                 case PotionType.ATK:
                     MainManager.PlaySound("StatUp");
@@ -287,7 +266,7 @@ namespace BFPlus.Extensions.EnemyAI
                     battle.enemydata[actionid].data[3] = 3;
                     break;
                 case PotionType.MitePotion:
-                    battle.dontusecharge=true;
+                    battle.dontusecharge = true;
                     itemSprite.gameObject.SetActive(false);
                     battle.GetSingleTarget();
                     entity.animstate = (int)MainManager.Animations.TossItem;
@@ -404,10 +383,10 @@ namespace BFPlus.Extensions.EnemyAI
             entity.trail = true;
             entity.animstate = (int)MainManager.Animations.Hurt;
             MainManager.PlaySound("Jump", -1, 0.85f, 1f);
-            MainManager.SetCamera(entity.transform,entity.transform.position + Vector3.up * 3, 0.02f, new Vector3(0f, 2.3f, -6f));
+            MainManager.SetCamera(entity.transform, entity.transform.position + Vector3.up * 3, 0.02f, new Vector3(0f, 2.3f, -6f));
 
             targetEntity.transform.localPosition = new Vector3(-0.5f, 1f, -0.1f);
-            yield return LerpPosition(15, entity.transform.position, entity.transform.position + Vector3.up*5, entity.transform);
+            yield return LerpPosition(15, entity.transform.position, entity.transform.position + Vector3.up * 5, entity.transform);
             targetEntity.transform.localPosition = new Vector3(0.6f, -0.5f, -0.1f);
             targetEntity.transform.localEulerAngles = new Vector3(0, 0, 90);
             entity.animstate = 107;
@@ -604,7 +583,7 @@ namespace BFPlus.Extensions.EnemyAI
             AudioSource sound = MainManager.PlaySound("Toss2", 3, 0.8f, 1f, true);
             Vector3 startPos = entity.transform.position + new Vector3(-1f, 1.6f, -0.1f);
             Vector3 targetPos = playerTargetEntity.transform.position + Vector3.up;
-            yield return ThrowShield(shield, startPos, targetPos, actionid, 20f,p,entity,sound);
+            yield return ThrowShield(shield, startPos, targetPos, actionid, 20f, p, entity, sound);
 
             entity.LockRigid(true);
             entity.overrideanim = true;
@@ -615,7 +594,7 @@ namespace BFPlus.Extensions.EnemyAI
             Vector3 startPosShield = shield.position;
             startPos = entity.transform.position;
             entity.trail = true;
-            MainManager.PlaySound("Jump",0.85f,1);
+            MainManager.PlaySound("Jump", 0.85f, 1);
             Vector3 shieldOffset = new Vector3(-1.5f, 0f);
             float a = 0;
             float b = 20;
@@ -680,6 +659,7 @@ namespace BFPlus.Extensions.EnemyAI
                 entity.spritetransform.localEulerAngles = new Vector3(0, 0, 0);
                 entity.animstate = 110;
                 MainManager.PlaySound("Ding2");
+                MainManager.StopSound("Toss2");
                 UnityEngine.Object.Destroy(shield.gameObject);
             }
 
@@ -701,6 +681,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.overrridejump = false;
             entity.trail = false;
             entity.animstate = baseState;
+            MainManager.StopSound("Toss2");
         }
 
 
@@ -716,7 +697,7 @@ namespace BFPlus.Extensions.EnemyAI
         IEnumerator ThrowShield(Transform shield, Vector3 startPos, Vector3 targetPos, int actionid, float endTime, MainModule p, EntityControl entity, AudioSource sound)
         {
             entity.spin = Vector3.zero;
-            MainManager.PlaySound("MKKey",0.9f,1);
+            MainManager.PlaySound("MKKey", 0.9f, 1);
             entity.animstate = 100;
             float a = 0f;
             while (a <= endTime)

@@ -1,15 +1,8 @@
 ﻿using BFPlus.Extensions;
 using BFPlus.Patches.DoActionPatches;
-using BFPlus.Patches.DoActionPatches.EnemyPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -23,7 +16,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 191442;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(409));
             cursor.GotoPrev(i => i.MatchLdsfld(out _));
@@ -47,9 +40,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 193057;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(58));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(58));
             cursor.Prev.OpCode = OpCodes.Nop;
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchPrimalAnnounceDialogue), "CheckAnnounceDialogue"));
         }
@@ -71,10 +64,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 195386;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdfld(out _),i => i.MatchLdcI4(52));
-            cursor.GotoPrev(i => i.MatchLdsfld(out _), i=>i.MatchLdsfld(out _));
+            cursor.GotoNext(i => i.MatchLdfld(out _), i => i.MatchLdcI4(52));
+            cursor.GotoPrev(i => i.MatchLdsfld(out _), i => i.MatchLdsfld(out _));
 
             var label = cursor.DefineLabel();
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchMiteKnightQuest), "HasTakenQuest"));

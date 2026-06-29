@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.NPCControlTranspilers
@@ -18,9 +13,9 @@ namespace BFPlus.Patches.NPCControlTranspilers
         {
             priority = 1877;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After,i => i.MatchLdcI4(182),i=>i.MatchBgt(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(182), i => i.MatchBgt(out _));
 
             var localVar = cursor.Next.Operand;
             int cursorIndex = cursor.Index;
@@ -34,7 +29,7 @@ namespace BFPlus.Patches.NPCControlTranspilers
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchShootProjectile), "IsNewProjEnemy"));
             cursor.Emit(OpCodes.Brtrue, jumpTo);
 
-            cursor.GotoNext(MoveType.After, i => i.MatchStloc(out _),i => i.MatchLdloc(out _), i=>i.MatchLdcI4(59),i=>i.MatchBeq(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchStloc(out _), i => i.MatchLdloc(out _), i => i.MatchLdcI4(59), i => i.MatchBeq(out _));
 
             cursorIndex = cursor.Index;
             cursor.GotoNext(i => i.MatchStfld(out _));

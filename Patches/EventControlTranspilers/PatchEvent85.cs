@@ -5,12 +5,6 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.EventControlTranspilers
@@ -26,11 +20,11 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 95176;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdcI4(92), i=>i.MatchBeq(out _));
+            cursor.GotoNext(i => i.MatchLdcI4(92), i => i.MatchBeq(out _));
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdelemRef());
+            cursor.GotoNext(MoveType.After, i => i.MatchLdelemRef());
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "GetNewBossPortrait"));
             Utils.RemoveUntilInst(cursor, i => i.MatchCallvirt(out _));
         }
@@ -45,7 +39,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 96047;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             //Patch new bosses ids
             cursor.GotoNext(i => i.MatchLdstr("Miniboss"));
@@ -87,11 +81,11 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 95038;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(94));
 
-            cursor.GotoNext(MoveType.After,i => i.MatchLdloc(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdloc(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckBossList"));
             cursor.Remove();
         }
@@ -105,7 +99,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 95013;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(AccessTools.Field(typeof(EventControl), "minibosslist")));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckMinibossList"));
@@ -121,12 +115,12 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 97414;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(
                 MoveType.After,
-                i => i.MatchStloc(out _), 
-                i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "battleresult")), 
+                i => i.MatchStloc(out _),
+                i => i.MatchLdsfld(AccessTools.Field(typeof(MainManager), "battleresult")),
                 i => i.MatchBrfalse(out _));
 
             var textRef = cursor.Instrs[cursor.Index - 3].Operand;
@@ -166,7 +160,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 95048;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(163));
             cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(out _));
@@ -182,10 +176,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 95484;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(166));
-            cursor.GotoPrev(i => i.MatchLdcI4(1), i=>i.MatchLdcI4(1));
+            cursor.GotoPrev(i => i.MatchLdcI4(1), i => i.MatchLdcI4(1));
 
             int cursorIndex = cursor.Index;
 
@@ -220,9 +214,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 96701;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i=>i.MatchNewobj(out _),i => i.MatchCall(AccessTools.Method(typeof(MainManager), "SetCamera", new Type[] { typeof(Transform), typeof(Vector3?), typeof(float), typeof(Vector3), typeof(Vector3)})));
+            cursor.GotoNext(MoveType.After, i => i.MatchNewobj(out _), i => i.MatchCall(AccessTools.Method(typeof(MainManager), "SetCamera", new Type[] { typeof(Transform), typeof(Vector3?), typeof(float), typeof(Vector3), typeof(Vector3) })));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "ResetRenderSettings"));
         }
     }
@@ -233,7 +227,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 97569;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(692));
             cursor.GotoPrev(i => i.MatchLdcI4(11));
@@ -247,7 +241,7 @@ namespace BFPlus.Patches.EventControlTranspilers
             cursor.Remove();
 
             cursor.GotoNext(i => i.MatchLdcI4(693));
-            cursor.GotoNext(MoveType.After,i => i.MatchLdsfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(out _));
             cursor.Prev.OpCode = OpCodes.Nop;
 
             cursor.Emit(OpCodes.Ldarg_0);
@@ -274,9 +268,9 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 96984;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(23), i => i.MatchStloc(out _), i=>i.MatchLdloc(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(23), i => i.MatchStloc(out _), i => i.MatchLdloc(out _));
             int cursorIndex = cursor.Index;
 
             cursor.GotoPrev(i => i.MatchLdcI4(91));
@@ -290,9 +284,9 @@ namespace BFPlus.Patches.EventControlTranspilers
             cursor.Emit(OpCodes.Ldloc, idRef);
         }
 
-        static int CheckJournalId(int id,int enemyId)
+        static int CheckJournalId(int id, int enemyId)
         {
-            if(enemyId == (int)NewEnemies.Mars)
+            if (enemyId == (int)NewEnemies.Mars)
             {
                 return (int)NewAchievement.GodofWar;
             }

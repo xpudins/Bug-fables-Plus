@@ -3,14 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
 {
@@ -21,7 +13,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
             priority = 0;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdloc1());
             cursor.Next.OpCode = OpCodes.Nop;
@@ -44,14 +36,16 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
         {
             BattleControl_Ext.Instance.inAiAttack = false;
             var __instance = MainManager.battle;
-            BattleControl_Ext.Instance.entityAttacking = entity;
+            if (actionid != -555)
+                BattleControl_Ext.Instance.entityAttacking = entity;
             BattleControl_Ext.actionID = actionid;
             BattleControl_Ext.Instance.firstHitMulti = false;
             int target = __instance.target;
             bool isPlayer = entity.CompareTag("Player");
             BattleControl.AttackArea itemareaRef = __instance.itemarea;
+            BattleControl_Ext.mashSuperblockThreshold = BattleControl_Ext.mashSuperblockTimer = -1;
 
-            if(!__instance.cancelupdate)
+            if (!__instance.cancelupdate)
                 __instance.action = true;
 
 
@@ -90,7 +84,7 @@ namespace BFPlus.Patches.BattleControlTranspilers.DoActionPatches
                 }
             }
 
-            if (__instance.enemy && actionid >=0 && actionid < __instance.enemydata.Length)
+            if (__instance.enemy && actionid >= 0 && actionid < __instance.enemydata.Length)
             {
                 BattleControl_Ext.Instance.spinelingFlipped = __instance.enemydata[actionid].animid == (int)NewEnemies.Spineling && MainManager.HasCondition(MainManager.BattleCondition.Flipped, __instance.enemydata[actionid]) > -1;
             }

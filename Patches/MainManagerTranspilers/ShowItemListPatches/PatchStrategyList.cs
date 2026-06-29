@@ -3,13 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.ShowItemListPatches
 {
@@ -20,10 +13,10 @@ namespace BFPlus.Patches.ShowItemListPatches
             priority = 70969;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(5));
-            cursor.GotoNext(MoveType.After,i => i.MatchStsfld(out _));
+            cursor.GotoNext(MoveType.After, i => i.MatchStsfld(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "SetStrategyValues"));
         }
     }
@@ -35,21 +28,30 @@ namespace BFPlus.Patches.ShowItemListPatches
             priority = 74697;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchLdcI4(9), i=> i.MatchBneUn(out _));
-            cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _), i=> i.MatchLdloc(out _));
+            cursor.GotoNext(i => i.MatchLdcI4(9), i => i.MatchBneUn(out _));
+            cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _), i => i.MatchLdloc(out _));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "SetStrategyTextValues"));
 
             cursor.GotoNext(MoveType.After, i => i.MatchStloc(out _), i => i.MatchLdloc(out _));
-            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckTrustFallColor"));
-            cursor.Emit(OpCodes.Brtrue, cursor.Body.Instructions[cursor.Index+4].Operand);
-            cursor.Emit(OpCodes.Ldloc, cursor.Body.Instructions[cursor.Index - 3].Operand);
 
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "CheckTrustFallColor"));
+            cursor.Emit(OpCodes.Brtrue, cursor.Body.Instructions[cursor.Index + 4].Operand);
+            cursor.Emit(OpCodes.Ldloc, cursor.Body.Instructions[cursor.Index - 3].Operand);
             //change index of flee to 5
             cursor.GotoNext(i => i.MatchLdcI4(4));
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchStrategyTextValues), "GetFleeIndex"));
             cursor.Remove();
+
+            //Carousel skips red text
+            cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(MainManager), "AllPartyFree")));
+            cursor.Next.OpCode = OpCodes.Nop;
+            ILLabel label = null;
+            cursor.GotoNext(i => i.MatchBrtrue(out label));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), nameof(BattleControl_Ext.CanBypassSwapRestrictions)));
+            cursor.Emit(OpCodes.Brtrue, label);
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager), "AllPartyFree"));
 
             cursor.GotoNext(i => i.MatchLdstr("|icon,189|"));
             cursor.GotoNext(i => i.MatchLdcI4(4));
@@ -70,7 +72,7 @@ namespace BFPlus.Patches.ShowItemListPatches
             priority = 75304;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdcI4(9), i => i.MatchBneUn(out _));
             cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _), i => i.MatchLdsfld(out _));

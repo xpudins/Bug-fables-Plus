@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EntityControlTranspilers
 {
@@ -21,7 +16,7 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 846;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdstr("copter"));
             cursor.GotoNext(i => i.MatchLdsfld(out _));
@@ -39,9 +34,9 @@ namespace BFPlus.Patches.EntityControlTranspilers
         {
             priority = 913;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchCall(out _),i => i.MatchLdcR4(0.75f));
+            cursor.GotoNext(i => i.MatchCall(out _), i => i.MatchLdcR4(0.75f));
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(MainManager_Ext), "GetFloweringCopterScale"));
             Utils.RemoveUntilInst(cursor, i => i.MatchCallvirt(out _));

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.GiantLairPlayroom
 {
@@ -19,11 +14,11 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
             Transform maze = baseObject.Find("Maze");
 
             Transform faders = maze.Find("Fader");
-            foreach(Transform child in faders)
+            foreach (Transform child in faders)
             {
                 Vector3 pivot = new Vector3(0, -5, 8);
                 float maxDistance = 10;
-                if(child.name == "BigWoodChunk (3)")
+                if (child.name == "BigWoodChunk (3)")
                 {
                     maxDistance = 12;
                     pivot = new Vector3(0, -10, 8);
@@ -48,7 +43,7 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
             }
 
             GameObject toyCrane = maze.Find("ToyCrane (1)").GetChild(0).gameObject;
-            ScrewPlatform screwPlat = AddScrewPlatform(toyCrane, new Vector3(0, 350, 0), new int[] { 4,5 }, Vector3.zero, "OmegaMove", ScrewPlatform.Type.Platform, false, true, 30);
+            ScrewPlatform screwPlat = AddScrewPlatform(toyCrane, new Vector3(0, 350, 0), new int[] { 4, 5 }, Vector3.zero, "OmegaMove", ScrewPlatform.Type.Platform, false, true, 30);
             screwPlat.cardinaldir = ScrewPlatform.Cardinal.X;
             screwPlat.platformrotate = true;
             screwPlat.rotatelocal = true;
@@ -57,7 +52,7 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
             GameObject gate = maze.Find("PrisonGateLocal (3)").GetChild(0).gameObject;
             Transform[] gates = { gate.transform.GetChild(3), gate.transform.GetChild(4) };
 
-            foreach(Transform obj in gates)
+            foreach (Transform obj in gates)
             {
                 AddScrewPlatform(obj.gameObject, new Vector3(0, -5, 0), new int[] { 7 }, Vector3.zero, "", ScrewPlatform.Type.Platform, false, true, 30);
             }
@@ -79,7 +74,7 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
                 }
             }
 
-            CheckCraneRotation(926,baseObject);
+            CheckCraneRotation(926, baseObject);
         }
     }
 }

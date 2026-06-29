@@ -1,54 +1,16 @@
 ﻿using HarmonyLib;
-using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using Mono.Cecil.Cil;
-using OpCodes = Mono.Cecil.Cil.OpCodes;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.Utils;
+using System;
+using System.Linq;
+using UnityEngine;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 namespace BFPlus.Extensions
 {
     public static class Utils
     {
-        public static void InsertYieldReturn(this ILGenerator gen, List<CodeInstruction> instructions, int index, List<CodeInstruction> oldInstructions)
-        {
-            var declaringType = ((FieldInfo)instructions[1].operand).DeclaringType;
-
-            var f_state = declaringType.GetField("<>1__state", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            var f_current = declaringType.GetField("<>2__current", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-            var jumpTable = instructions.Find(ins => ins.opcode == System.Reflection.Emit.OpCodes.Switch);
-            var jumpTableLabels = ((Label[])jumpTable.operand).ToList();
-
-            int nextReturnIndex = jumpTableLabels.Count;
-
-            var newLabel = gen.DefineLabel();
-            jumpTableLabels.Add(newLabel);
-            jumpTable.operand = jumpTableLabels.ToArray();
-
-            var newInstructions = new List<CodeInstruction>()
-            {
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Stfld, f_current),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ldarg_0),
-
-                // Save indexInserted of the new label and return
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4, nextReturnIndex),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Stfld, f_state),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_1),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ret),
-
-                // Jump here when the method is called again
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ldarg_0).WithLabels(newLabel),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_M1),
-                new CodeInstruction(System.Reflection.Emit.OpCodes.Stfld, f_state)
-            };
-            instructions.InsertRange(index, newInstructions);
-        }
-
         public static void InsertYieldReturn(ILCursor cursor)
         {
             var declaringType = ((FieldReference)cursor.Body.Instructions[1].Operand).DeclaringType.Resolve();
@@ -82,39 +44,12 @@ namespace BFPlus.Extensions
             cursor.Emit(OpCodes.Stfld, f_state);
         }
 
-        public static int GetILIndex(List<CodeInstruction> instructions, Func<List<CodeInstruction>, int, bool> pattern, int startIndex)
-        {
-            int j = 0;
-            do
-            {
-                j++;
-            } while (!pattern(instructions,j+startIndex));
-            return j;
-        }
-
-        public static void InsertWaitStylish(List<CodeInstruction> newInstructions, List<CodeInstruction> instructionsList, ILGenerator generator, float waitFrames=0f)
-        {
-            var waitStylish = AccessTools.Method(typeof(BattleControl_Ext), "WaitStylish");
-            newInstructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_R4, waitFrames));
-            newInstructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Call, waitStylish));
-            generator.InsertYieldReturn(newInstructions, newInstructions.Count, instructionsList);
-        }
-
-        public static void InsertStartStylishTimer(List<CodeInstruction> instructions, float startFrames, float endFrames, int stylishID =0, bool commandSuccess=true)
-        {
-            var startStylishTimer = AccessTools.Method(typeof(BattleControl_Ext), "StartStylishTimer");
-            instructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_R4, startFrames));
-            instructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_R4, endFrames));
-            instructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4, stylishID));
-            instructions.Add(new CodeInstruction(commandSuccess ? System.Reflection.Emit.OpCodes.Ldc_I4_1 : System.Reflection.Emit.OpCodes.Ldc_I4_0));
-            instructions.Add(new CodeInstruction(System.Reflection.Emit.OpCodes.Call, startStylishTimer));
-        }
-
-        public static void InsertStartStylishTimer(ILCursor cursor, float startFrames, float endFrames, int stylishID = 0, bool commandSuccess = true)
+        public static void InsertStartStylishTimer(ILCursor cursor, float startFrames, float endFrames, int stylishID = 0, float stylishGain = 0.1f, bool commandSuccess = true)
         {
             cursor.Emit(OpCodes.Ldc_R4, startFrames);
             cursor.Emit(OpCodes.Ldc_R4, endFrames);
             cursor.Emit(OpCodes.Ldc_I4, stylishID);
+            cursor.Emit(OpCodes.Ldc_R4, stylishGain);
             cursor.Emit(commandSuccess ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl_Ext), "StartStylishTimer"));
         }
@@ -126,13 +61,31 @@ namespace BFPlus.Extensions
             InsertYieldReturn(cursor);
         }
 
-        public static void RemoveUntilInst(ILCursor cursor, params Func<Instruction,bool>[] predicates)
+        public static void RemoveUntilInst(ILCursor cursor, params Func<Instruction, bool>[] predicates)
         {
             int cursorIndex = cursor.Index;
             cursor.GotoNext(predicates);
             int matchIndex = cursor.Index;
             cursor.Goto(cursorIndex);
             cursor.RemoveRange(matchIndex - cursorIndex);
+        }
+
+        static BattleControl.AttackProperty? GetDizzyProperty()
+        {
+            return (BattleControl.AttackProperty)NewProperty.Dizzy;
+        }
+
+        static BattleControl.AttackProperty? GetInkProperty()
+        {
+            return BattleControl.AttackProperty.Ink;
+        }
+
+        public static Vector2 RotateVector(Vector2 vec, float degAng)
+        {
+            degAng *= -(float)Math.PI / 180f;
+            return new Vector2(
+               vec.x * Mathf.Cos(degAng) - vec.y * Mathf.Sin(degAng),
+               vec.x * Mathf.Sin(degAng) + vec.y * Mathf.Cos(degAng));
         }
     }
 }

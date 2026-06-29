@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.GiantLairPlayroom
 {
@@ -26,12 +21,12 @@ namespace BFPlus.Extensions.Maps.GiantLairPlayroom
             hazard.freezetime = 0;
             hazard.speed = 0.1f;
             hazard.holdspace = -5;
-            
+
             GameObject cranePlat = baseObject.transform.Find("CranePlatform").gameObject;
 
             GameObject toyCrane = baseObject.transform.Find("ToyCrane (1)").GetChild(0).gameObject;
 
-            AddScrewPlatform(cranePlat, new Vector3(0, 12, 0), new int[] { 2,3 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, false, 100);
+            AddScrewPlatform(cranePlat, new Vector3(0, 12, 0), new int[] { 2, 3 }, Vector3.zero, "", ScrewPlatform.Type.Platform, true, false, 100);
 
             ScrewPlatform screwPlat = AddScrewPlatform(toyCrane, new Vector3(0, -63, 0), new int[] { 6 }, Vector3.zero, "OmegaMove", ScrewPlatform.Type.Platform, false, true, 300);
             screwPlat.cardinaldir = ScrewPlatform.Cardinal.X;

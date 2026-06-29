@@ -1,12 +1,7 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BFPlus.Extensions;
-using MonoMod.Cil;
+﻿using BFPlus.Extensions;
+using HarmonyLib;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
 
 namespace BFPlus.Patches.DoActionPatches
 {
@@ -17,7 +12,7 @@ namespace BFPlus.Patches.DoActionPatches
             priority = 51506;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.GotoNext(i => i.MatchLdfld(typeof(MainManager.BattleData).GetField("charge")), i => i.MatchLdcI4(3));
             cursor.GotoNext();

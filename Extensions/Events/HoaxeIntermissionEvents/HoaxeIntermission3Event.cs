@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
@@ -109,7 +105,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
         {
             MainManager.FadeMusic(0.02f);
             MainManager.ChangeMusic("Tension2");
-            EntityControl[] entities = MainManager.GetEntities(new int[] { 14,15,16,17});
+            EntityControl[] entities = MainManager.GetEntities(new int[] { 14, 15, 16, 17 });
             EntityControl hoaxe = MainManager.instance.playerdata[0].entity;
 
             MainManager.SetCamera(null, new Vector3?(new Vector3(3f, 2f, 8f)), 0.025f, MainManager.defaultcamoffset, new Vector3(5f, -20f));
@@ -134,12 +130,12 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.transform.position = new Vector3(-31.54f, 0, 3.13f);
             hoaxe.animstate = 106;
 
-            entities = MainManager.GetEntities(new int[] { 8,9,10,11,12 });
+            entities = MainManager.GetEntities(new int[] { 8, 9, 10, 11, 12 });
 
-            for (int i = 0; i < entities.Length-1; i++) 
+            for (int i = 0; i < entities.Length - 1; i++)
             {
                 entities[i].alwaysactive = true;
-                entities[i].transform.position = new Vector3(-10f+(0.1f*i), 0, 7f + (0.1f * i));
+                entities[i].transform.position = new Vector3(-10f + (0.1f * i), 0, 7f + (0.1f * i));
                 entities[i].gameObject.layer = 9;
             }
 
@@ -147,7 +143,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             entities[4].animstate = (int)MainManager.Animations.Angry;
             entities[4].flip = false;
 
-            MainManager.SetCamera(hoaxe.transform.position,1);
+            MainManager.SetCamera(hoaxe.transform.position, 1);
             MainManager.FadeOut();
             yield return EventControl.sec;
 
@@ -166,7 +162,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             {
                 yield return null;
             }
-            Vector3 targetPos = hoaxe.transform.position + Vector3.up*2f;
+            Vector3 targetPos = hoaxe.transform.position + Vector3.up * 2f;
 
             SpriteRenderer berry = MainManager.NewSpriteObject(new Vector3(-18.81f, 0, 3.13f), MainManager.map.transform, MainManager.itemsprites[0, 6]);
             yield return MainManager.ArcMovement(berry.gameObject, berry.transform.position, targetPos, new Vector3(0, 0, 20), 5, 40, true);
@@ -177,7 +173,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.flip = true;
 
             Sprite broomSprite = MainManager_Ext.assetBundle.LoadAssetWithSubAssets<Sprite>("Hoaxe")[32];
-            SpriteRenderer broom = MainManager.NewSpriteObject(hoaxe.transform.position + new Vector3(0,0,-0.1f), MainManager.map.transform, broomSprite);
+            SpriteRenderer broom = MainManager.NewSpriteObject(hoaxe.transform.position + new Vector3(0, 0, -0.1f), MainManager.map.transform, broomSprite);
             hoaxe.animstate = (int)MainManager.Animations.Surprized;
 
             float a = 0;
@@ -186,7 +182,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             do
             {
                 broom.transform.eulerAngles = new Vector3(0, 0, Mathf.Lerp(0, 90, a / b));
-                broom.transform.position = Vector3.Lerp(startPos, startPos+new Vector3(-1,0.1f,0),a/b);
+                broom.transform.position = Vector3.Lerp(startPos, startPos + new Vector3(-1, 0.1f, 0), a / b);
                 a += MainManager.TieFramerate(1f);
                 yield return null;
             } while (a < b);
@@ -210,7 +206,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             for (int i = 0; i < entities.Length - 1; i++)
             {
-                entities[i].MoveTowards(waspPos[i],2);
+                entities[i].MoveTowards(waspPos[i], 2);
                 yield return null;
             }
             yield return new WaitUntil(() => !entities[3].forcemove);
@@ -231,12 +227,12 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             for (int i = 0; i < entities.Length - 1; i++)
             {
-                entities[i].MoveTowards(waspPos[i],2f);
+                entities[i].MoveTowards(waspPos[i], 2f);
                 yield return null;
                 yield return null;
             }
 
-            while(entities.Any(e => e.forcemove))
+            while (entities.Any(e => e.forcemove))
             {
                 yield return null;
             }
@@ -250,7 +246,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
                 entities[i].FaceTowards(hoaxe.transform.position);
             }
             Coroutine[] attacks = new Coroutine[entities.Length - 1];
-            for (int i = 0; i < entities.Length - 1; i++) 
+            for (int i = 0; i < entities.Length - 1; i++)
             {
                 switch (entities[i].animid)
                 {
@@ -259,7 +255,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
                         break;
 
                     case (int)MainManager.AnimIDs.WaspScout - 1:
-                        attacks[i] = instance.StartCoroutine(DoWaspScoutAttack(entities[i],hoaxe));
+                        attacks[i] = instance.StartCoroutine(DoWaspScoutAttack(entities[i], hoaxe));
                         break;
 
                     case (int)MainManager.AnimIDs.WaspDriller - 1:
@@ -279,11 +275,11 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             for (int i = 0; i < attacks.Length; i++)
             {
-                if(attacks[i] != null)
+                if (attacks[i] != null)
                     instance.StopCoroutine(attacks[i]);
             }
             UnityEngine.Object.Destroy(tiredPart);
-            if(shakeSprite != null)
+            if (shakeSprite != null)
                 hoaxe.StopCoroutine(shakeSprite);
 
             MainManager.LoadMap(169);
@@ -293,9 +289,9 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.animstate = 103;
 
             MainManager.SetCamera(hoaxe.transform, null, 1);
-            for(int i=0; i< MainManager.map.entities.Length; i++)
+            for (int i = 0; i < MainManager.map.entities.Length; i++)
             {
-                if(MainManager.map.entities[i] != null)
+                if (MainManager.map.entities[i] != null)
                     MainManager.map.entities[i].gameObject.SetActive(false);
             }
             yield return EventControl.sec;
@@ -304,7 +300,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             hoaxe.LockRigid(true);
             hoaxe.flip = false;
             hoaxe.backsprite = false;
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 hoaxe.animstate = 103;
                 yield return BattleControl_Ext.LerpPosition(25, hoaxe.transform.position, new Vector3(0.2f, 0, -7 + i * 2), hoaxe.transform);
@@ -325,10 +321,10 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             }
 
             MainManager.PlaySound("Flame", 1.1f, 1);
-            GameObject firePart = MainManager.PlayParticle("Flame", hoaxe.transform.position + new Vector3(-1.2f,0.2f,-0.1f),-1);
+            GameObject firePart = MainManager.PlayParticle("Flame", hoaxe.transform.position + new Vector3(-1.2f, 0.2f, -0.1f), -1);
             firePart.transform.localScale = Vector3.one * 0.5f;
             firePart.transform.GetChild(0).gameObject.SetActive(false);
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 firePart.gameObject.SetActive(!firePart.activeSelf);
                 yield return EventControl.halfsec;
@@ -344,7 +340,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             MainManager.player.canpause = true;
 
             MainManager.instance.flags[929] = true;
-            yield return EndIntermissionPostgame(instance, 99,(int)MainManager.Maps.HoneyFactoryCore);
+            yield return EndIntermissionPostgame(instance, 99, (int)MainManager.Maps.HoneyFactoryCore);
         }
 
         IEnumerator DoWaspTrooperAttack(EntityControl trooper)

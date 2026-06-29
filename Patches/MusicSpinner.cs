@@ -1,10 +1,5 @@
 ﻿using BFPlus.Extensions;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches
@@ -14,7 +9,7 @@ namespace BFPlus.Patches
     {
         static void Postfix(MusicSpinner __instance, Collider other)
         {
-            if((int)MainManager.map.mapid == (int)NewMaps.GiantLairPlayroomBoss)
+            if ((int)MainManager.map.mapid == (int)NewMaps.GiantLairPlayroomBoss)
             {
                 if (__instance.spin + __instance.spinhit > __instance.spinlimit)
                 {

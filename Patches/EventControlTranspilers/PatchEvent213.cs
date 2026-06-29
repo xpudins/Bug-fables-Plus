@@ -1,11 +1,5 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -16,10 +10,10 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 252952;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i=>i.MatchLdstr("Moth"));
-            cursor.Next.Operand = "KabbuTheme";     
+            cursor.GotoNext(i => i.MatchLdstr("Moth"));
+            cursor.Next.Operand = "KabbuTheme";
         }
     }
 }

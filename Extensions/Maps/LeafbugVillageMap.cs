@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Maps
@@ -31,9 +27,9 @@ namespace BFPlus.Extensions.Maps
 
             var inkSplatters = baseObject.Find("InkSplatters");
 
-            foreach(Transform splatter in inkSplatters)
+            foreach (Transform splatter in inkSplatters)
             {
-                splatter.GetComponent<SpriteRenderer>().material.color = new Color(0.19f,0,0.51f);
+                splatter.GetComponent<SpriteRenderer>().material.color = new Color(0.19f, 0, 0.51f);
             }
 
 
@@ -44,16 +40,16 @@ namespace BFPlus.Extensions.Maps
             fallHazard.gameObject.AddComponent<Hazards>().type = Hazards.Type.Hole;
             CheckDiscovery(NewDiscoveries.LeafbugVillage);
 
-            GameObject[] hideInsides = new GameObject[] { baseObject.Find("dragonfly_39 (3)").gameObject, 
+            GameObject[] hideInsides = new GameObject[] { baseObject.Find("dragonfly_39 (3)").gameObject,
                 baseObject.Find("dragonfly_39 (4)").gameObject,baseObject.Find("Chest (2)").gameObject };
 
-            foreach (GameObject go in hideInsides) 
+            foreach (GameObject go in hideInsides)
             {
                 InsideSorter sorter = go.AddComponent<InsideSorter>();
                 sorter.insideid = 0;
                 sorter.child = go;
             }
-        
+
         }
 
         public override GameObject LoadBattleMap()
@@ -61,7 +57,7 @@ namespace BFPlus.Extensions.Maps
             GameObject battleMap = UnityEngine.Object.Instantiate(MainManager_Ext.mapPrefabs.LoadAsset(NewMaps.LeafbugVillage.ToString())) as GameObject;
             AddCorrectMaterials(battleMap.transform);
             battleMap.transform.Find("Base").Find("BridgeRopes").gameObject.SetActive(false);
-            battleMap.transform.position = new Vector3(0,3.85f, 15);
+            battleMap.transform.position = new Vector3(0, 3.85f, 15);
             return battleMap;
         }
     }

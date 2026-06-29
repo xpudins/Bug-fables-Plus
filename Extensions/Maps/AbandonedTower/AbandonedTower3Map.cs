@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static UnityEngine.Experimental.UIElements.EventDispatcher;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.AbandonedTower
 {
@@ -36,7 +30,7 @@ namespace BFPlus.Extensions.Maps.AbandonedTower
             AddPipesComponents(baseObject.transform);
 
 
-            foreach(Transform pipe in baseObject.Find("DownPipes"))
+            foreach (Transform pipe in baseObject.Find("DownPipes"))
             {
                 pipe.gameObject.GetComponent<SpriteBounce>().requiresentity = 13;
             }

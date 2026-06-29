@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 
 namespace BFPlus.Extensions.Maps.PitMaps
@@ -23,11 +18,11 @@ namespace BFPlus.Extensions.Maps.PitMaps
             map.nobattlemusic = true;
 
             map.fogcolor = map.globallight;
-            map.fogend =40f;
+            map.fogend = 40f;
             map.battleleafcolor = map.globallight;
 
             AddCorrectMaterials(map.transform);
-            
+
             GameObject particleGo = new GameObject("spores");
             particleGo.transform.position = new Vector3(0f, 1f, 6.5f);
 

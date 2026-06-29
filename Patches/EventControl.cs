@@ -1,14 +1,10 @@
-﻿using HarmonyLib;
+﻿using BFPlus.Extensions;
+using BFPlus.Extensions.Events;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
-using BFPlus.Extensions;
-using BFPlus.Extensions.Events;
 
 namespace BFPlus.Patches
 {
@@ -30,21 +26,43 @@ namespace BFPlus.Patches
     {
         static void Postfix(EventControl __instance, int id, NPCControl caller)
         {
-            if(id == 82)
+            if (id == 82)
             {
                 MainManager_Ext.CheckWellRestedAchievement(true);
             }
 
             if (Enum.IsDefined(typeof(NewEvents), id))
             {
-                __instance.StartCoroutine(EventFactory.GetEventClass((NewEvents)id).StartEvent(caller,__instance));
+                __instance.StartCoroutine(EventFactory.GetEventClass((NewEvents)id).StartEvent(caller, __instance));
             }
 
             ///Idk why but they set the emoticonoffset in startevent in relation to animid so hoaxe gets a fucked up emoticon offset
-            if(MainManager.instance.playerdata != null && MainManager.instance.playerdata.Length == 1 && MainManager.instance.playerdata[0].entity != null)
+            if (MainManager.instance.playerdata != null && MainManager.instance.playerdata.Length == 1 && MainManager.instance.playerdata[0].entity != null)
             {
-                if(MainManager.instance.playerdata[0].entity.animid == (int)NewAnimID.Hoaxe)
+                if (MainManager.instance.playerdata[0].entity.animid == (int)NewAnimID.Hoaxe)
                     MainManager.instance.playerdata[0].entity.emoticonoffset = new Vector3(0, 2.2f, -0.1f);
+            }
+
+            if (MainManager.player != null)
+            {
+                for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
+                {
+                    if (MainManager.instance.playerdata[i].entity != null)
+                    {
+                        MainManager.instance.playerdata[i].entity.overrridejump = false;
+                        MainManager.instance.playerdata[i].entity.overrideanim = false;
+                        MainManager.instance.playerdata[i].entity.animstate = 0;
+                        MainManager.instance.playerdata[i].entity.SetAnimForce();
+                    }
+                }
+            }
+
+            if(MainManager.map != null && MainManager.map.chompy != null)
+            {
+                MainManager.map.chompy.overrridejump = false;
+                MainManager.map.chompy.overrideanim = false;
+                MainManager.map.chompy.animstate = 0;
+                MainManager.map.chompy.SetAnimForce();
             }
         }
     }
@@ -60,7 +78,7 @@ namespace BFPlus.Patches
             StylishReward reward = BattleControl_Ext.stylishReward;
             int[] hpValues = new int[MainManager.instance.playerdata.Length];
 
-            for(int i = 0; i < MainManager.instance.playerdata.Length; i++)
+            for (int i = 0; i < MainManager.instance.playerdata.Length; i++)
             {
                 hpValues[i] = MainManager.instance.playerdata[i].hp;
             }

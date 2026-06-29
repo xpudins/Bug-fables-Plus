@@ -5,10 +5,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.EventControlTranspilers
 {
@@ -19,7 +15,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 249299;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.Goto(0);
             while (cursor.TryGotoNext(i => i.MatchLdcI4(27)))
@@ -38,7 +34,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.Goto(0);
             cursor.GotoNext(i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "maxbp")));
@@ -53,7 +49,7 @@ namespace BFPlus.Patches.EventControlTranspilers
         {
             priority = 249559;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
             cursor.Goto(0);
             var patcher = new DataPatcher() { loader = OpCodes.Ldfld, name = "LevelData", foundString = "Data/LevelData", setter = OpCodes.Stfld, completeReplace = OpCodes.Ldc_I4_1 };

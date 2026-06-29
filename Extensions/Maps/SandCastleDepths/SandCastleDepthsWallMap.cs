@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions.Maps.SandCastleDepths
 {
@@ -13,7 +8,7 @@ namespace BFPlus.Extensions.Maps.SandCastleDepths
         protected override void LoadCustomData()
         {
             base.LoadCustomData();
-            map.camangle = new Vector3(15, 0, 0);      
+            map.camangle = new Vector3(15, 0, 0);
             map.camlimitneg = new Vector3(-8, -8, -50);
             map.camlimitpos = new Vector3(50, 999, 999);
             map.fogend = 100;
@@ -25,7 +20,7 @@ namespace BFPlus.Extensions.Maps.SandCastleDepths
             for (int i = 0; i < walls.childCount; i++)
             {
                 Transform wall = walls.GetChild(i);
-                ScrewPlatform screwPlat = AddScrewPlatform(wall.gameObject, new Vector3(i == 0 ? 12f : -12f, wall.position.y, wall.position.z), new int[] { 0, 1 }, Vector3.zero, "Rumble", ScrewPlatform.Type.Platform, true, true,30f);          
+                ScrewPlatform screwPlat = AddScrewPlatform(wall.gameObject, new Vector3(i == 0 ? 12f : -12f, wall.position.y, wall.position.z), new int[] { 0, 1 }, Vector3.zero, "Rumble", ScrewPlatform.Type.Platform, true, true, 30f);
                 screwPlat.smoothmovement = true;
                 wall.GetChild(0).gameObject.AddComponent<Hazards>().type = Hazards.Type.Spikes;
             }

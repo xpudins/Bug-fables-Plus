@@ -7,16 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using static UnityEngine.Object;
+using static MainManager;
 using static BattleControl;
 using static BFPlus.Extensions.BattleControl_Ext;
-using System.Data;
+
 namespace BFPlus.Extensions.Stylish
 {
     public class KabbuStylish : IStylish
     {
-        IEnumerator DoFlip(EntityControl kabbu, int flipCount)
+        IEnumerator DoFlip(EntityControl kabbu, int flipCount, float gain)
         {
-            StylishUtils.ShowStylish(1.2f + (0.1f * flipCount), kabbu, flipCount == 0 ? 0.1f :0.02f);
+            StylishUtils.ShowStylish(1.2f + (0.1f * flipCount), kabbu, stylishIncrease: gain * (flipCount == 0 ? 1f : 0.2f));
             Vector3 startPos = kabbu.transform.position;
             Vector3 endPos = kabbu.transform.position + Vector3.left * 1.5f;
             float a = 0;
@@ -27,7 +28,7 @@ namespace BFPlus.Extensions.Stylish
             do
             {
                 kabbu.spritetransform.eulerAngles = new Vector3(0f, 180f, Mathf.Lerp(0f, -360f, a / b));
-                kabbu.transform.position = MainManager.BeizierCurve3(startPos, endPos, 7f + flipCount*1.5f, a / b);
+                kabbu.transform.position = MainManager.BeizierCurve3(startPos, endPos, 7f + flipCount * 1.5f, a / b);
                 a += MainManager.TieFramerate(1f);
                 yield return null;
             } while (a < b);
@@ -83,7 +84,7 @@ namespace BFPlus.Extensions.Stylish
                 kabbu.Emoticon(MainManager.Emoticons.None);
                 if (anotherFlip && flipCount < 3)
                 {
-                    yield return DoFlip(kabbu, ++flipCount);
+                    yield return DoFlip(kabbu, ++flipCount, gain);
                 }
             }
             else
@@ -94,35 +95,69 @@ namespace BFPlus.Extensions.Stylish
             }
         }
 
-        IEnumerator DoBasicAttackStylish()
+        IEnumerator DoBasicAttackStylish(float gain)
         {
-            BattleControl.SetDefaultCamera();
+            SetDefaultCamera();
             EntityControl kabbu = Instance.entityAttacking;
             kabbu.overrridejump = true;
             kabbu.overrideonlyflip = true;
 
             Vector3 startAngle = kabbu.spritetransform.eulerAngles;
-            yield return DoFlip(kabbu, 0);
+            yield return DoFlip(kabbu, 0, gain);
 
             kabbu.overrridejump = false;
             kabbu.overrideonlyflip = false;
             kabbu.spritetransform.eulerAngles = startAngle;
-            kabbu.animstate = (int)MainManager.Animations.BattleIdle;
+            kabbu.animstate = (int)Animations.BattleIdle;
         }
-
-
-        IEnumerator DoTauntStylish()
+        IEnumerator DoHeavyStrikeStylish(float gain)
         {
+            SetDefaultCamera();
             EntityControl kabbu = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, kabbu);
-            kabbu.animstate = (int)MainManager.Animations.Happy;
+            StylishUtils.ShowStylish(1.2f, kabbu, gain);
+            kabbu.overrridejump = true;
+            kabbu.overrideonlyflip = true;
+            kabbu.animstate = (int)MainManager.Animations.Jump;
+
+            yield return null;
+            yield return null;
+
+            //this is needed cause base sprite pivot isnt the center, if we dont do that the rotation will look weird.
+            kabbu.anim.enabled = false;
+
+            MainManager_Ext.Instance.ChangeSpritePivot(kabbu);
+
+            Vector3[] partyPos = MainManager.battle.partypos;
+            Vector3 startAngle = kabbu.spritetransform.eulerAngles;
+            Vector3 startPos = kabbu.transform.position;
+
+            int kabbuIndex = Array.FindIndex(MainManager.battle.partypointer, x => x == MainManager.battle.currentturn);
+            Vector3 endPos = partyPos[kabbuIndex];
+            float a = 0;
+            float b = 35f;
+            do
+            {
+                kabbu.spritetransform.Rotate(new Vector3(0, 0, MainManager.TieFramerate(-20f)));
+                kabbu.transform.position = MainManager.BeizierCurve3(startPos, endPos, 10, a / b);
+                a += MainManager.TieFramerate(1f);
+                yield return null;
+            } while (a < b);
+
+            kabbu.anim.enabled = true;
+            yield return new WaitUntil(() => kabbu.onground);
+            kabbu.spin = new Vector3(0, 10, 0);
+            kabbu.spritetransform.eulerAngles = startAngle;
+            kabbu.animstate = 101;
+            kabbu.overrridejump = false;
+            kabbu.overrideonlyflip = false;
+
             yield return EventControl.halfsec;
+            kabbu.spin = Vector3.zero;
         }
-
-        IEnumerator DoUnderStrikeStylish()
+        IEnumerator DoUnderStrikeStylish(float gain)
         {
             EntityControl kabbu = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, kabbu);
+            StylishUtils.ShowStylish(1.2f, kabbu, gain);
             kabbu.overrridejump = true;
             kabbu.overrideonlyflip = true;
 
@@ -148,76 +183,10 @@ namespace BFPlus.Extensions.Stylish
             kabbu.overrideonlyflip = false;
             yield return EventControl.quartersec;
         }
-
-        IEnumerator DoHeavyStrikeStylish()
-        {
-            SetDefaultCamera();
-            EntityControl kabbu = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, kabbu);
-            kabbu.overrridejump = true;
-            kabbu.overrideonlyflip = true;
-            kabbu.animstate = (int)MainManager.Animations.Jump;
-
-            yield return null;
-            yield return null;
-
-            //this is needed cause base sprite pivot isnt the center, if we dont do that the rotation will look weird.
-            kabbu.anim.enabled = false;
-
-            Sprite originalSprite = kabbu.sprite.sprite;
-            Rect spriteRect = originalSprite.rect;
-            Sprite newSprite = Sprite.Create(
-                originalSprite.texture,
-                spriteRect,
-                new Vector2(0.5f, 0.5f),
-                originalSprite.pixelsPerUnit,
-                0,
-                SpriteMeshType.Tight,
-                originalSprite.border
-            );
-            kabbu.sprite.sprite = newSprite;
-
-            Vector3[] partyPos = MainManager.battle.partypos;
-            Vector3 startAngle = kabbu.spritetransform.eulerAngles;
-            Vector3 startPos = kabbu.transform.position;
-
-            int kabbuIndex = Array.FindIndex(MainManager.battle.partypointer, x => x == MainManager.battle.currentturn);
-            Vector3 endPos = partyPos[kabbuIndex];
-            float a = 0;
-            float b = 35f;
-            do
-            {
-                kabbu.spritetransform.Rotate(new Vector3(0, 0, MainManager.TieFramerate(-20f)));
-                kabbu.transform.position = MainManager.BeizierCurve3(startPos, endPos, 10, a / b);
-                a += MainManager.TieFramerate(1f);
-                yield return null;
-            } while (a < b);
-
-            kabbu.anim.enabled = true;
-            yield return new WaitUntil(() => kabbu.onground);                                    
-            kabbu.spin = new Vector3(0,10,0);
-            kabbu.spritetransform.eulerAngles = startAngle;
-            kabbu.animstate = 101;
-            kabbu.overrridejump = false;
-            kabbu.overrideonlyflip = false;     
-
-            yield return EventControl.halfsec;
-            kabbu.spin = Vector3.zero;
-        }
-
-        public static IEnumerator DoPebbleTossStylish(EntityControl kabbu, int hits)
-        {
-            StylishUtils.ShowStylish(1.2f + 0.1f * hits, kabbu, hits == 0 ? 0.1f : 0.02f);
-            kabbu.animstate = 118;
-            kabbu.spin = new Vector3(0, 20, 0);
-            yield return EventControl.thirdsec;
-            kabbu.spin = Vector3.zero;
-        }
-
-        IEnumerator DoDashThroughStylish()
+        IEnumerator DoDashThroughStylish(float gain)
         {
             EntityControl kabbu = Instance.entityAttacking;
-            StylishUtils.ShowStylish(1.2f, kabbu);
+            StylishUtils.ShowStylish(1.2f, kabbu, gain);
 
             kabbu.animstate = 117;
             MainManager.PlaySound("Spin4");
@@ -227,7 +196,7 @@ namespace BFPlus.Extensions.Stylish
             smoke.transform.parent = kabbu.transform;
             smoke.transform.localPosition = new Vector3(0f, 0.25f, 0.1f);
             smoke.GetComponent<Renderer>().material.renderQueue = 3001;
-            
+
             ParticleSystem.EmissionModule se = smoke.emission;
             ParticleSystem.MainModule sd = smoke.main;
             sd.startLifetime = new ParticleSystem.MinMaxCurve(1f);
@@ -236,7 +205,7 @@ namespace BFPlus.Extensions.Stylish
 
             Vector3 centerPoint = MainManager.battle.partymiddle;
             float radius = 2.5f;
-            float speed = 15f;      
+            float speed = 15f;
 
             float angle = 0f;
             float a = 0f;
@@ -270,45 +239,56 @@ namespace BFPlus.Extensions.Stylish
 
         }
 
-        public IEnumerator DoStylish(int actionid, int stylishID)
+        IEnumerator DoTauntStylish(float gain)
         {
-            Instance.entityAttacking?.Emoticon(MainManager.Emoticons.None);
+            EntityControl kabbu = Instance.entityAttacking;
+            StylishUtils.ShowStylish(1.2f, kabbu, gain);
+            kabbu.animstate = (int)MainManager.Animations.Happy;
+            yield return EventControl.halfsec;
+        }
+
+        public static IEnumerator DoPebbleTossStylish(EntityControl kabbu, int hits, float gain)
+        {
+            StylishUtils.ShowStylish(1.2f + 0.1f * hits, kabbu, gain);
+            kabbu.animstate = 118;
+            kabbu.spin = new Vector3(0, 20, 0);
+            yield return EventControl.thirdsec;
+            kabbu.spin = Vector3.zero;
+        }
+
+        public IEnumerator DoStylish(int actionid, int stylishID, float stylishGain)
+        {
+            Instance.entityAttacking?.Emoticon(Emoticons.None);
             switch (actionid)
             {
                 //Basic Attack
                 case -1:
-                    yield return DoBasicAttackStylish();
+                    yield return DoBasicAttackStylish(stylishGain);
                     break;
 
-                //taunt
-                case 3:
-                //pep talk
-                case 43:
-                    yield return DoTauntStylish();
+                case (int)Skills.HeavyStrike:
+                    yield return DoHeavyStrikeStylish(stylishGain);
                     break;
 
-                //UnderStrike
-                case 6:
-                    yield return DoUnderStrikeStylish();
+                case (int)Skills.BeetleTaunt:
+                case (int)Skills.PepTalk:
+                    yield return DoTauntStylish(stylishGain);
                     break;
 
-                //DashThrough
-                case 10:
-                    yield return DoDashThroughStylish();
+                case (int)Skills.BeetleDig:
+                    yield return DoUnderStrikeStylish(stylishGain);
                     break;
 
-                //Boulder Toss
-                case 19:
-                    yield return DoHeavyStrikeStylish();
+                case (int)Skills.HornDash:
+                    yield return DoDashThroughStylish(stylishGain);
                     break;
 
-                //heavyStrike
-                case 32:
-                    yield return DoHeavyStrikeStylish();
+                case (int)Skills.PebbleTossPlus:
+                    yield return DoHeavyStrikeStylish(stylishGain);
                     break;
 
                 case (int)NewSkill.Lecture:
-                    yield return DoPebbleTossStylish(Instance.entityAttacking,stylishID);
+                    yield return DoPebbleTossStylish(Instance.entityAttacking, stylishID, stylishGain);
                     break;
             }
         }

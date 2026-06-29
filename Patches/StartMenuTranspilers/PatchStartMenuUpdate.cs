@@ -3,11 +3,6 @@ using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Patches.StartMenuTranspilers
@@ -18,10 +13,10 @@ namespace BFPlus.Patches.StartMenuTranspilers
         {
             priority = 0;
         }
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(MainManager),"camspeed")));
-            Utils.RemoveUntilInst(cursor, i=>i.MatchStfld(AccessTools.Field(typeof(MainManager), "camangleoffset")));
+            cursor.GotoNext(MoveType.After, i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "camspeed")));
+            Utils.RemoveUntilInst(cursor, i => i.MatchStfld(AccessTools.Field(typeof(MainManager), "camangleoffset")));
             cursor.Remove();
             cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(PatchStartMenuUpdate), "SetMenuCamera"));
         }
@@ -38,8 +33,8 @@ namespace BFPlus.Patches.StartMenuTranspilers
             }
 
             MainManager.instance.camtargetpos = defaultCamPos;
-            MainManager.instance.camangleoffset = new Vector3(defaultAngle.x + Mathf.Sin(Time.time / 7.5f) * 5,defaultAngle.y+ Mathf.Sin(Time.time / 5f) *10);
-        
+            MainManager.instance.camangleoffset = new Vector3(defaultAngle.x + Mathf.Sin(Time.time / 7.5f) * 5, defaultAngle.y + Mathf.Sin(Time.time / 5f) * 10);
+
         }
     }
 }

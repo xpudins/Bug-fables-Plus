@@ -4,10 +4,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
 {
@@ -18,10 +14,10 @@ namespace BFPlus.Patches.BattleControlTranspilers.EventDialoguePatches
             priority = 9036;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "ReorganizeEnemies", new Type[] {typeof(bool)})));
-            cursor.GotoPrev(MoveType.After,i => i.MatchLdloc1());
+            cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(BattleControl), "ReorganizeEnemies", new Type[] { typeof(bool) })));
+            cursor.GotoPrev(MoveType.After, i => i.MatchLdloc1());
             cursor.Prev.OpCode = OpCodes.Nop;
             int cursorIndex = cursor.Index;
 

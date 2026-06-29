@@ -1,12 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using static MainManager;
 
 namespace BFPlus.Extensions.Events
 {
@@ -14,7 +7,7 @@ namespace BFPlus.Extensions.Events
     {
         protected override IEnumerator DoEvent(NPCControl caller, EventControl instance)
         {
-            EntityControl[] leafbugs = MainManager.GetEntities(new int[] {25,26,27});
+            EntityControl[] leafbugs = MainManager.GetEntities(new int[] { 25, 26, 27 });
             bool newrecipe = false;
             while (MainManager.instance.message)
             {
@@ -47,7 +40,7 @@ namespace BFPlus.Extensions.Events
 
                     if (MainManager.listcanceled || MainManager.instance.flagvar[0] == -1)
                     {
-                        if(i == 0)
+                        if (i == 0)
                         {
                             yield return null;
                             yield break;
@@ -80,7 +73,7 @@ namespace BFPlus.Extensions.Events
                 }
                 else
                 {
-                    MainManager.SetCamera(items[2].transform.position,0.04f);
+                    MainManager.SetCamera(items[2].transform.position, 0.04f);
                     int cookedItem = MainManager.MixIngredients(ids[0], ids[1]);
                     for (int l = 0; l < MainManager.librarylimit[2]; l++)
                     {
@@ -108,7 +101,7 @@ namespace BFPlus.Extensions.Events
                     yield return EventControl.tenthsec;
                     for (int i = 0; i < 3; i++)
                     {
-                        for (int j = 0; j< leafbugs.Length; j++)
+                        for (int j = 0; j < leafbugs.Length; j++)
                         {
                             leafbugs[j].PlaySound("Jump");
                             leafbugs[j].Jump();

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace BFPlus.Extensions
 {
@@ -11,7 +6,7 @@ namespace BFPlus.Extensions
     {
         void LateUpdate()
         {
-            foreach(Transform t in transform)
+            foreach (Transform t in transform)
             {
                 t.eulerAngles = Vector3.zero;
             }

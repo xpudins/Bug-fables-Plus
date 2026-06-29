@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static MainManager;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Object;
 namespace BFPlus.Extensions.Maps.DeepCave
 {
@@ -15,9 +9,9 @@ namespace BFPlus.Extensions.Maps.DeepCave
             SetBaseMapData(Color.gray, new Vector3(0, 0f, 0f), new Vector3(15, 0, 0), MainManager.Areas.FarGrasslands, Resources.Load("Audio/Music/Cave1") as AudioClip);
             map.skyboxmat = Resources.Load<Material>("materials/skybox/Cavern2");
             map.battleleafcolor = new Color(0.28f, 0.8f, 0.63f);
-            map.globallight = new Color(0.29f, 0.56f,0.298f);
+            map.globallight = new Color(0.29f, 0.56f, 0.298f);
             map.canfollowID = new int[0];
-            
+
             AddCorrectMaterials(map.transform);
         }
 

@@ -1,10 +1,7 @@
-﻿using System;
+﻿using BFPlus.Extensions.Stylish;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using static BattleControl;
 
@@ -81,22 +78,21 @@ namespace BFPlus.Extensions.EnemyAI
             yield return EventControl.tenthsec;
             int turns = hardmode ? 3 : 2;
             battle.DoDamage(actionid, battle.playertargetID, POPJUMP_DMG, null, battle.commandsuccess);
-            DoFirePierce(ref MainManager.instance.playerdata[battle.playertargetID], turns);
+            BattleControl_Ext.Instance.DoConditionPierce(ref MainManager.instance.playerdata[battle.playertargetID], turns, MainManager.BattleCondition.Fire);
 
             yield return EventControl.tenthsec;
             entity.animstate = 107;
             MainManager.PlaySound("Boing1", 1f, 1);
 
             yield return EventControl.tenthsec;
-            yield return BattleControl_Ext.LerpPosition(20, entity.transform.position, entity.transform.position + Vector3.up *4, entity.transform);
+            yield return BattleControl_Ext.LerpPosition(20, entity.transform.position, entity.transform.position + Vector3.up * 4, entity.transform);
 
             bool stylish = UnityEngine.Random.Range(0, 10) < 7;
 
             if (stylish)
             {
                 entity.animstate = 108;
-                MainManager.PlaySound("AtkSuccess", 1.2f, 1);
-                battle.StartCoroutine(BattleControl_Ext.Instance.ShowStylishMessage(entity, Vector3.down*2));
+                StylishUtils.ShowStylish(1.2f, entity, 0, false, Vector3.down * 2);
 
                 a = 0;
                 b = 25;
@@ -116,7 +112,7 @@ namespace BFPlus.Extensions.EnemyAI
             yield return EventControl.tenthsec;
 
             battle.DoDamage(actionid, battle.playertargetID, POPJUMP_DMG, null, battle.commandsuccess);
-            DoFirePierce(ref MainManager.instance.playerdata[battle.playertargetID], turns);
+            BattleControl_Ext.Instance.DoConditionPierce(ref MainManager.instance.playerdata[battle.playertargetID], turns, MainManager.BattleCondition.Fire);
             yield return EventControl.tenthsec;
 
             entity.animstate = 107;
@@ -153,14 +149,14 @@ namespace BFPlus.Extensions.EnemyAI
             battle.nonphyscal = true;
             bool burnEnemy = UnityEngine.Random.Range(0, 2) == 0;
 
-            if(battle.enemydata.Length == 1)
+            if (battle.enemydata.Length == 1)
             {
                 burnEnemy = false;
             }
 
             EntityControl target = null;
             int targetId = -1;
-            if (burnEnemy) 
+            if (burnEnemy)
             {
                 var possibleEnemies = battle.enemydata.Select((e, i) => (e, i))
                 .Where(x => x.i != actionid && x.e.position != BattlePosition.Underground)
@@ -179,7 +175,7 @@ namespace BFPlus.Extensions.EnemyAI
             entity.FaceTowards(target.transform.position);
             entity.animstate = 101;
             yield return EventControl.tenthsec;
-            MainManager.PlaySound("Charge7",1.2f,1);
+            MainManager.PlaySound("Charge7", 1.2f, 1);
             entity.StartCoroutine(entity.ShakeSprite(0.2f, 45f));
             yield return EventControl.quartersec;
             Transform fireball = (UnityEngine.Object.Instantiate(Resources.Load("Prefabs/Particles/Fireball"), entity.transform.position + new Vector3(0f, 1.75f), Quaternion.identity, battle.battlemap.transform) as GameObject).transform;
@@ -207,28 +203,12 @@ namespace BFPlus.Extensions.EnemyAI
                 MainManager.SetCondition(MainManager.BattleCondition.Fire, ref battle.enemydata[targetId], turns);
             }
             else
-            { 
-                
+            {
                 battle.DoDamage(actionid, targetId, FIRETOSS_DMG, null, battle.commandsuccess);
-                DoFirePierce(ref MainManager.instance.playerdata[targetId], turns);
+                BattleControl_Ext.Instance.DoConditionPierce(ref MainManager.instance.playerdata[battle.playertargetID], turns, MainManager.BattleCondition.Fire);
             }
 
             yield return null;
-        }
-
-        void DoFirePierce(ref MainManager.BattleData target, int turns)
-        {
-            if (target.hp > 0)
-            {
-
-                if (battle.commandsuccess)
-                {
-                    turns--;
-                    if (battle.GetSuperBlock(0))
-                        turns -= 1;
-                }
-                battle.TryCondition(ref target, MainManager.BattleCondition.Fire, turns);
-            }
         }
     }
 }

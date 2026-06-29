@@ -1,13 +1,7 @@
-﻿using BFPlus.Extensions;
-using BFPlus.Patches.DoActionPatches;
+﻿using BFPlus.Patches.DoActionPatches;
 using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BFPlus.Patches.BattleControlTranspilers
 {
@@ -22,9 +16,9 @@ namespace BFPlus.Patches.BattleControlTranspilers
             priority = 586;
         }
 
-        protected override void ApplyPatch(ILCursor cursor)
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
         {
-            cursor.GotoNext(MoveType.After, i=>i.MatchLdcI4(1),i => i.MatchStfld(AccessTools.Field(typeof(MainManager.BattleData), "cantmove")));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(1), i => i.MatchStfld(AccessTools.Field(typeof(MainManager.BattleData), "cantmove")));
             int cursorIndex = cursor.Index;
             ILLabel label = null;
             cursor.GotoNext(i => i.MatchBlt(out label));
@@ -32,6 +26,24 @@ namespace BFPlus.Patches.BattleControlTranspilers
             cursor.Emit(OpCodes.Ldarg_0);
             cursor.Emit(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), "firststrike"));
             cursor.Emit(OpCodes.Brtrue, label);
+        }
+    }
+
+    /// <summary>
+    /// Add a set max options call before player turn because we want to remove setmaxoptiosn in playerturn
+    /// </summary>
+    public class PatchSetMaxOptions : PatchBaseBattleControlUpdate
+    {
+        public PatchSetMaxOptions()
+        {
+            priority = 404;
+        }
+
+        protected override void ApplyPatch(ILCursor cursor, ILContext context)
+        {
+            cursor.GotoNext(i => i.MatchCall(AccessTools.Method(typeof(BattleControl), nameof(BattleControl.PlayerTurn))));
+            cursor.Emit(OpCodes.Call, AccessTools.Method(typeof(BattleControl), nameof(BattleControl.SetMaxOptions)));
+            cursor.Emit(OpCodes.Ldarg_0);
         }
     }
 }

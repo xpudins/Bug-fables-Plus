@@ -1,11 +1,4 @@
-﻿using BFPlus.Extensions.EnemyAI;
-using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events
@@ -16,7 +9,7 @@ namespace BFPlus.Extensions.Events
         {
             while (MainManager.instance.message)
                 yield return null;
-            MainManager.SetCamera(new Vector3(-1,0,0),0.02f);
+            MainManager.SetCamera(new Vector3(-1, 0, 0), 0.02f);
 
             EntityControl[] party = MainManager.GetPartyEntities(true);
             EntityControl artia = MainManager.GetEntity(5);
@@ -30,13 +23,13 @@ namespace BFPlus.Extensions.Events
                 new Vector3(6f, 0,0)
             };
 
-            for(int i = 0; i < party.Length; i++)
+            for (int i = 0; i < party.Length; i++)
             {
                 party[i].transform.position = posArray[i];
                 party[i].FaceTowards(artia.transform.position);
             }
 
-            if(MainManager.map.chompy != null)
+            if (MainManager.map.chompy != null)
             {
                 MainManager.map.chompy.transform.position = posArray[3];
                 MainManager.map.chompy.FaceTowards(artia.transform.position);
@@ -59,7 +52,7 @@ namespace BFPlus.Extensions.Events
 
             yield return EventControl.sec;
             Transform painting = MainManager.map.mainmesh.Find("CatalystPainting");
-            painting.transform.position = new Vector3(-1.4f,2.3f,3.2f);
+            painting.transform.position = new Vector3(-1.4f, 2.3f, 3.2f);
             yield return EventControl.sec;
 
             MainManager.FadeOut();

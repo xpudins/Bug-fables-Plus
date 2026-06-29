@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
 
 namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 {
@@ -40,7 +34,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
 
             var temp = Resources.Load<GameObject>("prefabs/maps/GiantLairEntrance").transform.GetChild(1).gameObject;
 
-            var particle = UnityEngine.Object.Instantiate(temp,MainManager.map.transform);
+            var particle = UnityEngine.Object.Instantiate(temp, MainManager.map.transform);
             particle.transform.position = tree.transform.position;
             particle.transform.localEulerAngles = Vector3.zero;
 
@@ -64,7 +58,7 @@ namespace BFPlus.Extensions.Events.HoaxeIntermissionEvents
             }
 
             ButtonSprite button = new GameObject().AddComponent<ButtonSprite>().SetUp(4, -1, "", new Vector3(7f, -3f, 10f), Vector3.one, 1, MainManager.GUICamera.transform);
-            
+
             while (!MainManager.GetKey(4))
             {
                 yield return null;

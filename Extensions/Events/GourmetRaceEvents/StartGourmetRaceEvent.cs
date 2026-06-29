@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BFPlus.Extensions.Events.GourmetRaceEvents
@@ -88,7 +84,7 @@ namespace BFPlus.Extensions.Events.GourmetRaceEvents
             MainManager.instance.flags[10] = false;
             game.StartGame();
 
-            if(!MainManager.instance.librarystuff[0, (int)NewDiscoveries.GourmetRace])
+            if (!MainManager.instance.librarystuff[0, (int)NewDiscoveries.GourmetRace])
             {
                 MainManager.UpdateJounal(MainManager.Library.Discovery, (int)NewDiscoveries.GourmetRace);
             }
